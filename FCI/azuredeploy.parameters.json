@@ -1,0 +1,78 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "namePrefix": {
+      "value": "aesql100"
+    },
+    "vmSize": {
+      "value": "Standard_D2s_v3"
+    },
+    "vmDiskSize": {
+      "value": 64
+    },
+    "vmDiskCount": {
+      "value": 2
+    },
+    "DomainName": {
+      "value": "tamz.local"
+    },
+    "localadminusername": {
+      "value": "tamzadmin"
+    },
+    "localadminPassword": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/3a1cbafc-8869-447c-8f82-7164262f97ce/resourceGroups/tia-core-prod-rg/providers/Microsoft.KeyVault/vaults/TAMZ-Prod-KeyVault"
+        },
+        "secretName": "DomainAdmin"
+      }
+    },
+    "domainUsername": {
+      "value": "TAMZ\\troyault"
+    },
+    "domainuserPassword": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/tia-core-prod-rg/providers/Microsoft.KeyVault/vaults/TAMZ-Prod-KeyVault"
+        },
+        "secretName": "DomainAdmin"
+      }
+    },
+    "svcUsername": {
+      "value": "TAMZ\\AzureSqlService"
+    },
+    "svcPassword": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/tia-core-prod-rg/providers/Microsoft.KeyVault/vaults/TAMZ-Prod-KeyVault"
+        },
+        "secretName": "AzureSQLAcct"
+      }
+    },
+    "existingVirtualNetworkRGName": {
+      "value": "tsb-core-prod-rg"
+    },
+    "existingVirtualNetworkName": {
+      "value": "tsb-prod-vnet"
+    },
+    "existingSubnetName": {
+      "value": "data"
+    },
+    "clusterIP": {
+      "value": "10.40.4.101"
+    },
+    "sqlinstance": {
+      "value" : "TAMZFCI"
+    },
+    "logdrivesize":{
+      "value": "10GB"
+    },
+    "datadrivesize":{
+      "value": "10GB"
+    },
+    "tempdbdrivesize" :{
+      "value": "10GB"
+    }
+  }
+}
