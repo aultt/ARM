@@ -204,10 +204,18 @@
       "defaultValue": "MSSQLSERVER"
     },
     "_artifactsLocation": {
-      "type": "string"
+      "type": "string",
+      "metadata": {
+        "description": "Location of resources that the script is dependent on such as linked templates and DSC modules"
+      },
+      "defaultValue": "https://raw.githubusercontent.com/aultt/ARM/master/FCI"
     },
     "_artifactsLocationSasToken": {
-      "type": "string"
+      "type": "securestring",
+      "metadata": {
+        "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated."
+      },
+      "defaultValue": ""
     }
   },
   "variables": {
