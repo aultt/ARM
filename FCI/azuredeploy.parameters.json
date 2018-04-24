@@ -15,46 +15,46 @@
       "value": 2
     },
     "DomainName": {
-      "value": "tamz.local"
+      "value": "contoso.local"
     },
     "localadminusername": {
-      "value": "tamzadmin"
+      "value": "myadmin"
     },
     "localadminPassword": {
       "reference": {
         "keyVault": {
-          "id": "/subscriptions/3a1cbafc-8869-447c-8f82-7164262f97ce/resourceGroups/tia-core-prod-rg/providers/Microsoft.KeyVault/vaults/TAMZ-Prod-KeyVault"
+          "id": "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/core-prod-rg/providers/Microsoft.KeyVault/vaults/My-Prod-KeyVault"
         },
         "secretName": "DomainAdmin"
       }
     },
     "domainUsername": {
-      "value": "TAMZ\\troyault"
+      "value": "Contoso\\myadmin"
     },
     "domainuserPassword": {
       "reference": {
         "keyVault": {
-          "id": "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/tia-core-prod-rg/providers/Microsoft.KeyVault/vaults/TAMZ-Prod-KeyVault"
+          "id": "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/core-prod-rg/providers/Microsoft.KeyVault/vaults/MY-Prod-KeyVault"
         },
         "secretName": "DomainAdmin"
       }
     },
     "svcUsername": {
-      "value": "TAMZ\\AzureSqlService"
+      "value": "Contoso\\SqlService"
     },
     "svcPassword": {
       "reference": {
         "keyVault": {
-          "id": "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/tia-core-prod-rg/providers/Microsoft.KeyVault/vaults/TAMZ-Prod-KeyVault"
+          "id": "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/core-prod-rg/providers/Microsoft.KeyVault/vaults/My-Prod-KeyVault"
         },
         "secretName": "AzureSQLAcct"
       }
     },
     "existingVirtualNetworkRGName": {
-      "value": "tsb-core-prod-rg"
+      "value": "core-prod-rg"
     },
     "existingVirtualNetworkName": {
-      "value": "tsb-prod-vnet"
+      "value": "prod-vnet"
     },
     "existingSubnetName": {
       "value": "data"
@@ -63,7 +63,7 @@
       "value": "10.40.4.101"
     },
     "sqlinstance": {
-      "value" : "TAMZFCI"
+      "value" : "CONTOSOFCI"
     },
     "logdrivesize":{
       "value": "10GB"
