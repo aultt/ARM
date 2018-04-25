@@ -214,7 +214,7 @@ configuration ConfigNode1
             FailoverClusterIPAddress   = $clusterIP
             FailoverClusterGroupName   = $SQLClusterName
         
-            PsDscRunAsCredential       = $SqlInstallCredential
+            PsDscRunAsCredential       = $domainuserCreds
         
             DependsOn                  = '[WindowsFeature]NetFramework45', '[Script]CleanSQL','[Script]EnableS2D'
         }
