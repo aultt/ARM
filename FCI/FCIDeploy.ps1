@@ -9,3 +9,5 @@ New-AzureRmResourceGroupDeployment -Name NewFCI -ResourceGroupName $RG -Template
 
 Remove-AzureRmResourceGroup -Name $RG -Force
 
+
+

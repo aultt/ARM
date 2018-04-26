@@ -62,11 +62,6 @@ configuration ConfigNode1
 
     Import-DscResource -ModuleName xComputerManagement, xFailOverCluster, xActiveDirectory, xSOFS, SQLServerDSC, xPendingReboot, xNetworking
     [string[]]$SQLSysAdminAccounts = "${DomainName}\Domain Admins"
-    
-    [System.Collections.ArrayList]$Nodes = @()
-    For ($count = 1; $count -lt $vmCount+1; $count++) {
-        $Nodes.Add($vmNamePrefix + $Count.ToString())
-    }
 
     Node localhost
     {
@@ -124,20 +119,17 @@ configuration ConfigNode1
             TestScript = '(test-path -Path "C:\Program Files\Microsoft SQL Server\MSSQL13.MSSQLSERVER\MSSQL\DATA\master.mdf") -eq $false'
             GetScript  = '@{Ensure = if ((test-path -Path "C:\Program Files\Microsoft SQL Server\MSSQL13.MSSQLSERVER\MSSQL\DATA\master.mdf") -eq $false) {"Present"} Else {"Absent"}}'
         }
-
-        Script MoveClusterGroups0 {
-            SetScript  = 'try {Get-ClusterGroup -ErrorAction SilentlyContinue | Move-ClusterGroup -Node $env:COMPUTERNAME -ErrorAction SilentlyContinue} catch {}'
-            TestScript = 'return $false'
-            GetScript  = '@{Result = "Moved Cluster Group"}'
-            DependsOn  = "[xComputer]DomainJoin"
+        xPendingReboot Reboot1
+        { 
+            Name      = 'Reboot1'
+            DependsOn = "[Script]CleanSQL"
         }
-
         xCluster FailoverCluster
         {
             Name                          = $ClusterName
+            StaticIPAddress = '10.40.4.102'
             DomainAdministratorCredential = $domainuserCreds
-            Nodes                         = $Nodes
-            DependsOn                     = "[Script]MoveClusterGroups0"
+            DependsOn                     = "[xPendingReboot]Reboot1"
         }
 
         Script CloudWitness {
@@ -152,14 +144,6 @@ configuration ConfigNode1
             TestScript = "(Get-Cluster).SameSubnetDelay -eq 2000 -and (Get-Cluster).SameSubnetThreshold -eq 15 -and (Get-Cluster).CrossSubnetDelay -eq 3000 -and (Get-Cluster).CrossSubnetThreshold -eq 15"
             GetScript  = "@{Ensure = if ((Get-Cluster).SameSubnetDelay -eq 2000 -and (Get-Cluster).SameSubnetThreshold -eq 15 -and (Get-Cluster).CrossSubnetDelay -eq 3000 -and (Get-Cluster).CrossSubnetThreshold -eq 15) {'Present'} else {'Absent'}}"
             DependsOn  = "[Script]CloudWitness"
-        }
-
-        # Likelely redundant
-        Script MoveClusterGroups1 {
-            SetScript  = 'try {Get-ClusterGroup -ErrorAction SilentlyContinue | Move-ClusterGroup -Node $env:COMPUTERNAME -ErrorAction SilentlyContinue} catch {}'
-            TestScript = 'return $false'
-            GetScript  = '@{Result = "Moved Cluster Group"}'
-            DependsOn  = "[Script]IncreaseClusterTimeouts"
         }
 
         Script EnableS2D {
@@ -177,11 +161,12 @@ configuration ConfigNode1
             GetScript  = "@{Ensure = if ((Get-StoragePool -FriendlyName S2D*).OperationalStatus -eq 'OK') {'Present'} Else {'Absent'}}"
             DependsOn  = "[Script]MoveClusterGroups1"
         }
-
+        
         WindowsFeature 'NetFramework45'
         {
             Name   = 'NET-Framework-45-Core'
             Ensure = 'Present'
+            DependsOn  = '[Script]MoveClusterGroups2'
         }
         
         SQLSetup FCISQLNode1
@@ -218,42 +203,18 @@ configuration ConfigNode1
         
             DependsOn                  = '[WindowsFeature]NetFramework45', '[Script]CleanSQL','[Script]EnableS2D'
         }
-    
-        #xPendingReboot Reboot1
-        #{ 
-        #    Name      = 'Reboot1'
-        #    DependsOn = "[Script]CleanSQL"
-        #}
+        xPendingReboot Reboot2
+        { 
+            Name      = 'Reboot2'
+            DependsOn = "[SQLSetup]FCISQLNode1"
+        }
 
-        #Script MoveClusterGroups2 {
-        #    SetScript  = 'try {Get-ClusterGroup -ErrorAction SilentlyContinue | Move-ClusterGroup -Node $env:COMPUTERNAME -ErrorAction SilentlyContinue} catch {}'
-        #    TestScript = 'return $false'
-        #    GetScript  = '@{Result = "Moved Cluster Group"}'
-        #    DependsOn  = "[xPendingReboot]Reboot1"
-        #}
-
- 
-        #xPendingReboot Reboot2
-        #{ 
-        #    Name      = 'Reboot2'
-        #    DependsOn = "[xFirewall]SQLFirewall"
-        #}
-
-        #Script MoveClusterGroups3 {
-        #    SetScript  = 'try {Get-ClusterGroup -ErrorAction SilentlyContinue | Move-ClusterGroup -Node $env:COMPUTERNAME -ErrorAction SilentlyContinue} catch {}'
-        #    TestScript = 'return $false'
-        #    GetScript  = '@{Result = "Moved Cluster Group"}'
-        #    DependsOn  = "[xPendingReboot]Reboot2"
-        #}
-
- 
-
-        #Script FixProbe {
-        #    SetScript  = "Get-ClusterResource -Name 'SQL IP*' | Set-ClusterParameter -Multiple @{Address=${clusterIP};ProbePort=${ProbePort};SubnetMask='255.255.255.255';Network='Cluster Network 1';EnableDhcp=0} -ErrorAction SilentlyContinue | out-null;Get-ClusterGroup -Name 'SQL Server*' -ErrorAction SilentlyContinue | Move-ClusterGroup -ErrorAction SilentlyContinue"
-        #    TestScript = "(Get-ClusterResource -name 'SQL IP*' | Get-ClusterParameter -Name ProbePort).Value -eq  ${probePort}"
-        #    GetScript  = '@{Result = "Moved Cluster Group"}'
-        #    DependsOn  = "[xSQLServerFailoverClusterSetup]CompleteMSSQLSERVER"
-        #}
+        Script FixProbe {
+            SetScript  = "Get-ClusterResource -Name 'SQL IP*' | Set-ClusterParameter -Multiple @{Address=${clusterIP};ProbePort=${ProbePort};SubnetMask='255.255.255.255';Network='Cluster Network 1';EnableDhcp=0} -ErrorAction SilentlyContinue | out-null;Get-ClusterGroup -Name 'SQL Server*' -ErrorAction SilentlyContinue | Move-ClusterGroup -ErrorAction SilentlyContinue"
+            TestScript = "(Get-ClusterResource -name 'SQL IP*' | Get-ClusterParameter -Name ProbePort).Value -eq  ${probePort}"
+            GetScript  = '@{Result = "Moved Cluster Group"}'
+            DependsOn  = "[SQLSetup]FCISQLNode1"
+        }
     }
 }
 
