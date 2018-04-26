@@ -159,62 +159,62 @@ configuration ConfigNode1
 "@
             TestScript = "(Get-StoragePool -FriendlyName S2D*).OperationalStatus -eq 'OK'"
             GetScript  = "@{Ensure = if ((Get-StoragePool -FriendlyName S2D*).OperationalStatus -eq 'OK') {'Present'} Else {'Absent'}}"
-            DependsOn  = "[Script]MoveClusterGroups1"
+            DependsOn  = "[Script]CloudWitness"
         }
         
         WindowsFeature 'NetFramework45'
         {
             Name   = 'NET-Framework-45-Core'
             Ensure = 'Present'
-            DependsOn  = '[Script]MoveClusterGroups2'
+            DependsOn  = '[Script]EnableS2D'
         }
         
-        SQLSetup FCISQLNode1
-        {
-            Action                     = 'InstallFailoverCluster'
-            ForceReboot                = $true
-            UpdateEnabled              = $false
-            SourcePath                 = 'c:\SQLServerFull'
-        
-            InstanceName               = $SQLInstance
-            Features                   = $SQLFeatures
-        
-            InstallSharedDir           = 'C:\Program Files\Microsoft SQL Server'
-            InstallSharedWOWDir        = 'C:\Program Files (x86)\Microsoft SQL Server'
-            InstanceDir                = $InstanceDir
-        
-            SQLCollation               = $SQLCollation
-            SQLSvcAccount              = $svcCreds
-            AgtSvcAccount              = $svcCreds
-            SQLSysAdminAccounts        = $SQLSysAdminAccounts
-    
-            InstallSQLDataDir          = $InstallSQLDataDir
-            SQLUserDBDir               = $SQLUserDBDir
-            SQLUserDBLogDir            = $SQLUserDBLogDir
-            SQLTempDBDir               = $SQLTempDBDir
-            SQLTempDBLogDir            = $SQLTempDBLogDir
-            SQLBackupDir               = $SQLBackupDir
-        
-            FailoverClusterNetworkName = $SQLClusterName
-            FailoverClusterIPAddress   = $clusterIP
-            FailoverClusterGroupName   = $SQLClusterName
-        
-            PsDscRunAsCredential       = $domainuserCreds
-        
-            DependsOn                  = '[WindowsFeature]NetFramework45', '[Script]CleanSQL','[Script]EnableS2D'
-        }
-        xPendingReboot Reboot2
-        { 
-            Name      = 'Reboot2'
-            DependsOn = "[SQLSetup]FCISQLNode1"
-        }
+       # SQLSetup FCISQLNode1
+       # {
+       #     Action                     = 'InstallFailoverCluster'
+       #     ForceReboot                = $true
+       #     UpdateEnabled              = $false
+       #     SourcePath                 = 'c:\SQLServerFull'
+       # 
+       #     InstanceName               = $SQLInstance
+       #     Features                   = $SQLFeatures
+       # 
+       #     InstallSharedDir           = 'C:\Program Files\Microsoft SQL Server'
+       #     InstallSharedWOWDir        = 'C:\Program Files (x86)\Microsoft SQL Server'
+       #     InstanceDir                = $InstanceDir
+       # 
+       #     SQLCollation               = $SQLCollation
+       #     SQLSvcAccount              = $svcCreds
+       #     AgtSvcAccount              = $svcCreds
+       #     SQLSysAdminAccounts        = $SQLSysAdminAccounts
+       #
+       #     InstallSQLDataDir          = $InstallSQLDataDir
+       #     SQLUserDBDir               = $SQLUserDBDir
+       #     SQLUserDBLogDir            = $SQLUserDBLogDir
+       #     SQLTempDBDir               = $SQLTempDBDir
+       #     SQLTempDBLogDir            = $SQLTempDBLogDir
+       #     SQLBackupDir               = $SQLBackupDir
+       # 
+       #     FailoverClusterNetworkName = $SQLClusterName
+       #     FailoverClusterIPAddress   = $clusterIP
+       #     FailoverClusterGroupName   = $SQLClusterName
+       # 
+       #     PsDscRunAsCredential       = $domainuserCreds
+       # 
+        #    DependsOn                  = '[WindowsFeature]NetFramework45', '[Script]CleanSQL','[Script]EnableS2D'
+        #}
+        #xPendingReboot Reboot2
+        #{ 
+        #    Name      = 'Reboot2'
+        #    DependsOn = "[SQLSetup]FCISQLNode1"
+        #}
 
-        Script FixProbe {
-            SetScript  = "Get-ClusterResource -Name 'SQL IP*' | Set-ClusterParameter -Multiple @{Address=${clusterIP};ProbePort=${ProbePort};SubnetMask='255.255.255.255';Network='Cluster Network 1';EnableDhcp=0} -ErrorAction SilentlyContinue | out-null;Get-ClusterGroup -Name 'SQL Server*' -ErrorAction SilentlyContinue | Move-ClusterGroup -ErrorAction SilentlyContinue"
-            TestScript = "(Get-ClusterResource -name 'SQL IP*' | Get-ClusterParameter -Name ProbePort).Value -eq  ${probePort}"
-            GetScript  = '@{Result = "Moved Cluster Group"}'
-            DependsOn  = "[SQLSetup]FCISQLNode1"
-        }
+        #Script FixProbe {
+        #    SetScript  = "Get-ClusterResource -Name 'SQL IP*' | Set-ClusterParameter -Multiple @{Address=${clusterIP};ProbePort=${ProbePort};SubnetMask='255.255.255.255';Network='Cluster Network 1';EnableDhcp=0} -ErrorAction SilentlyContinue | out-null;Get-ClusterGroup -Name 'SQL Server*' -ErrorAction SilentlyContinue | Move-ClusterGroup -ErrorAction SilentlyContinue"
+        #    TestScript = "(Get-ClusterResource -name 'SQL IP*' | Get-ClusterParameter -Name ProbePort).Value -eq  ${probePort}"
+        #    GetScript  = '@{Result = "Moved Cluster Group"}'
+        #    DependsOn  = "[SQLSetup]FCISQLNode1"
+        #}
     }
 }
 
