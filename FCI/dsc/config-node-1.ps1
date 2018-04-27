@@ -52,16 +52,16 @@ configuration ConfigNode1
         [string]$SQLFeatures,
         [string]$SQLInstance,
         [string]$InstallSQLDataDir,
-        [string]$InstanceDir ="${datadriveLetter}:\",
-        [string]$SQLUserDBDir = "${datadriveLetter}:\${datadrivelabel}",
-        [string]$SQLUserDBLogDir = "${logdriveLetter}:\${logdrivelabel}",
-        [string]$SQLTempDBDir = "${tempdbdriveLetter}:\${tempdbdrivelabel}",
-        [string]$SQLTempDBLogDir = "${tempdbdriveLetter}:\${tempdbdrivelabel}",
-        [string]$SQLBackupDir = "${datadriveLetter}:\BACKUP"
+        [string]$InstanceDir ="G:\",
+        [string]$SQLUserDBDir = "G:\MSSQL",
+        [string]$SQLUserDBLogDir = "L:\MSSQL",
+        [string]$SQLTempDBDir = "T:\TEMPDB",
+        [string]$SQLTempDBLogDir = "T:\TEMPDB",
+        [string]$SQLBackupDir = "G:\BACKUP"
     )
 
     Import-DscResource -ModuleName xComputerManagement, xFailOverCluster, xActiveDirectory, xSOFS, SQLServerDSC, xPendingReboot, xNetworking
-    [string[]]$SQLSysAdminAccounts = "${DomainName}\Domain Admins"
+    [string[]]$SQLSysAdminAccounts = "TAMZ\Domain Admins"
 
     Node localhost
     {
@@ -169,40 +169,40 @@ configuration ConfigNode1
             DependsOn  = '[Script]EnableS2D'
         }
         
-       # SQLSetup FCISQLNode1
-       # {
-       #     Action                     = 'InstallFailoverCluster'
-       #     ForceReboot                = $true
-       #     UpdateEnabled              = $false
-       #     SourcePath                 = 'c:\SQLServerFull'
-       # 
-       #     InstanceName               = $SQLInstance
-       #     Features                   = $SQLFeatures
-       # 
-       #     InstallSharedDir           = 'C:\Program Files\Microsoft SQL Server'
-       #     InstallSharedWOWDir        = 'C:\Program Files (x86)\Microsoft SQL Server'
-       #     InstanceDir                = $InstanceDir
-       # 
-       #     SQLCollation               = $SQLCollation
-       #     SQLSvcAccount              = $svcCreds
-       #     AgtSvcAccount              = $svcCreds
-       #     SQLSysAdminAccounts        = $SQLSysAdminAccounts
-       #
-       #     InstallSQLDataDir          = $InstallSQLDataDir
-       #     SQLUserDBDir               = $SQLUserDBDir
-       #     SQLUserDBLogDir            = $SQLUserDBLogDir
-       #     SQLTempDBDir               = $SQLTempDBDir
-       #     SQLTempDBLogDir            = $SQLTempDBLogDir
-       #     SQLBackupDir               = $SQLBackupDir
-       # 
-       #     FailoverClusterNetworkName = $SQLClusterName
-       #     FailoverClusterIPAddress   = $clusterIP
-       #     FailoverClusterGroupName   = $SQLClusterName
-       # 
-       #     PsDscRunAsCredential       = $domainuserCreds
-       # 
-        #    DependsOn                  = '[WindowsFeature]NetFramework45', '[Script]CleanSQL','[Script]EnableS2D'
-        #}
+         SQLSetup FCISQLNode1
+        {
+           Action                     = 'InstallFailoverCluster'
+            ForceReboot                = $true
+            UpdateEnabled              = $false
+            SourcePath                 = 'c:\SQLServerFull'
+        
+            InstanceName               = $SQLInstance
+            Features                   = $SQLFeatures
+        
+            InstallSharedDir           = 'C:\Program Files\Microsoft SQL Server'
+            InstallSharedWOWDir        = 'C:\Program Files (x86)\Microsoft SQL Server'
+            InstanceDir                = $InstanceDir
+        
+            #SQLCollation               = $SQLCollation
+            SQLSvcAccount              = $svcCreds
+            AgtSvcAccount              = $svcCreds
+            SQLSysAdminAccounts        = $SQLSysAdminAccounts
+       
+            InstallSQLDataDir          = $InstallSQLDataDir
+            SQLUserDBDir               = $SQLUserDBDir
+            SQLUserDBLogDir            = $SQLUserDBLogDir
+            SQLTempDBDir               = $SQLTempDBDir
+            SQLTempDBLogDir            = $SQLTempDBLogDir
+            SQLBackupDir               = $SQLBackupDir
+        
+            FailoverClusterNetworkName = $SQLClusterName
+            FailoverClusterIPAddress   = $clusterIP
+            FailoverClusterGroupName   = $SQLClusterName
+        
+            PsDscRunAsCredential       = $domainuserCreds
+        
+            DependsOn                  = '[WindowsFeature]NetFramework45', '[Script]CleanSQL','[Script]EnableS2D'
+        }
         #xPendingReboot Reboot2
         #{ 
         #    Name      = 'Reboot2'
