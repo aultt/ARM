@@ -463,6 +463,7 @@
             "clusterName": "[variables('clusterName')]",
             "sqlClusterName": "[variables('sqlClusterName')]",
             "clusterIP": "[parameters('clusterIP')]",
+            "vmNamePrefix": "[variables('vmNamePrefix')]",
             "witnessStorageName": "[variables('witnessStorageName')]",
             "witnessStorageKey": {
               "userName": "PLACEHOLDER-DO-NOT-USE",
@@ -533,6 +534,7 @@
             "clusterName": "[variables('clusterName')]",
             "sqlClusterName": "[variables('sqlClusterName')]",
             "clusterIP": "[parameters('clusterIP')]",
+            "vmNamePrefix": "[variables('vmNamePrefix')]",
             "witnessStorageName": "[variables('witnessStorageName')]",
             "witnessStorageKey": {
               "userName": "PLACEHOLDER-DO-NOT-USE",
@@ -554,7 +556,8 @@
         "protectedSettings": {
           "items": {
             "domainuserPassword": "[parameters('domainuserPassword')]",
-            "svcPassword": "[parameters('svcPassword')]"
+            "svcPassword": "[parameters('svcPassword')]",
+            "witnessStorageKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts',variables('witnessStorageName')),variables('apiVersionStorage')).keys[0].value]"
           }
         }
       },
