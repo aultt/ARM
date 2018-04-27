@@ -22,12 +22,6 @@ configuration ConfigNode1
         [String]$vmNamePrefix,
 
         [Parameter(Mandatory)]
-        [Int]$vmCount,
-
-        [Parameter(Mandatory)]
-        [Int]$vmDiskSize,
-
-        [Parameter(Mandatory)]
         [String]$witnessStorageName,
 
         [Parameter(Mandatory)]
