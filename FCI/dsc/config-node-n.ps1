@@ -129,41 +129,5 @@ configuration ConfigNodeN
             Name = "Reboot1"
             DependsOn = "[Script]CleanSQL"
         }
-
-        #xSQLServerFailoverClusterSetup PrepareMSSQLSERVER
-        #{
-        #    DependsOn = "[xPendingReboot]Reboot1"
-        #    Action = "Prepare"
-        #    SourcePath = "C:\"
-        #    SourceFolder = "SQLServerFull"
-        #    UpdateSource = ""
-        #    SetupCredential = $domainCreds
-        #    Features = $SQLFeatures
-        #    InstanceName = $SQLInstance
-        #    FailoverClusterNetworkName = $SQLClusterName
-        #    SQLSvcAccount = $ServiceCreds
-        #}
-
-        #xFirewall SQLFirewall
-        #{
-        #    Name = "SQL Firewall Rule"
-        #    DisplayName = "SQL Firewall Rule"
-        #    Ensure = "Present"
-        #    Enabled = "True"
-        #    Profile = ("Domain", "Private", "Public")
-        #    Direction = "Inbound"
-        #    RemotePort = "Any"
-        #    LocalPort = ("445", "1433", "37000", "37001")
-        #    Protocol = "TCP"
-        #    Description = "Firewall Rule for SQL"
-        #    DependsOn = "[xSQLServerFailoverClusterSetup]PrepareMSSQLSERVER"
-        #}
-
-        #xPendingReboot Reboot2
-        #{ 
-        #    Name = 'Reboot2'
-        #    DependsOn = "[xFirewall]SQLFirewall"
-        #}
-
     }
 }
