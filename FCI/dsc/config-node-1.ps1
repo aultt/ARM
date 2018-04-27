@@ -114,6 +114,13 @@ configuration ConfigNode1
             DependsOn  = "[xWaitForADDomain]DscForestWait"
         }
         
+        Script MoveClusterGroups0 {
+            SetScript  = 'try {Get-ClusterGroup -ErrorAction SilentlyContinue | Move-ClusterGroup -Node $env:COMPUTERNAME -ErrorAction SilentlyContinue} catch {}'
+            TestScript = 'return $false'
+            GetScript  = '@{Result = "Moved Cluster Group"}'
+            DependsOn  = "[xComputer]DomainJoin"
+        }
+
         Script CleanSQL {
             SetScript  = 'C:\SQLServerFull\Setup.exe /Action=Uninstall /FEATURES=SQL,AS,RS,IS /INSTANCENAME=MSSQLSERVER /Q'
             TestScript = '(test-path -Path "C:\Program Files\Microsoft SQL Server\MSSQL13.MSSQLSERVER\MSSQL\DATA\master.mdf") -eq $false'
@@ -129,7 +136,7 @@ configuration ConfigNode1
             Name                          = $ClusterName
             StaticIPAddress = '10.40.4.102'
             DomainAdministratorCredential = $domainuserCreds
-            DependsOn                     = "[xPendingReboot]Reboot1"
+            DependsOn                     = "[Script]MoveClusterGroups0"
         }
 
         Script CloudWitness {
@@ -173,7 +180,7 @@ configuration ConfigNode1
         {
            Action                     = 'InstallFailoverCluster'
             ForceReboot                = $true
-            UpdateEnabled              = $false
+            UpdateEnabled              = 'false'
             SourcePath                 = 'c:\SQLServerFull'
         
             InstanceName               = $SQLInstance

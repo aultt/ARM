@@ -16,7 +16,7 @@ configuration ConfigNodeN
         [String]$SQLClusterName
     )
 
-    Import-DscResource -ModuleName xComputerManagement, xActiveDirectory, SQLServerDSC, xPendingReboot, xNetworking
+    Import-DscResource -ModuleName xComputerManagement, xActiveDirectory, SQLServerDSC, xPendingReboot, xNetworking,xFailoverCluster
 
     Node localhost
     {
@@ -72,13 +72,28 @@ configuration ConfigNodeN
             Credential = $domainuserCreds
             DependsOn = "[xWaitForADDomain]DscForestWait"
         }
+        
+        Script MoveClusterGroups0 {
+            SetScript  = 'try {Get-ClusterGroup -ErrorAction SilentlyContinue | Move-ClusterGroup -Node $env:COMPUTERNAME -ErrorAction SilentlyContinue} catch {}'
+            TestScript = 'return $false'
+            GetScript  = '@{Result = "Moved Cluster Group"}'
+            DependsOn  = "[xComputer]DomainJoin"
+        }
+
+        xCluster FailoverCluster
+        {
+            Name                          = $ClusterName
+            StaticIPAddress = '10.40.4.102'
+            DomainAdministratorCredential = $domainuserCreds
+            DependsOn                     = "[Script]MoveClusterGroups0"
+        }
 
         Script CleanSQL
         {
             SetScript = 'C:\SQLServerFull\Setup.exe /Action=Uninstall /FEATURES=SQL,AS,IS,RS /INSTANCENAME=MSSQLSERVER /Q'
             TestScript = '(test-path -Path "C:\Program Files\Microsoft SQL Server\MSSQL13.MSSQLSERVER\MSSQL\DATA\master.mdf") -eq $false'
             GetScript = '@{Ensure = if ((test-path -Path "C:\Program Files\Microsoft SQL Server\MSSQL13.MSSQLSERVER\MSSQL\DATA\master.mdf") -eq $false) {"Present"} Else {"Absent"}}'
-            DependsOn = "[xComputer]DomainJoin"
+            DependsOn = "[xCluster]FailoverCluster"
         }
 
         xPendingReboot Reboot1
