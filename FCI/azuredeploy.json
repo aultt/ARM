@@ -463,7 +463,6 @@
             "clusterName": "[variables('clusterName')]",
             "sqlClusterName": "[variables('sqlClusterName')]",
             "clusterIP": "[parameters('clusterIP')]",
-            "vmNamePrefix": "[variables('vmNamePrefix')]",
             "witnessStorageName": "[variables('witnessStorageName')]",
             "witnessStorageKey": {
               "userName": "PLACEHOLDER-DO-NOT-USE",

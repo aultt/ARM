@@ -19,9 +19,6 @@ configuration ConfigNode1
         [String]$SQLClusterName,
 
         [Parameter(Mandatory)]
-        [String]$vmNamePrefix,
-
-        [Parameter(Mandatory)]
         [String]$witnessStorageName,
 
         [Parameter(Mandatory)]
