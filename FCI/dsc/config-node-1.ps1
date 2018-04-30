@@ -126,7 +126,7 @@ configuration ConfigNode1
             Name = $ClusterName
             StaticIPAddress = '10.40.4.102'
             DomainAdministratorCredential = $domainuserCreds
-            DependsOn = 'Script MoveClusterGroups0' 
+            DependsOn = '[Script]MoveClusterGroups0' 
         }
 
         Script CloudWitness {

@@ -100,12 +100,7 @@ configuration ConfigNodeN
             DependsOn = "[xWaitForADDomain]DscForestWait"
         }
         
-#        Script MoveClusterGroups0 {
-#            SetScript  = 'try {Get-ClusterGroup -ErrorAction SilentlyContinue | Move-ClusterGroup -Node $env:COMPUTERNAME -ErrorAction SilentlyContinue} catch {}'
-#            TestScript = 'return $false'
-#            GetScript  = '@{Result = "Moved Cluster Group"}'
-#            DependsOn  = "[xComputer]DomainJoin"
-#        }
+
         xWaitForCluster WaitForMyCluster
         {
             Name = $ClusterName
@@ -114,12 +109,18 @@ configuration ConfigNodeN
             PsDscRunAsCredential  = $domainuserCreds
             DependsOn = "[xComputer]DomainJoin"
         }
+        Script MoveClusterGroups0 {
+            SetScript  = 'try {Get-ClusterGroup -ErrorAction SilentlyContinue | Move-ClusterGroup -Node $env:COMPUTERNAME -ErrorAction SilentlyContinue} catch {}'
+            TestScript = 'return $false'
+            GetScript  = '@{Result = "Moved Cluster Group"}'
+            DependsOn  = "[xWaitForCluster]WaitForMyCluster"
+        }
         xCluster FailoverCluster
         {
             Name                          = $ClusterName
             StaticIPAddress = '10.40.4.102'
             DomainAdministratorCredential = $domainuserCreds
-            DependsOn                     = "[xWaitForCluster]WaitForMyCluster"
+            DependsOn                     = '[Script]MoveClusterGroups0'
         }
 
 #        Script CloudWitness {
