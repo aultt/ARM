@@ -106,13 +106,20 @@ configuration ConfigNodeN
             GetScript  = '@{Result = "Moved Cluster Group"}'
             DependsOn  = "[xComputer]DomainJoin"
         }
-
+        xWaitForCluster WaitForMyCluster
+        {
+            Name = $ClusterName
+            RetryIntervalSec = 30
+            RetryCount = 75
+            PsDscRunAsCredential  = $domainuserCreds
+            DependsOn = "[Script]MoveClusterGroups0"
+        }
         xCluster FailoverCluster
         {
             Name                          = $ClusterName
             StaticIPAddress = '10.40.4.102'
             DomainAdministratorCredential = $domainuserCreds
-            DependsOn                     = "[Script]MoveClusterGroups0"
+            DependsOn                     = "xWaitForCluster WaitForMyCluster"
         }
 
         Script CloudWitness {
