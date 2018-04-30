@@ -115,12 +115,18 @@ configuration ConfigNode1
             Name      = 'Reboot1'
             DependsOn = "[Script]CleanSQL"
         }
+        Script MoveClusterGroups0 {
+            SetScript  = 'try {Get-ClusterGroup -ErrorAction SilentlyContinue | Move-ClusterGroup -Node $env:COMPUTERNAME -ErrorAction SilentlyContinue} catch {}'
+            TestScript = 'return $false'
+            GetScript  = '@{Result = "Moved Cluster Group"}'
+            DependsOn  = "[xComputer]DomainJoin"
+        }
         xCluster FailoverCluster
         {
-            Name                          = $ClusterName
+            Name = $ClusterName
             StaticIPAddress = '10.40.4.102'
             DomainAdministratorCredential = $domainuserCreds
-            DependsOn                     = "[xComputer]DomainJoin"
+            DependsOn = 'Script MoveClusterGroups0' 
         }
 
         Script CloudWitness {
