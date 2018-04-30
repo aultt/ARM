@@ -119,7 +119,7 @@ configuration ConfigNodeN
             Name                          = $ClusterName
             StaticIPAddress = '10.40.4.102'
             DomainAdministratorCredential = $domainuserCreds
-            DependsOn                     = "xWaitForCluster WaitForMyCluster"
+            DependsOn                     = "[xWaitForCluster]WaitForMyCluster"
         }
 
         Script CloudWitness {
