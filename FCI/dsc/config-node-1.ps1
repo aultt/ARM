@@ -46,9 +46,9 @@ configuration ConfigNode1
         [string]$tempdbdriveLetter,
         [string]$tempdbdrivelabel,
         [string]$tempdbdriveSize,
-        [string]$SQLFeatures,
-        [string]$SQLInstance,
-        [string]$InstallSQLDataDir,
+        [string]$SQLFeatures ='SQLENGINE',
+        [string]$SQLInstance ='FCISQL',
+        [string]$InstallSQLDataDir="G:\MSSQL",
         [string]$InstanceDir ="G:\",
         [string]$SQLUserDBDir = "G:\MSSQL",
         [string]$SQLUserDBLogDir = "L:\MSSQL",
@@ -215,18 +215,18 @@ configuration ConfigNode1
         
             DependsOn                  = '[WindowsFeature]NetFramework45', '[Script]CleanSQL','[Script]EnableS2D'
         }
-        #xPendingReboot Reboot2
-        #{ 
-        #    Name      = 'Reboot2'
-        #    DependsOn = "[SQLSetup]FCISQLNode1"
-        #}
+        xPendingReboot Reboot2
+        { 
+            Name      = 'Reboot2'
+            DependsOn = "[SQLSetup]FCISQLNode1"
+        }
 
-        #Script FixProbe {
-        #    SetScript  = "Get-ClusterResource -Name 'SQL IP*' | Set-ClusterParameter -Multiple @{Address=${clusterIP};ProbePort=${ProbePort};SubnetMask='255.255.255.255';Network='Cluster Network 1';EnableDhcp=0} -ErrorAction SilentlyContinue | out-null;Get-ClusterGroup -Name 'SQL Server*' -ErrorAction SilentlyContinue | Move-ClusterGroup -ErrorAction SilentlyContinue"
-        #    TestScript = "(Get-ClusterResource -name 'SQL IP*' | Get-ClusterParameter -Name ProbePort).Value -eq  ${probePort}"
-        #    GetScript  = '@{Result = "Moved Cluster Group"}'
-        #    DependsOn  = "[SQLSetup]FCISQLNode1"
-        #}
+        Script FixProbe {
+            SetScript  = "Get-ClusterResource -Name 'SQL IP*' | Set-ClusterParameter -Multiple @{Address=${clusterIP};ProbePort=${ProbePort};SubnetMask='255.255.255.255';Network='Cluster Network 1';EnableDhcp=0} -ErrorAction SilentlyContinue | out-null;Get-ClusterGroup -Name 'SQL Server*' -ErrorAction SilentlyContinue | Move-ClusterGroup -ErrorAction SilentlyContinue"
+            TestScript = "(Get-ClusterResource -name 'SQL IP*' | Get-ClusterParameter -Name ProbePort).Value -eq  ${probePort}"
+            GetScript  = '@{Result = "Moved Cluster Group"}'
+            DependsOn  = "[SQLSetup]FCISQLNode1"
+        }
     }
 }
 
