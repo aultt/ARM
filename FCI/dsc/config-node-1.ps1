@@ -23,9 +23,9 @@ configuration ConfigNode1
 
         [Parameter(Mandatory)]
         [Int]$vmCount,
-        
-        [Parameter(Mandatory)]
-        [Int]$vmDiskSize,
+
+        #[Parameter(Mandatory)]
+        #[Int]$vmDiskSize,
 
         [Parameter(Mandatory)]
         [String]$witnessStorageName,

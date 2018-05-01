@@ -464,6 +464,7 @@
             "sqlClusterName": "[variables('sqlClusterName')]",
             "clusterIP": "[parameters('clusterIP')]",
             "vmNamePrefix": "[variables('vmNamePrefix')]",
+            
             "vmCount": "[parameters('vmCount')]",
             "witnessStorageName": "[variables('witnessStorageName')]",
             "witnessStorageKey": {
