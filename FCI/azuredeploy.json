@@ -464,8 +464,9 @@
             "sqlClusterName": "[variables('sqlClusterName')]",
             "clusterIP": "[parameters('clusterIP')]",
             "vmNamePrefix": "[variables('vmNamePrefix')]",
-            
             "vmCount": "[parameters('vmCount')]",
+            "vmDiskSize": "[parameters('vmDiskSize')]",
+            "vmDiskSize": "[parameters('vmDiskSize')]",
             "witnessStorageName": "[variables('witnessStorageName')]",
             "witnessStorageKey": {
               "userName": "PLACEHOLDER-DO-NOT-USE",
@@ -508,7 +509,8 @@
       "location": "[resourceGroup().location]",
       "dependsOn": [
         "virtualMachineLoop",
-        "[resourceId('Microsoft.Compute/availabilitySets', variables('vmAvailabilitySetName'))]"
+        "[resourceId('Microsoft.Compute/availabilitySets', variables('vmAvailabilitySetName'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('witnessStorageName'))]"
       ],
       "copy": {
         "name": "virtualMachineExtensionLoop",
@@ -531,14 +533,16 @@
             "svcCreds": {
               "userName": "[parameters('svcUserName')]",
               "password": "PrivateSettingsRef:svcPassword"
-            }
-          }          
+            },
+            "sqlFeatures": "[parameters('SQLFeatures')]",
+            "sqlInstance": "[parameters('SQLInstance')]"
+          }
         },
         "protectedSettings": {
           "items": {
             "domainuserPassword": "[parameters('domainuserPassword')]",
             "svcPassword": "[parameters('svcPassword')]"
-            }
+          }
         }
       },
       "comments": "This VM DSC extension prepares the 1st Cluster Node"

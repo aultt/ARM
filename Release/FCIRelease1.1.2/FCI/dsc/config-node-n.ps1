@@ -8,32 +8,15 @@ configuration ConfigNodeN
         [System.Management.Automation.PSCredential]$domainuserCreds,
         [Parameter(Mandatory)]
         [System.Management.Automation.PSCredential]$svcCreds,      
-        
+        #[String]$DomainNetbiosName = (Get-NetBIOSName -DomainName $DomainName),
         [Int]$RetryCount = 20,
-        [Int]$RetryIntervalSec = 30
-        #[Int]$probePort = 37000, 
-
-        #[string]$datadriveLetter,
-        #[string]$datadrivelabel,
-        #[string]$datadriveSize,
-        #[string]$logdriveLetter,
-        #[string]$logdrivelabel,
-        #[string]$logdriveSize,
-        #[string]$tempdbdriveLetter,
-        #[string]$tempdbdrivelabel,
-        #[string]$tempdbdriveSize,
-        #[string]$SQLFeatures,
-        #[string]$SQLInstance,
-        #[string]$InstallSQLDataDir,
-        #[string]$InstanceDir ="G:\",
-        #[string]$SQLUserDBDir = "G:\MSSQL",
-        #[string]$SQLUserDBLogDir = "L:\MSSQL",
-        #[string]$SQLTempDBDir = "T:\TEMPDB",
-        #[string]$SQLTempDBLogDir = "T:\TEMPDB",
-        #[string]$SQLBackupDir = "G:\BACKUP"
+        [Int]$RetryIntervalSec = 30,
+        [string]$SQLFeatures,
+        [string]$SQLInstance,
+        [String]$SQLClusterName
     )
 
-    Import-DscResource -ModuleName xComputerManagement, xActiveDirectory, SQLServerDSC, xPendingReboot, xNetworking,xFailoverCluster
+    Import-DscResource -ModuleName xComputerManagement, xActiveDirectory, xSQLServer, xPendingReboot, xNetworking
 
     Node localhost
     {
@@ -90,12 +73,12 @@ configuration ConfigNodeN
             DependsOn = "[xWaitForADDomain]DscForestWait"
         }
 
-
         Script CleanSQL
         {
-           SetScript = 'C:\SQLServerFull\Setup.exe /Action=Uninstall /FEATURES=SQL,AS,IS,RS /INSTANCENAME=MSSQLSERVER /Q'
+            SetScript = 'C:\SQLServerFull\Setup.exe /Action=Uninstall /FEATURES=SQL,AS,IS,RS /INSTANCENAME=MSSQLSERVER /Q'
             TestScript = '(test-path -Path "C:\Program Files\Microsoft SQL Server\MSSQL13.MSSQLSERVER\MSSQL\DATA\master.mdf") -eq $false'
             GetScript = '@{Ensure = if ((test-path -Path "C:\Program Files\Microsoft SQL Server\MSSQL13.MSSQLSERVER\MSSQL\DATA\master.mdf") -eq $false) {"Present"} Else {"Absent"}}'
+            DependsOn = "[xComputer]DomainJoin"
         }
 
         xPendingReboot Reboot1
@@ -103,5 +86,41 @@ configuration ConfigNodeN
             Name = "Reboot1"
             DependsOn = "[Script]CleanSQL"
         }
+
+        #xSQLServerFailoverClusterSetup PrepareMSSQLSERVER
+        #{
+        #    DependsOn = "[xPendingReboot]Reboot1"
+        #    Action = "Prepare"
+        #    SourcePath = "C:\"
+        #    SourceFolder = "SQLServerFull"
+        #    UpdateSource = ""
+        #    SetupCredential = $domainCreds
+        #    Features = $SQLFeatures
+        #    InstanceName = $SQLInstance
+        #    FailoverClusterNetworkName = $SQLClusterName
+        #    SQLSvcAccount = $ServiceCreds
+        #}
+
+        #xFirewall SQLFirewall
+        #{
+        #    Name = "SQL Firewall Rule"
+        #    DisplayName = "SQL Firewall Rule"
+        #    Ensure = "Present"
+        #    Enabled = "True"
+        #    Profile = ("Domain", "Private", "Public")
+        #    Direction = "Inbound"
+        #    RemotePort = "Any"
+        #    LocalPort = ("445", "1433", "37000", "37001")
+        #    Protocol = "TCP"
+        #    Description = "Firewall Rule for SQL"
+        #    DependsOn = "[xSQLServerFailoverClusterSetup]PrepareMSSQLSERVER"
+        #}
+
+        #xPendingReboot Reboot2
+        #{ 
+        #    Name = 'Reboot2'
+        #    DependsOn = "[xFirewall]SQLFirewall"
+        #}
+
     }
 }

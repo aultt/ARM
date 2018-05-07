@@ -15,46 +15,46 @@
       "value": 2
     },
     "DomainName": {
-      "value": "contoso.local"
+      "value": "tamz.local"
     },
     "localadminusername": {
-      "value": "myadmin"
+      "value": "tamzadmin"
     },
     "localadminPassword": {
       "reference": {
         "keyVault": {
-          "id": "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/core-prod-rg/providers/Microsoft.KeyVault/vaults/My-Prod-KeyVault"
+          "id": "/subscriptions/3a1cbafc-8869-447c-8f82-7164262f97ce/resourceGroups/tia-core-prod-rg/providers/Microsoft.KeyVault/vaults/TAMZ-Prod-KeyVault"
         },
         "secretName": "DomainAdmin"
       }
     },
     "domainUsername": {
-      "value": "Contoso\\myadmin"
+      "value": "TAMZ\\troyault"
     },
     "domainuserPassword": {
       "reference": {
         "keyVault": {
-          "id": "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/core-prod-rg/providers/Microsoft.KeyVault/vaults/MY-Prod-KeyVault"
+          "id": "/subscriptions/3a1cbafc-8869-447c-8f82-7164262f97ce/resourceGroups/tia-core-prod-rg/providers/Microsoft.KeyVault/vaults/TAMZ-Prod-KeyVault"
         },
         "secretName": "DomainAdmin"
       }
     },
     "svcUsername": {
-      "value": "Contoso\\SqlService"
+      "value": "TAMZ\\AzureSqlService"
     },
     "svcPassword": {
       "reference": {
         "keyVault": {
-          "id": "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/core-prod-rg/providers/Microsoft.KeyVault/vaults/My-Prod-KeyVault"
+          "id": "/subscriptions/3a1cbafc-8869-447c-8f82-7164262f97ce/resourceGroups/tia-core-prod-rg/providers/Microsoft.KeyVault/vaults/TAMZ-Prod-KeyVault"
         },
         "secretName": "AzureSQLAcct"
       }
     },
     "existingVirtualNetworkRGName": {
-      "value": "core-prod-rg"
+      "value": "tsb-core-prod-rg"
     },
     "existingVirtualNetworkName": {
-      "value": "prod-vnet"
+      "value": "tsb-prod-vnet"
     },
     "existingSubnetName": {
       "value": "data"
@@ -63,7 +63,7 @@
       "value": "10.40.4.101"
     },
     "sqlinstance": {
-      "value" : "CONTOSOFCI"
+      "value" : "TAMZFCI"
     },
     "logdrivesize":{
       "value": "10GB"
@@ -73,6 +73,17 @@
     },
     "tempdbdrivesize" :{
       "value": "10GB"
+    },
+    "_artifactsLocation": {
+      "value": "https://template001.blob.core.windows.net/fcitemplate"
+    },
+    "_artifactsLocationSasToken": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/3a1cbafc-8869-447c-8f82-7164262f97ce/resourceGroups/tia-core-prod-rg/providers/Microsoft.KeyVault/vaults/TAMZ-Prod-KeyVault"
+        },
+        "secretName": "TemplateKey"
+      }
     }
   }
 }
