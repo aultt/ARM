@@ -19,15 +19,6 @@ configuration ConfigNode1
         [String]$SQLClusterName,
 
         [Parameter(Mandatory)]
-        [String]$vmNamePrefix,
-
-        [Parameter(Mandatory)]
-        [Int]$vmCount,
-
-        [Parameter(Mandatory)]
-        [Int]$vmDiskSize,
-
-        [Parameter(Mandatory)]
         [String]$witnessStorageName,
 
         [Parameter(Mandatory)]
@@ -35,9 +26,7 @@ configuration ConfigNode1
 
         [Parameter(Mandatory)]
         [String]$clusterIP,
-
-        #[String]$DomainNetbiosName = (Get-NetBIOSName -DomainName $DomainName),
-
+        
         [Int]$RetryCount = 20,
         [Int]$RetryIntervalSec = 30,
         [Int]$probePort = 37000, 
@@ -54,20 +43,16 @@ configuration ConfigNode1
         [string]$SQLFeatures,
         [string]$SQLInstance,
         [string]$InstallSQLDataDir,
-        [string]$SQLUserDBDir = "${datadriveLetter}:\${datadrivelabel}",
-        [string]$SQLUserDBLogDir = "${logdriveLetter}:\${logdrivelabel}",
-        [string]$SQLTempDBDir = "${tempdbdriveLetter}:\${tempdbdrivelabel}",
-        [string]$SQLTempDBLogDir = "${tempdbdriveLetter}:\${tempdbdrivelabel}",
-        [string]$SQLBackupDir = "${datadriveLetter}:\BACKUP"
+        [string]$InstanceDir ="G:\",
+        [string]$SQLUserDBDir = "G:\MSSQL",
+        [string]$SQLUserDBLogDir = "L:\MSSQL",
+        [string]$SQLTempDBDir = "T:\TEMPDB",
+        [string]$SQLTempDBLogDir = "T:\TEMPDB",
+        [string]$SQLBackupDir = "G:\BACKUP"
     )
 
-    Import-DscResource -ModuleName xComputerManagement, xFailOverCluster, xActiveDirectory, xSOFS, xSQLServer, xPendingReboot, xNetworking
-    #[string[]]$AdminUserNames = "${DomainNetbiosName}\Domain Admins"
-    
-    [System.Collections.ArrayList]$Nodes = @()
-    For ($count = 1; $count -lt $vmCount+1; $count++) {
-        $Nodes.Add($vmNamePrefix + $Count.ToString())
-    }
+    Import-DscResource -ModuleName xComputerManagement, xFailOverCluster, xActiveDirectory, xSOFS, SQLServerDSC, xPendingReboot, xNetworking
+    [string[]]$SQLSysAdminAccounts = "TAMZ\Domain Admins"
 
     Node localhost
     {
@@ -125,20 +110,23 @@ configuration ConfigNode1
             TestScript = '(test-path -Path "C:\Program Files\Microsoft SQL Server\MSSQL13.MSSQLSERVER\MSSQL\DATA\master.mdf") -eq $false'
             GetScript  = '@{Ensure = if ((test-path -Path "C:\Program Files\Microsoft SQL Server\MSSQL13.MSSQLSERVER\MSSQL\DATA\master.mdf") -eq $false) {"Present"} Else {"Absent"}}'
         }
-
+        xPendingReboot Reboot1
+        { 
+            Name      = 'Reboot1'
+            DependsOn = "[Script]CleanSQL"
+        }
         Script MoveClusterGroups0 {
             SetScript  = 'try {Get-ClusterGroup -ErrorAction SilentlyContinue | Move-ClusterGroup -Node $env:COMPUTERNAME -ErrorAction SilentlyContinue} catch {}'
             TestScript = 'return $false'
             GetScript  = '@{Result = "Moved Cluster Group"}'
             DependsOn  = "[xComputer]DomainJoin"
         }
-
         xCluster FailoverCluster
         {
-            Name                          = $ClusterName
+            Name = $ClusterName
+            StaticIPAddress = '10.40.4.102'
             DomainAdministratorCredential = $domainuserCreds
-            Nodes                         = $Nodes
-            DependsOn                     = "[Script]MoveClusterGroups0"
+            DependsOn = '[Script]MoveClusterGroups0' 
         }
 
         Script CloudWitness {
@@ -155,14 +143,6 @@ configuration ConfigNode1
             DependsOn  = "[Script]CloudWitness"
         }
 
-        # Likelely redundant
-        Script MoveClusterGroups1 {
-            SetScript  = 'try {Get-ClusterGroup -ErrorAction SilentlyContinue | Move-ClusterGroup -Node $env:COMPUTERNAME -ErrorAction SilentlyContinue} catch {}'
-            TestScript = 'return $false'
-            GetScript  = '@{Result = "Moved Cluster Group"}'
-            DependsOn  = "[Script]IncreaseClusterTimeouts"
-        }
-
         Script EnableS2D {
             #SetScript  = "Enable-ClusterS2D -Confirm:0; New-Volume -StoragePoolFriendlyName S2D* -FriendlyName VDisk01 -FileSystem NTFS -DriveLetter ${driveLetter} -UseMaximumSize"
             #SetScript = Enable-ClusterS2D -Confirm:0;New-Volume -StoragePoolFriendlyName S2D* -FriendlyName ${datadrivelable} -FileSystem NTFS -AllocationUnitSize 65536 -DriveLetter ${datadriveLetter} -size ${datadriveSize};
@@ -176,43 +156,61 @@ configuration ConfigNode1
 "@
             TestScript = "(Get-StoragePool -FriendlyName S2D*).OperationalStatus -eq 'OK'"
             GetScript  = "@{Ensure = if ((Get-StoragePool -FriendlyName S2D*).OperationalStatus -eq 'OK') {'Present'} Else {'Absent'}}"
-            DependsOn  = "[Script]MoveClusterGroups1"
+            DependsOn  = "[Script]CloudWitness"
         }
-
-        #xPendingReboot Reboot1
-        #{ 
-        #    Name      = 'Reboot1'
-        #    DependsOn = "[Script]CleanSQL"
-        #}
-
-        #Script MoveClusterGroups2 {
-        #    SetScript  = 'try {Get-ClusterGroup -ErrorAction SilentlyContinue | Move-ClusterGroup -Node $env:COMPUTERNAME -ErrorAction SilentlyContinue} catch {}'
-        #    TestScript = 'return $false'
-        #    GetScript  = '@{Result = "Moved Cluster Group"}'
-        #    DependsOn  = "[xPendingReboot]Reboot1"
-        #}
-
- 
+        
+        WindowsFeature 'NetFramework45'
+        {
+            Name   = 'NET-Framework-45-Core'
+            Ensure = 'Present'
+            DependsOn  = '[Script]EnableS2D'
+        }
+        
+         SQLSetup FCISQLNode1
+        {
+           Action                     = 'InstallFailoverCluster'
+            ForceReboot                = $true
+            UpdateEnabled              = 'false'
+            SourcePath                 = 'c:\SQLServerFull'
+        
+            InstanceName               = $SQLInstance
+            Features                   = $SQLFeatures
+        
+            InstallSharedDir           = 'C:\Program Files\Microsoft SQL Server'
+            InstallSharedWOWDir        = 'C:\Program Files (x86)\Microsoft SQL Server'
+            InstanceDir                = $InstanceDir
+        
+            #SQLCollation               = $SQLCollation
+            SQLSvcAccount              = $svcCreds
+            AgtSvcAccount              = $svcCreds
+            SQLSysAdminAccounts        = $SQLSysAdminAccounts
+       
+            InstallSQLDataDir          = $InstallSQLDataDir
+            SQLUserDBDir               = $SQLUserDBDir
+            SQLUserDBLogDir            = $SQLUserDBLogDir
+            SQLTempDBDir               = $SQLTempDBDir
+            SQLTempDBLogDir            = $SQLTempDBLogDir
+            SQLBackupDir               = $SQLBackupDir
+        
+            FailoverClusterNetworkName = $SQLClusterName
+            FailoverClusterIPAddress   = $clusterIP
+            FailoverClusterGroupName   = $SQLClusterName
+        
+            PsDscRunAsCredential       = $domainuserCreds
+        
+            DependsOn                  = '[WindowsFeature]NetFramework45', '[Script]CleanSQL','[Script]EnableS2D'
+        }
         #xPendingReboot Reboot2
         #{ 
         #    Name      = 'Reboot2'
-        #    DependsOn = "[xFirewall]SQLFirewall"
+        #    DependsOn = "[SQLSetup]FCISQLNode1"
         #}
-
-        #Script MoveClusterGroups3 {
-        #    SetScript  = 'try {Get-ClusterGroup -ErrorAction SilentlyContinue | Move-ClusterGroup -Node $env:COMPUTERNAME -ErrorAction SilentlyContinue} catch {}'
-        #    TestScript = 'return $false'
-        #    GetScript  = '@{Result = "Moved Cluster Group"}'
-        #    DependsOn  = "[xPendingReboot]Reboot2"
-        #}
-
- 
 
         #Script FixProbe {
         #    SetScript  = "Get-ClusterResource -Name 'SQL IP*' | Set-ClusterParameter -Multiple @{Address=${clusterIP};ProbePort=${ProbePort};SubnetMask='255.255.255.255';Network='Cluster Network 1';EnableDhcp=0} -ErrorAction SilentlyContinue | out-null;Get-ClusterGroup -Name 'SQL Server*' -ErrorAction SilentlyContinue | Move-ClusterGroup -ErrorAction SilentlyContinue"
         #    TestScript = "(Get-ClusterResource -name 'SQL IP*' | Get-ClusterParameter -Name ProbePort).Value -eq  ${probePort}"
         #    GetScript  = '@{Result = "Moved Cluster Group"}'
-        #    DependsOn  = "[xSQLServerFailoverClusterSetup]CompleteMSSQLSERVER"
+        #    DependsOn  = "[SQLSetup]FCISQLNode1"
         #}
     }
 }

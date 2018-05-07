@@ -463,10 +463,6 @@
             "clusterName": "[variables('clusterName')]",
             "sqlClusterName": "[variables('sqlClusterName')]",
             "clusterIP": "[parameters('clusterIP')]",
-            "vmNamePrefix": "[variables('vmNamePrefix')]",
-            "vmCount": "[parameters('vmCount')]",
-            "vmDiskSize": "[parameters('vmDiskSize')]",
-            "vmDiskSize": "[parameters('vmDiskSize')]",
             "witnessStorageName": "[variables('witnessStorageName')]",
             "witnessStorageKey": {
               "userName": "PLACEHOLDER-DO-NOT-USE",
@@ -534,14 +530,32 @@
               "userName": "[parameters('svcUserName')]",
               "password": "PrivateSettingsRef:svcPassword"
             },
+            "clusterName": "[variables('clusterName')]",
+            "sqlClusterName": "[variables('sqlClusterName')]",
+            "clusterIP": "[parameters('clusterIP')]",
+            "witnessStorageName": "[variables('witnessStorageName')]",
+            "witnessStorageKey": {
+              "userName": "PLACEHOLDER-DO-NOT-USE",
+              "password": "PrivateSettingsRef:witnessStorageKey"
+            },
+            "datadriveletter" : "[parameters('datadriveletter')]",
+            "datadrivesize" : "[parameters('datadrivesize')]",
+            "datadrivelabel" : "[parameters('datadrivelabel')]",
+            "logdriveletter" : "[parameters('logdriveletter')]",
+            "logdrivesize" : "[parameters('logdrivesize')]",
+            "logdrivelabel" : "[parameters('logdrivelabel')]",
+            "tempdbdriveletter" : "[parameters('tempdbdriveletter')]",
+            "tempdbdrivesize" : "[parameters('tempdbdrivesize')]",
+            "tempdbdrivelabel" : "[parameters('tempdbdrivelabel')]",
             "sqlFeatures": "[parameters('SQLFeatures')]",
             "sqlInstance": "[parameters('SQLInstance')]"
-          }
+          }          
         },
         "protectedSettings": {
           "items": {
             "domainuserPassword": "[parameters('domainuserPassword')]",
-            "svcPassword": "[parameters('svcPassword')]"
+            "svcPassword": "[parameters('svcPassword')]",
+            "witnessStorageKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts',variables('witnessStorageName')),variables('apiVersionStorage')).keys[0].value]"
           }
         }
       },
