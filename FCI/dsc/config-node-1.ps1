@@ -208,7 +208,7 @@ configuration ConfigNode1
             SourceCredential           = $domainuserCreds
 
             InstanceName               = 'INST2016'
-            Features                   = 'SQLENGINE,AS'
+            Features                   = 'SQLENGINE'
 
             InstallSharedDir           = 'C:\Program Files\Microsoft SQL Server'
             InstallSharedWOWDir        = 'C:\Program Files (x86)\Microsoft SQL Server'
