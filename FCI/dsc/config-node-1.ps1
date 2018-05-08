@@ -232,7 +232,7 @@ configuration ConfigNode1
 
             PsDscRunAsCredential       = $domainuserCreds
 
-            DependsOn                  = '[WindowsFeature]NetFramework45'
+            DependsOn                  = '[WindowsFeature]NetFramework45','[Script]MoveClusterGroups2','[Script]EnableS2D'
         }
         #xPendingReboot Reboot2
         #{ 
