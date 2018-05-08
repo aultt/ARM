@@ -61,7 +61,7 @@ configuration ConfigNode1
         [string]$SQLBackupDir = "${datadriveLetter}:\BACKUP"
     )
 
-    Import-DscResource -ModuleName xComputerManagement, xFailOverCluster, xActiveDirectory, xSOFS, xPendingReboot, xNetworking
+    Import-DscResource -ModuleName xComputerManagement, xFailOverCluster, xActiveDirectory, xSOFS, xPendingReboot, xNetworking, sqlserverdsc
     #[string[]]$AdminUserNames = "${DomainNetbiosName}\Domain Admins"
     
     [System.Collections.ArrayList]$Nodes = @()
@@ -179,20 +179,62 @@ configuration ConfigNode1
             DependsOn  = "[Script]MoveClusterGroups1"
         }
 
-        #xPendingReboot Reboot1
-        #{ 
-        #    Name      = 'Reboot1'
-        #    DependsOn = "[Script]CleanSQL"
-        #}
+        xPendingReboot Reboot1
+        { 
+            Name      = 'Reboot1'
+            DependsOn = "[Script]CleanSQL"
+        
+        }
 
-        #Script MoveClusterGroups2 {
-        #    SetScript  = 'try {Get-ClusterGroup -ErrorAction SilentlyContinue | Move-ClusterGroup -Node $env:COMPUTERNAME -ErrorAction SilentlyContinue} catch {}'
-        #    TestScript = 'return $false'
-        #    GetScript  = '@{Result = "Moved Cluster Group"}'
-        #    DependsOn  = "[xPendingReboot]Reboot1"
-        #}
+        Script MoveClusterGroups2 {
+            SetScript  = 'try {Get-ClusterGroup -ErrorAction SilentlyContinue | Move-ClusterGroup -Node $env:COMPUTERNAME -ErrorAction SilentlyContinue} catch {}'
+            TestScript = 'return $false'
+            GetScript  = '@{Result = "Moved Cluster Group"}'
+            DependsOn  = "[xPendingReboot]Reboot1"
+        }
 
- 
+        WindowsFeature 'NetFramework45'
+        {
+            Name   = 'NET-Framework-45-Core'
+            Ensure = 'Present'
+        }
+        
+        SqlSetup 'InstallNamedInstanceNode1-INST2016'
+        {
+            Action                     = 'InstallFailoverCluster'
+            ForceReboot                = $false
+            UpdateEnabled              = 'False'
+            SourcePath                 = 'C:\SQLServerFull'
+            SourceCredential           = $domainuserCreds
+
+            InstanceName               = 'INST2016'
+            Features                   = 'SQLENGINE,AS'
+
+            InstallSharedDir           = 'C:\Program Files\Microsoft SQL Server'
+            InstallSharedWOWDir        = 'C:\Program Files (x86)\Microsoft SQL Server'
+            InstanceDir                = 'C:\Program Files\Microsoft SQL Server'
+
+            #SQLCollation               = 'Finnish_Swedish_CI_AS'
+            SQLSvcAccount              = $svcCreds
+            AgtSvcAccount              = $svcCreds
+            SQLSysAdminAccounts        = 'TAMZ\DBA'
+
+            # Drive D: must be a shared disk.
+            InstallSQLDataDir          = 'G:\MSSQL\Data'
+            SQLUserDBDir               = 'G:\MSSQL\Data'
+            SQLUserDBLogDir            = 'G:\MSSQL\Log'
+            SQLTempDBDir               = 'G:\MSSQL\Temp'
+            SQLTempDBLogDir            = 'G:\MSSQL\Temp'
+            SQLBackupDir               = 'G:\MSSQL\Backup'
+
+            FailoverClusterNetworkName = 'TESTCLU01A'
+            FailoverClusterIPAddress   = '10.40.4.102'
+            FailoverClusterGroupName   = 'TESTCLU01A'
+
+            PsDscRunAsCredential       = $domainuserCreds
+
+            DependsOn                  = '[WindowsFeature]NetFramework45'
+        }
         #xPendingReboot Reboot2
         #{ 
         #    Name      = 'Reboot2'
