@@ -61,7 +61,7 @@ configuration ConfigNode1
         [string]$SQLBackupDir = "${datadriveLetter}:\BACKUP"
     )
 
-    Import-DscResource -ModuleName xComputerManagement, xFailOverCluster, xActiveDirectory, xSOFS, xSQLServer, xPendingReboot, xNetworking
+    Import-DscResource -ModuleName xComputerManagement, xFailOverCluster, xActiveDirectory, xSOFS, xPendingReboot, xNetworking
     #[string[]]$AdminUserNames = "${DomainNetbiosName}\Domain Admins"
     
     [System.Collections.ArrayList]$Nodes = @()

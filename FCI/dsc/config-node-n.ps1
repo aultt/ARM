@@ -16,7 +16,7 @@ configuration ConfigNodeN
         [String]$SQLClusterName
     )
 
-    Import-DscResource -ModuleName xComputerManagement, xActiveDirectory, xSQLServer, xPendingReboot, xNetworking
+    Import-DscResource -ModuleName xComputerManagement, xActiveDirectory, xPendingReboot, xNetworking
 
     Node localhost
     {
