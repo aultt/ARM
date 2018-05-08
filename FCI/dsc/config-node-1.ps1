@@ -205,7 +205,6 @@ configuration ConfigNode1
             ForceReboot                = $false
             UpdateEnabled              = 'False'
             SourcePath                 = 'C:\SQLServerFull'
-            SourceCredential           = $domainuserCreds
 
             InstanceName               = 'INST2016'
             Features                   = 'SQLENGINE'
