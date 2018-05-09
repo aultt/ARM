@@ -16,7 +16,7 @@ configuration ConfigNodeN
         [String]$SQLClusterName
     )
 
-    Import-DscResource -ModuleName xComputerManagement, xActiveDirectory, xPendingReboot, xNetworking,sqlserverdsc
+    Import-DscResource -ModuleName xComputerManagement, xActiveDirectory, xPendingReboot, xNetworking,sqlserverdsc,xfailovercluster
 
     Node localhost
     {
@@ -73,6 +73,14 @@ configuration ConfigNodeN
             DependsOn = "[xWaitForADDomain]DscForestWait"
         }
 
+        xwaitforcluster SQLCluster
+        {
+            Name = "aesql100c"
+            DomainAdministratorCredential = $domainuserCreds
+            RetryIntervalSec = 30
+            RetryCount = 60
+        }
+
         Script CleanSQL
         {
             SetScript = 'C:\SQLServerFull\Setup.exe /Action=Uninstall /FEATURES=SQL,AS,IS,RS /INSTANCENAME=MSSQLSERVER /Q'
@@ -93,6 +101,7 @@ configuration ConfigNodeN
             Ensure = 'Present'
         }
 
+
         SqlSetup 'InstallNamedInstanceNode2'
         {
             Action                     = 'AddNode'
@@ -110,7 +119,7 @@ configuration ConfigNodeN
 
             PsDscRunAsCredential       = $domainuserCreds
 
-            DependsOn                  =  '[WindowsFeature]NetFramework45','[xPendingReboot]Reboot1'
+            DependsOn                  =  '[WindowsFeature]NetFramework45','[xPendingReboot]Reboot1','[xwaitforcluster]SQLCluster'
         }
 
     }
