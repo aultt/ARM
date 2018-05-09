@@ -23,6 +23,7 @@ configuration ConfigNodeN
         # Set LCM to reboot if needed
         LocalConfigurationManager {
             DebugMode = "ForceModuleImport"
+            ActionafterReboot = 'ContinueConfiguration'
             RebootNodeIfNeeded = $true
         }
 
@@ -75,7 +76,7 @@ configuration ConfigNodeN
 
         xwaitforcluster SQLCluster
         {
-            Name = "aesql100c"
+            Name = "aesql200c"
             DomainAdministratorCredential = $domainuserCreds
             RetryIntervalSec = 30
             RetryCount = 60

@@ -75,6 +75,7 @@ configuration ConfigNode1
         LocalConfigurationManager {
             DebugMode          = "ForceModuleImport"
             RebootNodeIfNeeded = $true
+            ActionafterReboot = 'ContinueConfiguration'
         }
         
         WindowsFeature FC {
