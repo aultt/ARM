@@ -16,7 +16,7 @@ configuration ConfigNodeN
         [String]$SQLClusterName
     )
 
-    Import-DscResource -ModuleName xComputerManagement, xActiveDirectory, xPendingReboot, xNetworking
+    Import-DscResource -ModuleName xComputerManagement, xActiveDirectory, xPendingReboot, xNetworking,sqlserverdsc
 
     Node localhost
     {
@@ -87,40 +87,31 @@ configuration ConfigNodeN
             DependsOn = "[Script]CleanSQL"
         }
 
-        #xSQLServerFailoverClusterSetup PrepareMSSQLSERVER
-        #{
-        #    DependsOn = "[xPendingReboot]Reboot1"
-        #    Action = "Prepare"
-        #    SourcePath = "C:\"
-        #    SourceFolder = "SQLServerFull"
-        #    UpdateSource = ""
-        #    SetupCredential = $domainCreds
-        #    Features = $SQLFeatures
-        #    InstanceName = $SQLInstance
-        #    FailoverClusterNetworkName = $SQLClusterName
-        #    SQLSvcAccount = $ServiceCreds
-        #}
+        WindowsFeature 'NetFramework45'
+        {
+            Name   = 'NET-Framework-45-Core'
+            Ensure = 'Present'
+        }
 
-        #xFirewall SQLFirewall
-        #{
-        #    Name = "SQL Firewall Rule"
-        #    DisplayName = "SQL Firewall Rule"
-        #    Ensure = "Present"
-        #    Enabled = "True"
-        #    Profile = ("Domain", "Private", "Public")
-        #    Direction = "Inbound"
-        #    RemotePort = "Any"
-        #    LocalPort = ("445", "1433", "37000", "37001")
-        #    Protocol = "TCP"
-        #    Description = "Firewall Rule for SQL"
-        #    DependsOn = "[xSQLServerFailoverClusterSetup]PrepareMSSQLSERVER"
-        #}
+        SqlSetup 'InstallNamedInstanceNode2'
+        {
+            Action                     = 'AddNode'
+            ForceReboot                = $false
+            UpdateEnabled              = 'False'
+            SourcePath                 = 'C:\SQLServerFull'
 
-        #xPendingReboot Reboot2
-        #{ 
-        #    Name = 'Reboot2'
-        #    DependsOn = "[xFirewall]SQLFirewall"
-        #}
+            InstanceName               = 'INST2016'
+            Features                   = 'SQLENGINE'
+
+            SQLSvcAccount              = $svcCreds
+            AgtSvcAccount              = $svcCreds
+
+            FailoverClusterNetworkName = 'TESTCLU01A'
+
+            PsDscRunAsCredential       = $domainuserCreds
+
+            DependsOn                  =  '[WindowsFeature]NetFramework45','[xPendingReboot]Reboot1'
+        }
 
     }
 }
