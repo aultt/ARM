@@ -1,5 +1,5 @@
 Login-AzureRmAccount
-Select-AzureRmSubscription -SubscriptionName TAMZ_SandBox
+Select-AzureRmSubscription -SubscriptionName TAMZ_InternalApps
 $RG = 'sqlfci06'
 
 $templateFile = 'C:\Users\troyault\OneDrive - TAMZ\Git\ARM\FCI\azuredeploy.json'

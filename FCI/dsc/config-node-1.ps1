@@ -227,7 +227,7 @@ configuration ConfigNode1
             SQLBackupDir               = 'G:\MSSQL\Backup'
 
             FailoverClusterNetworkName = 'TESTCLU01A'
-            FailoverClusterIPAddress   = '10.40.4.102'
+            FailoverClusterIPAddress   = '10.30.4.102'
             FailoverClusterGroupName   = 'TESTCLU01A'
 
             PsDscRunAsCredential       = $domainuserCreds
