@@ -248,13 +248,12 @@ configuration ConfigNode1
         #}
 
  
-
-        #Script FixProbe {
-        #    SetScript  = "Get-ClusterResource -Name 'SQL IP*' | Set-ClusterParameter -Multiple @{Address=${clusterIP};ProbePort=${ProbePort};SubnetMask='255.255.255.255';Network='Cluster Network 1';EnableDhcp=0} -ErrorAction SilentlyContinue | out-null;Get-ClusterGroup -Name 'SQL Server*' -ErrorAction SilentlyContinue | Move-ClusterGroup -ErrorAction SilentlyContinue"
-        #    TestScript = "(Get-ClusterResource -name 'SQL IP*' | Get-ClusterParameter -Name ProbePort).Value -eq  ${probePort}"
-        #    GetScript  = '@{Result = "Moved Cluster Group"}'
-        #    DependsOn  = "[xSQLServerFailoverClusterSetup]CompleteMSSQLSERVER"
-        #}
+        Script FixProbe {
+            SetScript  = "Get-ClusterResource -Name 'SQL IP*' | Set-ClusterParameter -Multiple @{Address=${clusterIP};ProbePort=${ProbePort};SubnetMask='255.255.255.255';Network='Cluster Network 1';EnableDhcp=0} -ErrorAction SilentlyContinue | out-null;Get-ClusterGroup -Name 'SQL Server*' -ErrorAction SilentlyContinue | Move-ClusterGroup -ErrorAction SilentlyContinue"
+            TestScript = "(Get-ClusterResource -name 'SQL IP*' | Get-ClusterParameter -Name ProbePort).Value -eq  ${probePort}"
+            GetScript  = '@{Result = "Moved Cluster Group"}'
+            DependsOn  = '[SqlSetup]InstallNamedInstanceNode1-INST2016'
+        }
     }
 }
 
