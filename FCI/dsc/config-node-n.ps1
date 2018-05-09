@@ -121,6 +121,20 @@ configuration ConfigNodeN
 
             DependsOn                  =  '[WindowsFeature]NetFramework45','[xPendingReboot]Reboot1','[xwaitforcluster]SQLCluster'
         }
+        xFirewall SQLFirewall
+        {
+            Name = "SQL Firewall Rule"
+            DisplayName = "SQL Firewall Rule"
+            Ensure = "Present"
+            Enabled = "True"
+            Profile = ("Domain", "Private", "Public")
+            Direction = "Inbound"
+            RemotePort = "Any"
+            LocalPort = ("445", "1433", "37000", "37001")
+            Protocol = "TCP"
+            Description = "Firewall Rule for SQL"
+            DependsOn = "[SqlSetup]InstallNamedInstanceNode2"
+        }
 
     }
 }

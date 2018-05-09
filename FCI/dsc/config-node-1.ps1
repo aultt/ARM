@@ -234,11 +234,27 @@ configuration ConfigNode1
 
             DependsOn                  = '[WindowsFeature]NetFramework45','[Script]MoveClusterGroups2','[Script]EnableS2D'
         }
-        #xPendingReboot Reboot2
-        #{ 
-        #    Name      = 'Reboot2'
-        #    DependsOn = "[xFirewall]SQLFirewall"
-        #}
+
+        xFirewall SQLFirewall
+        {
+            Name = "SQL Firewall Rule"
+            DisplayName = "SQL Firewall Rule"
+            Ensure = "Present"
+            Enabled = "True"
+            Profile = ("Domain", "Private", "Public")
+            Direction = "Inbound"
+            RemotePort = "Any"
+            LocalPort = ("445", "1433", "37000", "37001")
+            Protocol = "TCP"
+            Description = "Firewall Rule for SQL"
+            DependsOn = "[SqlSetup]InstallNamedInstanceNode1-INST2016"
+        }
+
+        xPendingReboot Reboot2
+        { 
+            Name      = 'Reboot2'
+            DependsOn = "[xFirewall]SQLFirewall"
+        }
 
         #Script MoveClusterGroups3 {
         #    SetScript  = 'try {Get-ClusterGroup -ErrorAction SilentlyContinue | Move-ClusterGroup -Node $env:COMPUTERNAME -ErrorAction SilentlyContinue} catch {}'
@@ -252,7 +268,7 @@ configuration ConfigNode1
             SetScript  = "Get-ClusterResource -Name 'SQL IP*' | Set-ClusterParameter -Multiple @{Address=${clusterIP};ProbePort=${ProbePort};SubnetMask='255.255.255.255';Network='Cluster Network 1';EnableDhcp=0} -ErrorAction SilentlyContinue | out-null;Get-ClusterGroup -Name 'SQL Server*' -ErrorAction SilentlyContinue | Move-ClusterGroup -ErrorAction SilentlyContinue"
             TestScript = "(Get-ClusterResource -name 'SQL IP*' | Get-ClusterParameter -Name ProbePort).Value -eq  ${probePort}"
             GetScript  = '@{Result = "Moved Cluster Group"}'
-            DependsOn  = '[SqlSetup]InstallNamedInstanceNode1-INST2016'
+            DependsOn  = '[xPendingReboot]Reboot2'
         }
     }
 }
