@@ -76,7 +76,7 @@ configuration ConfigNodeN
 
         xwaitforcluster SQLCluster
         {
-            Name = "aesql200c"
+            Name = "TESTCLU01A"
             DomainAdministratorCredential = $domainuserCreds
             RetryIntervalSec = 30
             RetryCount = 60
@@ -120,7 +120,7 @@ configuration ConfigNodeN
 
             PsDscRunAsCredential       = $domainuserCreds
 
-            DependsOn                  =  '[WindowsFeature]NetFramework45','[xPendingReboot]Reboot1','[xwaitforcluster]SQLCluster'
+            DependsOn                  =  '[WindowsFeature]NetFramework45','[xPendingReboot]Reboot1'
         }
         xFirewall SQLFirewall
         {
