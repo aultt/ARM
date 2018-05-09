@@ -199,6 +199,19 @@ configuration ConfigNode1
             Ensure = 'Present'
         }
         
+        xPendingReboot Reboot2
+        { 
+            Name      = 'Reboot2'
+            DependsOn =  '[WindowsFeature]NetFramework45'
+        }
+        
+        Script MoveClusterGroups3 {
+            SetScript  = 'try {Get-ClusterGroup -ErrorAction SilentlyContinue | Move-ClusterGroup -Node $env:COMPUTERNAME -ErrorAction SilentlyContinue} catch {}'
+            TestScript = 'return $false'
+            GetScript  = '@{Result = "Moved Cluster Group"}'
+            DependsOn  = "[xPendingReboot]Reboot2",'[Script]EnableS2D'
+        }
+    
         SqlSetup 'InstallNamedInstanceNode1-INST2016'
         {
             Action                     = 'InstallFailoverCluster'
@@ -232,7 +245,7 @@ configuration ConfigNode1
 
             PsDscRunAsCredential       = $domainuserCreds
 
-            DependsOn                  = '[WindowsFeature]NetFramework45','[Script]MoveClusterGroups2','[Script]EnableS2D'
+            DependsOn                  = '[Script]MoveClusterGroups3'
         }
 
         xFirewall SQLFirewall
@@ -250,25 +263,11 @@ configuration ConfigNode1
             DependsOn = "[SqlSetup]InstallNamedInstanceNode1-INST2016"
         }
 
-        xPendingReboot Reboot2
-        { 
-            Name      = 'Reboot2'
-            DependsOn = "[xFirewall]SQLFirewall"
-        }
-
-        #Script MoveClusterGroups3 {
-        #    SetScript  = 'try {Get-ClusterGroup -ErrorAction SilentlyContinue | Move-ClusterGroup -Node $env:COMPUTERNAME -ErrorAction SilentlyContinue} catch {}'
-        #    TestScript = 'return $false'
-        #    GetScript  = '@{Result = "Moved Cluster Group"}'
-        #    DependsOn  = "[xPendingReboot]Reboot2"
-        #}
-
- 
         Script FixProbe {
             SetScript  = "Get-ClusterResource -Name 'SQL IP*' | Set-ClusterParameter -Multiple @{Address=${clusterIP};ProbePort=${ProbePort};SubnetMask='255.255.255.255';Network='Cluster Network 1';EnableDhcp=0} -ErrorAction SilentlyContinue | out-null;Get-ClusterGroup -Name 'SQL Server*' -ErrorAction SilentlyContinue | Move-ClusterGroup -ErrorAction SilentlyContinue"
             TestScript = "(Get-ClusterResource -name 'SQL IP*' | Get-ClusterParameter -Name ProbePort).Value -eq  ${probePort}"
             GetScript  = '@{Result = "Moved Cluster Group"}'
-            DependsOn  = '[xPendingReboot]Reboot2'
+            DependsOn  = "[xFirewall]SQLFirewall"
         }
     }
 }
