@@ -448,7 +448,8 @@
       "dependsOn": [
         "virtualMachineLoop",
         "[resourceId('Microsoft.Compute/availabilitySets', variables('vmAvailabilitySetName'))]",
-        "[resourceId('Microsoft.Storage/storageAccounts', variables('witnessStorageName'))]"
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('witnessStorageName'))]",
+        "[resourceId('Microsoft.Compute/virtualmachines',concat(variables('vmNamePrefix'),'1/confignode1'))]"
       ],
       "properties": {
         "publisher": "Microsoft.Powershell",
