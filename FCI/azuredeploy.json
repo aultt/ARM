@@ -238,6 +238,7 @@
     "ilbBEAddressPoolID": "[concat(variables('ilbID'),'/backendAddressPools/',variables('ilbBE'))]",
     "ilbProbe1": "[concat(parameters('namePrefix'),'ilbp1')]",
     "ilbProbeID1": "[concat(variables('ilbID'),'/probes/',variables('ilbProbe1'))]",
+    "firstnode" : "[concat(parameters('namePrefix'),'1')]",
     "nicSubnetUri": "[resourceId(parameters('existingVirtualNetworkRGName'),'Microsoft.Network/virtualNetworks/subnets',parameters('existingVirtualNetworkName'),parameters('existingSubnetName'))]"
   
   
@@ -449,7 +450,7 @@
         "virtualMachineLoop",
         "[resourceId('Microsoft.Compute/availabilitySets', variables('vmAvailabilitySetName'))]",
         "[resourceId('Microsoft.Storage/storageAccounts', variables('witnessStorageName'))]",
-        "[resourceId('Microsoft.Compute/virtualmachines',concat(variables('vmNamePrefix'),'1/confignode1'))]"
+        "[resourceId('Microsoft.Compute/virtualmachines',variables('firstnode'))]"
       ],
       "properties": {
         "publisher": "Microsoft.Powershell",
