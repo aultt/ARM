@@ -130,7 +130,7 @@ configuration ConfigNode1
         xCluster FailoverCluster
         {
             Name = 'aesql200c'
-            StaticIPAddress = '10.30.4.101/24'
+            StaticIPAddress = '10.30.4.103/24'
             DomainAdministratorCredential = $domainuserCreds
             DependsOn                     = "[xComputer]DomainJoin",'[WindowsFeature]FC'
         }

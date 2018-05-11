@@ -90,7 +90,7 @@ configuration ConfigNodeN
 #        xCluster JoinSecondNodeToCluster
 #        {
 #            Name                          = 'aesql200c'
-#            StaticIPAddress               = '10.30.4.101/24'
+#            StaticIPAddress               = '10.30.4.103/24'
 #            DomainAdministratorCredential = $domainuserCreds
 #            DependsOn                     = '[xWaitForCluster]WaitForCluster'
 #        }
