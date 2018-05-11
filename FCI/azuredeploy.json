@@ -238,10 +238,8 @@
     "ilbBEAddressPoolID": "[concat(variables('ilbID'),'/backendAddressPools/',variables('ilbBE'))]",
     "ilbProbe1": "[concat(parameters('namePrefix'),'ilbp1')]",
     "ilbProbeID1": "[concat(variables('ilbID'),'/probes/',variables('ilbProbe1'))]",
-    "firstnode" : "[concat(parameters('namePrefix'),'1')]",
+    "firstnode" : "[concat(parameters('namePrefix'),'1/ConfigNode1')]",
     "nicSubnetUri": "[resourceId(parameters('existingVirtualNetworkRGName'),'Microsoft.Network/virtualNetworks/subnets',parameters('existingVirtualNetworkName'),parameters('existingSubnetName'))]"
-  
-  
   },
   "resources": [
     {
@@ -449,8 +447,7 @@
       "dependsOn": [
         "virtualMachineLoop",
         "[resourceId('Microsoft.Compute/availabilitySets', variables('vmAvailabilitySetName'))]",
-        "[resourceId('Microsoft.Storage/storageAccounts', variables('witnessStorageName'))]",
-        "[resourceId('Microsoft.Compute/virtualmachines',variables('firstnode'))]"
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('witnessStorageName'))]"
       ],
       "properties": {
         "publisher": "Microsoft.Powershell",
@@ -512,7 +509,8 @@
       "dependsOn": [
         "virtualMachineLoop",
         "[resourceId('Microsoft.Compute/availabilitySets', variables('vmAvailabilitySetName'))]",
-        "[resourceId('Microsoft.Storage/storageAccounts', variables('witnessStorageName'))]"
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('witnessStorageName'))]",
+        "[resourceId('Microsoft.Compute/virtualmachines/extensions',variables('firstnode'))]"
       ],
       "copy": {
         "name": "virtualMachineExtensionLoop",
