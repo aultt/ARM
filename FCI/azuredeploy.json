@@ -510,8 +510,7 @@
       "dependsOn": [
         "virtualMachineLoop",
         "[resourceId('Microsoft.Compute/availabilitySets', variables('vmAvailabilitySetName'))]",
-        "[resourceId('Microsoft.Storage/storageAccounts', variables('witnessStorageName'))]",
-        "[concat(variables('vmNamePrefix'),'1/confignode1')]"
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('witnessStorageName'))]"
       ],
       "copy": {
         "name": "virtualMachineExtensionLoop",
