@@ -108,7 +108,7 @@ configuration ConfigNodeN
 "@
             TestScript = "(Get-StoragePool -FriendlyName S2D*).OperationalStatus -eq 'OK'"
             GetScript  = "@{Ensure = if ((Get-StoragePool -FriendlyName S2D*).OperationalStatus -eq 'OK') {'Present'} Else {'Absent'}}"
-            DependsOn  = "[Script]MoveClusterGroups1"
+            DependsOn  = "[xCluster]JoinSecondNodeToCluster"
         }
 #        Script CleanSQL
 #        {
