@@ -121,11 +121,11 @@ configuration ConfigNode1
             DependsOn  = "[xWaitForADDomain]DscForestWait"
         }
         
-        Script CleanSQL {
-            SetScript  = 'C:\SQLServerFull\Setup.exe /Action=Uninstall /FEATURES=SQL,AS,RS,IS /INSTANCENAME=MSSQLSERVER /Q'
-            TestScript = '(test-path -Path "C:\Program Files\Microsoft SQL Server\MSSQL13.MSSQLSERVER\MSSQL\DATA\master.mdf") -eq $false'
-            GetScript  = '@{Ensure = if ((test-path -Path "C:\Program Files\Microsoft SQL Server\MSSQL13.MSSQLSERVER\MSSQL\DATA\master.mdf") -eq $false) {"Present"} Else {"Absent"}}'
-        }
+#        Script CleanSQL {
+#            SetScript  = 'C:\SQLServerFull\Setup.exe /Action=Uninstall /FEATURES=SQL,AS,RS,IS /INSTANCENAME=MSSQLSERVER /Q'
+#            TestScript = '(test-path -Path "C:\Program Files\Microsoft SQL Server\MSSQL13.MSSQLSERVER\MSSQL\DATA\master.mdf") -eq $false'
+#            GetScript  = '@{Ensure = if ((test-path -Path "C:\Program Files\Microsoft SQL Server\MSSQL13.MSSQLSERVER\MSSQL\DATA\master.mdf") -eq $false) {"Present"} Else {"Absent"}}'
+#        }
 
         Script MoveClusterGroups0 {
             SetScript  = 'try {Get-ClusterGroup -ErrorAction SilentlyContinue | Move-ClusterGroup -Node $env:COMPUTERNAME -ErrorAction SilentlyContinue} catch {}'
@@ -136,9 +136,9 @@ configuration ConfigNode1
 
         xCluster FailoverCluster
         {
-            Name                          = $ClusterName
+            Name = $ClusterName
+            StaticIPAddress = $clusterIP
             DomainAdministratorCredential = $domainuserCreds
-            Nodes                         = $Nodes
             DependsOn                     = "[Script]MoveClusterGroups0"
         }
 
@@ -180,89 +180,89 @@ configuration ConfigNode1
             DependsOn  = "[Script]MoveClusterGroups1"
         }
 
-        xPendingReboot Reboot1
-        { 
-            Name      = 'Reboot1'
-            DependsOn = "[Script]CleanSQL"
-        
-        }
+#        xPendingReboot Reboot1
+#        { 
+#            Name      = 'Reboot1'
+#            DependsOn = "[Script]CleanSQL"
+#        
+#        }
 
-        Script MoveClusterGroups2 {
-            SetScript  = 'try {Get-ClusterGroup -ErrorAction SilentlyContinue | Move-ClusterGroup -Node $env:COMPUTERNAME -ErrorAction SilentlyContinue} catch {}'
-            TestScript = 'return $false'
-            GetScript  = '@{Result = "Moved Cluster Group"}'
-            DependsOn  = "[xPendingReboot]Reboot1"
-        }
+#        Script MoveClusterGroups2 {
+#            SetScript  = 'try {Get-ClusterGroup -ErrorAction SilentlyContinue | Move-ClusterGroup -Node $env:COMPUTERNAME -ErrorAction SilentlyContinue} catch {}'
+#            TestScript = 'return $false'
+#            GetScript  = '@{Result = "Moved Cluster Group"}'
+#            DependsOn  = "[xPendingReboot]Reboot1"
+#        }
 
-        WindowsFeature 'NetFramework45'
-        {
-            Name   = 'NET-Framework-45-Core'
-            Ensure = 'Present'
-        }
-        
-        xPendingReboot Reboot2
-        { 
-            Name      = 'Reboot2'
-            DependsOn =  '[WindowsFeature]NetFramework45'
-        }
-        
-        Script MoveClusterGroups3 {
-            SetScript  = 'try {Get-ClusterGroup -ErrorAction SilentlyContinue | Move-ClusterGroup -Node $env:COMPUTERNAME -ErrorAction SilentlyContinue} catch {}'
-            TestScript = 'return $false'
-            GetScript  = '@{Result = "Moved Cluster Group"}'
-            DependsOn  = "[xPendingReboot]Reboot2",'[Script]EnableS2D'
-        }
+#        WindowsFeature 'NetFramework45'
+#        {
+#            Name   = 'NET-Framework-45-Core'
+#            Ensure = 'Present'
+#        }
+#        
+#        xPendingReboot Reboot2
+#        { 
+#            Name      = 'Reboot2'
+#            DependsOn =  '[WindowsFeature]NetFramework45'
+#        }
+#        
+#        Script MoveClusterGroups3 {
+#            SetScript  = 'try {Get-ClusterGroup -ErrorAction SilentlyContinue | Move-ClusterGroup -Node $env:COMPUTERNAME -ErrorAction SilentlyContinue} catch {}'
+#            TestScript = 'return $false'
+#            GetScript  = '@{Result = "Moved Cluster Group"}'
+#            DependsOn  = "[xPendingReboot]Reboot2",'[Script]EnableS2D'
+#        }
     
-        SqlSetup 'InstallNamedInstanceNode1-INST2016'
-        {
-            Action                     = 'InstallFailoverCluster'
-            ForceReboot                = $false
-            UpdateEnabled              = 'False'
-            SourcePath                 = 'C:\SQLServerFull'
-
-            InstanceName               = 'INST2016'
-            Features                   = 'SQLENGINE'
-
-            InstallSharedDir           = 'C:\Program Files\Microsoft SQL Server'
-            InstallSharedWOWDir        = 'C:\Program Files (x86)\Microsoft SQL Server'
-            InstanceDir                = 'C:\Program Files\Microsoft SQL Server'
-
-            #SQLCollation               = 'Finnish_Swedish_CI_AS'
-            SQLSvcAccount              = $svcCreds
-            AgtSvcAccount              = $svcCreds
-            SQLSysAdminAccounts        = 'TAMZ\DBA'
-
-            # Drive D: must be a shared disk.
-            InstallSQLDataDir          = 'G:\MSSQL\Data'
-            SQLUserDBDir               = 'G:\MSSQL\Data'
-            SQLUserDBLogDir            = 'G:\MSSQL\Log'
-            SQLTempDBDir               = 'G:\MSSQL\Temp'
-            SQLTempDBLogDir            = 'G:\MSSQL\Temp'
-            SQLBackupDir               = 'G:\MSSQL\Backup'
-
-            FailoverClusterNetworkName = 'TESTCLU01A'
-            FailoverClusterIPAddress   = '10.30.4.102'
-            FailoverClusterGroupName   = 'TESTCLU01A'
-
-            PsDscRunAsCredential       = $domainuserCreds
-
-            DependsOn                  = '[Script]MoveClusterGroups3'
-        }
-
-        xFirewall SQLFirewall
-        {
-            Name = "SQL Firewall Rule"
-            DisplayName = "SQL Firewall Rule"
-            Ensure = "Present"
-            Enabled = "True"
-            Profile = ("Domain", "Private", "Public")
-            Direction = "Inbound"
-            RemotePort = "Any"
-            LocalPort = ("445", "1433", "37000", "37001")
-            Protocol = "TCP"
-            Description = "Firewall Rule for SQL"
-            DependsOn = "[SqlSetup]InstallNamedInstanceNode1-INST2016"
-        }
+#        SqlSetup 'InstallNamedInstanceNode1-INST2016'
+#        {
+#            Action                     = 'InstallFailoverCluster'
+#            ForceReboot                = $false
+#            UpdateEnabled              = 'False'
+#            SourcePath                 = 'C:\SQLServerFull'
+#
+#            InstanceName               = 'INST2016'
+#            Features                   = 'SQLENGINE'
+#
+#            InstallSharedDir           = 'C:\Program Files\Microsoft SQL Server'
+#            InstallSharedWOWDir        = 'C:\Program Files (x86)\Microsoft SQL Server'
+#            InstanceDir                = 'C:\Program Files\Microsoft SQL Server'
+#
+#            #SQLCollation               = 'Finnish_Swedish_CI_AS'
+#            SQLSvcAccount              = $svcCreds
+#            AgtSvcAccount              = $svcCreds
+#            SQLSysAdminAccounts        = 'TAMZ\DBA'
+#
+#            # Drive D: must be a shared disk.
+#            InstallSQLDataDir          = 'G:\MSSQL\Data'
+#            SQLUserDBDir               = 'G:\MSSQL\Data'
+#            SQLUserDBLogDir            = 'G:\MSSQL\Log'
+#            SQLTempDBDir               = 'G:\MSSQL\Temp'
+#            SQLTempDBLogDir            = 'G:\MSSQL\Temp'
+#            SQLBackupDir               = 'G:\MSSQL\Backup'
+#
+#            FailoverClusterNetworkName = 'TESTCLU01A'
+#            FailoverClusterIPAddress   = '10.30.4.102'
+#            FailoverClusterGroupName   = 'TESTCLU01A'
+#
+#            PsDscRunAsCredential       = $domainuserCreds
+#
+#            DependsOn                  = '[Script]MoveClusterGroups3'
+#        }
+#
+#        xFirewall SQLFirewall
+#        {
+#            Name = "SQL Firewall Rule"
+#            DisplayName = "SQL Firewall Rule"
+#            Ensure = "Present"
+#            Enabled = "True"
+#            Profile = ("Domain", "Private", "Public")
+#            Direction = "Inbound"
+#            RemotePort = "Any"
+#            LocalPort = ("445", "1433", "37000", "37001")
+#            Protocol = "TCP"
+#            Description = "Firewall Rule for SQL"
+#            DependsOn = "[SqlSetup]InstallNamedInstanceNode1-INST2016"
+#        }
 
         Script FixProbe {
             SetScript  = "Get-ClusterResource -Name 'SQL IP*' | Set-ClusterParameter -Multiple @{Address=${clusterIP};ProbePort=${ProbePort};SubnetMask='255.255.255.255';Network='Cluster Network 1';EnableDhcp=0} -ErrorAction SilentlyContinue | out-null;Get-ClusterGroup -Name 'SQL Server*' -ErrorAction SilentlyContinue | Move-ClusterGroup -ErrorAction SilentlyContinue"
