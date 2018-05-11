@@ -127,19 +127,12 @@ configuration ConfigNode1
 #            GetScript  = '@{Ensure = if ((test-path -Path "C:\Program Files\Microsoft SQL Server\MSSQL13.MSSQLSERVER\MSSQL\DATA\master.mdf") -eq $false) {"Present"} Else {"Absent"}}'
 #        }
 
-        Script MoveClusterGroups0 {
-            SetScript  = 'try {Get-ClusterGroup -ErrorAction SilentlyContinue | Move-ClusterGroup -Node $env:COMPUTERNAME -ErrorAction SilentlyContinue} catch {}'
-            TestScript = 'return $false'
-            GetScript  = '@{Result = "Moved Cluster Group"}'
-            DependsOn  = "[xComputer]DomainJoin"
-        }
-
         xCluster FailoverCluster
         {
             Name = $ClusterName
             StaticIPAddress = $clusterIP
             DomainAdministratorCredential = $domainuserCreds
-            DependsOn                     = "[Script]MoveClusterGroups0"
+            DependsOn                     = "[xComputer]DomainJoin"
         }
 
         Script CloudWitness {
@@ -156,29 +149,22 @@ configuration ConfigNode1
             DependsOn  = "[Script]CloudWitness"
         }
 
-        # Likelely redundant
-        Script MoveClusterGroups1 {
-            SetScript  = 'try {Get-ClusterGroup -ErrorAction SilentlyContinue | Move-ClusterGroup -Node $env:COMPUTERNAME -ErrorAction SilentlyContinue} catch {}'
-            TestScript = 'return $false'
-            GetScript  = '@{Result = "Moved Cluster Group"}'
-            DependsOn  = "[Script]IncreaseClusterTimeouts"
-        }
 
-        Script EnableS2D {
-            #SetScript  = "Enable-ClusterS2D -Confirm:0; New-Volume -StoragePoolFriendlyName S2D* -FriendlyName VDisk01 -FileSystem NTFS -DriveLetter ${driveLetter} -UseMaximumSize"
-            #SetScript = Enable-ClusterS2D -Confirm:0;New-Volume -StoragePoolFriendlyName S2D* -FriendlyName ${datadrivelable} -FileSystem NTFS -AllocationUnitSize 65536 -DriveLetter ${datadriveLetter} -size ${datadriveSize};
-            #latest Run Changes to include all three drives
-            SetScript  = 
-@"
-                            Enable-ClusterS2D -Confirm:0; 
-                            New-Volume -StoragePoolFriendlyName S2D* -FriendlyName ${datadrivelabel} -FileSystem NTFS -AllocationUnitSize 65536 -DriveLetter ${datadriveLetter} -size ${datadriveSize};
-                            New-Volume -StoragePoolFriendlyName S2D* -FriendlyName ${logdrivelabel} -FileSystem NTFS -AllocationUnitSize 65536 -DriveLetter ${logdriveLetter} -size ${logdriveSize};
-                            New-Volume -StoragePoolFriendlyName S2D* -FriendlyName ${tempdbdrivelabel} -FileSystem NTFS -AllocationUnitSize 65536 -DriveLetter ${tempdbdriveLetter} -size ${tempdbdriveSize};
-"@
-            TestScript = "(Get-StoragePool -FriendlyName S2D*).OperationalStatus -eq 'OK'"
-            GetScript  = "@{Ensure = if ((Get-StoragePool -FriendlyName S2D*).OperationalStatus -eq 'OK') {'Present'} Else {'Absent'}}"
-            DependsOn  = "[Script]MoveClusterGroups1"
-        }
+#        Script EnableS2D {
+#            #SetScript  = "Enable-ClusterS2D -Confirm:0; New-Volume -StoragePoolFriendlyName S2D* -FriendlyName VDisk01 -FileSystem NTFS -DriveLetter ${driveLetter} -UseMaximumSize"
+#            #SetScript = Enable-ClusterS2D -Confirm:0;New-Volume -StoragePoolFriendlyName S2D* -FriendlyName ${datadrivelable} -FileSystem NTFS -AllocationUnitSize 65536 -DriveLetter ${datadriveLetter} -size ${datadriveSize};
+#            #latest Run Changes to include all three drives
+#            SetScript  = 
+#@"
+#                            Enable-ClusterS2D -Confirm:0; 
+#                            New-Volume -StoragePoolFriendlyName S2D* -FriendlyName ${datadrivelabel} -FileSystem NTFS -AllocationUnitSize 65536 -DriveLetter ${datadriveLetter} -size ${datadriveSize};
+#                            New-Volume -StoragePoolFriendlyName S2D* -FriendlyName ${logdrivelabel} -FileSystem NTFS -AllocationUnitSize 65536 -DriveLetter ${logdriveLetter} -size ${logdriveSize};
+#                            New-Volume -StoragePoolFriendlyName S2D* -FriendlyName ${tempdbdrivelabel} -FileSystem NTFS -AllocationUnitSize 65536 -DriveLetter ${tempdbdriveLetter} -size ${tempdbdriveSize};
+#"@
+#            TestScript = "(Get-StoragePool -FriendlyName S2D*).OperationalStatus -eq 'OK'"
+#            GetScript  = "@{Ensure = if ((Get-StoragePool -FriendlyName S2D*).OperationalStatus -eq 'OK') {'Present'} Else {'Absent'}}"
+#            DependsOn  = "[Script]MoveClusterGroups1"
+#        }
 
 #        xPendingReboot Reboot1
 #        { 

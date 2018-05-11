@@ -13,7 +13,13 @@ configuration ConfigNodeN
         [Int]$RetryIntervalSec = 30,
         [string]$SQLFeatures,
         [string]$SQLInstance,
-        [String]$SQLClusterName
+        [String]$SQLClusterName,
+        [string]$datadriveLetter = 'G',
+        [string]$datadrivelabel = 'Data',
+        [string]$datadriveSize = '10GB',
+        [string]$logdriveLetter = 'L',
+        [string]$logdrivelabel ='Logs',
+        [string]$logdriveSize ='5GB'
     )
 
     Import-DscResource -ModuleName xComputerManagement, xActiveDirectory, xPendingReboot, xNetworking,sqlserverdsc,xfailovercluster
@@ -83,12 +89,27 @@ configuration ConfigNodeN
 
         xCluster JoinSecondNodeToCluster
         {
-            Name                          = 'Cluster01'
+            Name                          = 'aesql200c'
             StaticIPAddress               = '10.30.4.101/24'
             DomainAdministratorCredential = $domainuserCreds
             DependsOn                     = '[xWaitForCluster]WaitForCluster'
         }
-
+        
+        Script EnableS2D {
+            #SetScript  = "Enable-ClusterS2D -Confirm:0; New-Volume -StoragePoolFriendlyName S2D* -FriendlyName VDisk01 -FileSystem NTFS -DriveLetter ${driveLetter} -UseMaximumSize"
+            #SetScript = Enable-ClusterS2D -Confirm:0;New-Volume -StoragePoolFriendlyName S2D* -FriendlyName ${datadrivelable} -FileSystem NTFS -AllocationUnitSize 65536 -DriveLetter ${datadriveLetter} -size ${datadriveSize};
+            #latest Run Changes to include all three drives
+            SetScript  = 
+@"
+                            Enable-ClusterS2D -Confirm:0; 
+                            New-Volume -StoragePoolFriendlyName S2D* -FriendlyName ${datadrivelabel} -FileSystem NTFS -AllocationUnitSize 65536 -DriveLetter ${datadriveLetter} -size ${datadriveSize};
+                            New-Volume -StoragePoolFriendlyName S2D* -FriendlyName ${logdrivelabel} -FileSystem NTFS -AllocationUnitSize 65536 -DriveLetter ${logdriveLetter} -size ${logdriveSize};
+                            New-Volume -StoragePoolFriendlyName S2D* -FriendlyName ${tempdbdrivelabel} -FileSystem NTFS -AllocationUnitSize 65536 -DriveLetter ${tempdbdriveLetter} -size ${tempdbdriveSize};
+"@
+            TestScript = "(Get-StoragePool -FriendlyName S2D*).OperationalStatus -eq 'OK'"
+            GetScript  = "@{Ensure = if ((Get-StoragePool -FriendlyName S2D*).OperationalStatus -eq 'OK') {'Present'} Else {'Absent'}}"
+            DependsOn  = "[Script]MoveClusterGroups1"
+        }
 #        Script CleanSQL
 #        {
 #            SetScript = 'C:\SQLServerFull\Setup.exe /Action=Uninstall /FEATURES=SQL,AS,IS,RS /INSTANCENAME=MSSQLSERVER /Q'
