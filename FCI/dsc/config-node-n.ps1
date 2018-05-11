@@ -84,7 +84,7 @@ configuration ConfigNodeN
             Name             = 'aesql200c'
             RetryIntervalSec = 30
             RetryCount       = 60
-            DependsOn        = '[xComputer]DomainJoin'
+            DependsOn        = '[xComputer]DomainJoin','[WindowsFeature]FC' 
         }
 
         xCluster JoinSecondNodeToCluster
@@ -108,7 +108,7 @@ configuration ConfigNodeN
 "@
             TestScript = "(Get-StoragePool -FriendlyName S2D*).OperationalStatus -eq 'OK'"
             GetScript  = "@{Ensure = if ((Get-StoragePool -FriendlyName S2D*).OperationalStatus -eq 'OK') {'Present'} Else {'Absent'}}"
-            DependsOn  = "[xCluster]JoinSecondNodeToCluster"
+            DependsOn  = "[xCluster]JoinSecondNodeToCluster",'[WindowsFeature]FS'
         }
 #        Script CleanSQL
 #        {

@@ -132,7 +132,7 @@ configuration ConfigNode1
             Name = $ClusterName
             StaticIPAddress = $clusterIP
             DomainAdministratorCredential = $domainuserCreds
-            DependsOn                     = "[xComputer]DomainJoin"
+            DependsOn                     = "[xComputer]DomainJoin",'[WindowsFeature]FC'
         }
 
         Script CloudWitness {
