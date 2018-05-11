@@ -238,7 +238,7 @@
     "ilbBEAddressPoolID": "[concat(variables('ilbID'),'/backendAddressPools/',variables('ilbBE'))]",
     "ilbProbe1": "[concat(parameters('namePrefix'),'ilbp1')]",
     "ilbProbeID1": "[concat(variables('ilbID'),'/probes/',variables('ilbProbe1'))]",
-    "firstnode" : "[concat(parameters('namePrefix'),'1/ConfigNode1')]",
+    "firstnode" : "[concat(parameters('namePrefix'),'1ConfigNode1')]",
     "nicSubnetUri": "[resourceId(parameters('existingVirtualNetworkRGName'),'Microsoft.Network/virtualNetworks/subnets',parameters('existingVirtualNetworkName'),parameters('existingSubnetName'))]"
   },
   "resources": [
@@ -441,7 +441,7 @@
     },
     {
       "type": "Microsoft.Compute/virtualMachines/extensions",
-      "name": "[concat(variables('vmNamePrefix'),'1/confignode1')]",
+      "name": "[concat(variables('vmNamePrefix'),'1confignode1')]",
       "apiVersion": "2017-12-01",
       "location": "[resourceGroup().location]",
       "dependsOn": [
