@@ -510,7 +510,7 @@
         "virtualMachineLoop",
         "[resourceId('Microsoft.Compute/availabilitySets', variables('vmAvailabilitySetName'))]",
         "[resourceId('Microsoft.Storage/storageAccounts', variables('witnessStorageName'))]",
-        "[resourceId('Microsoft.Compute/virtualmachines/extensions',variables('firstnode'))]"
+        "variables('firstnode)"
       ],
       "copy": {
         "name": "virtualMachineExtensionLoop",
