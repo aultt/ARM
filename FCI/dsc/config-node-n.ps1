@@ -78,7 +78,7 @@ configuration ConfigNodeN
             Name             = 'aesql200c'
             RetryIntervalSec = 30
             RetryCount       = 60
-            DependsOn        = '[WindowsFeature]AddRemoteServerAdministrationToolsClusteringCmdInterfaceFeature'
+            DependsOn        = '[xComputer]DomainJoin'
         }
 
         xCluster JoinSecondNodeToCluster
