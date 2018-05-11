@@ -74,14 +74,6 @@ configuration ConfigNodeN
             DependsOn = "[xWaitForADDomain]DscForestWait"
         }
 
-        xwaitforcluster SQLCluster
-        {
-            Name = "TESTCLU01A"
-            DomainAdministratorCredential = $domainuserCreds
-            RetryIntervalSec = 30
-            RetryCount = 60
-        }
-
         Script CleanSQL
         {
             SetScript = 'C:\SQLServerFull\Setup.exe /Action=Uninstall /FEATURES=SQL,AS,IS,RS /INSTANCENAME=MSSQLSERVER /Q'
