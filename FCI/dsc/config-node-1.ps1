@@ -163,7 +163,7 @@ configuration ConfigNode1
 "@
             TestScript = "(Get-StoragePool -FriendlyName S2D*).OperationalStatus -eq 'OK'"
             GetScript  = "@{Ensure = if ((Get-StoragePool -FriendlyName S2D*).OperationalStatus -eq 'OK') {'Present'} Else {'Absent'}}"
-            DependsOn  = "[Script]MoveClusterGroups1"
+            DependsOn  = "[WindowsFeature]FS","[xCluster]FailoverCluster"
         }
 
 #        xPendingReboot Reboot1
