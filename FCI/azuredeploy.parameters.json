@@ -9,7 +9,7 @@
       "value": "Standard_D2s_v3"
     },
     "vmDiskSize": {
-      "value": 64
+      "value": 128
     },
     "vmDiskCount": {
       "value": 2
