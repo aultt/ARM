@@ -1,0 +1,225 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "mssqlstorageType": {
+      "type": "string",
+      "defaultValue": "Standard_LRS",
+      "allowedValues": [
+        "Standard_LRS",
+        "Standard_ZRS",
+        "Standard_GRS",
+        "Standard_RAGRS",
+        "Premium_LRS"
+      ]
+    },
+    "VMName": {
+      "type": "string",
+      "minLength": 8
+    },
+    "localAdminUserName": {
+      "type": "string",
+      "minLength": 5
+    },
+    "localAdminPassword": {
+      "type": "securestring"
+    },
+    "imageSKU": {
+      "type": "string",
+      "defaultValue": "Enterprise",
+      "allowedValues": [
+        "Enterprise",
+        "Standard",
+        "Express",
+        "Web",
+        "SQLDEV"
+      ]
+    },
+    "imageOffer":{
+      "type": "string",
+      "defaultValue": "SQL2017-WS2016",
+      "allowedValues": [
+        "SQL2016SP2-WS2016",
+        "SQL2016SP2-WS2016-BYOL",
+        "SQL2017-WS2016",
+        "SQL2017-WS2016-BYOL"
+      ]
+    },
+    "existingdomainName": {
+      "type": "string",
+      "metadata": {
+        "description": "DNS domain name for existing Active Directory domain"
+      }
+    },
+    "domainUsername": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the domain user in the existing Active Directory Domain with permissions to Add Computers"
+      }
+    },
+    "domainUserPassword": {
+      "type": "securestring",
+      "minLength": 12,
+      "metadata": {
+        "description": "Password for the domain user in the existing Active Directory Domain with permissions to Add Computers"
+      }
+    },
+    "existingvirtualNetworkName": {
+      "type": "string",
+      "defaultValue": "tia-prod-vnet"
+    },
+    "existingvirtualNetworkResourceGroup": {
+      "type": "string",
+      "defaultValue": "tia-core-prod-rg"
+    },
+    "existingSubnetName":{
+      "type": "string",
+      "defaultValue": "data"
+    },
+    "_artifactsLocation": {
+      "type": "string",
+      "metadata": {
+        "description": "Auto-generated container in staging storage account to receive post-build staging folder upload"
+      }
+    },
+    "_artifactsLocationSasToken": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Auto-generated token to access _artifactsLocation"
+      }
+    }
+  },
+  "resources": [
+    {
+      "name": "[variables('mssqlstorageName')]",
+      "type": "Microsoft.Storage/storageAccounts",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2016-01-01",
+      "sku": {
+        "name": "[parameters('mssqlstorageType')]"
+      },
+      "dependsOn": [ ],
+      "tags": {
+        "displayName": "mssqlstorage"
+      },
+      "kind": "Storage"
+    },
+    {
+      "name": "[variables('mssqlNicName')]",
+      "type": "Microsoft.Network/networkInterfaces",
+      "location": "eastus",
+      "apiVersion": "2016-03-30",
+      "dependsOn": [ ],
+      "tags": {
+        "displayName": "mssqlNic"
+      },
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[variables('mssqlSubnetRef')]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "[parameters('VMName')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('mssqlstorageName'))]",
+        "[resourceId('Microsoft.Network/networkInterfaces', variables('mssqlNicName'))]"
+      ],
+      "tags": {
+        "displayName": "mssql"
+      },
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[variables('mssqlVmSize')]"
+        },
+        "osProfile": {
+          "computerName": "[parameters('VMName')]",
+          "adminUsername": "[parameters('localAdminUsername')]",
+          "adminPassword": "[parameters('localAdminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('mssqlImagePublisher')]",
+            "offer": "[parameters('imageOffer')]",
+            "sku": "[parameters('imageSKU')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "name": "mssqlOSDisk",
+            "vhd": {
+              "uri": "[concat(reference(resourceId('Microsoft.Storage/storageAccounts', variables('mssqlstorageName')), '2016-01-01').primaryEndpoints.blob, variables('mssqlStorageAccountContainerName'), '/', variables('mssqlOSDiskName'), '.vhd')]"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('mssqlNicName'))]"
+            }
+          ]
+        }
+      },
+      "resources": [
+        {
+          "name": "Microsoft.Powershell.DSC",
+          "type": "extensions",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2016-03-30",
+          "dependsOn": [
+            "[resourceId('Microsoft.Compute/virtualMachines', parameters('VMName'))]"
+          ],
+          "tags": {
+            "displayName": "mssqlconfig"
+          },
+          "properties": {
+            "publisher": "Microsoft.Powershell",
+            "type": "DSC",
+            "typeHandlerVersion": "2.9",
+            "autoUpgradeMinorVersion": true,
+            "settings": {
+              "modulesUrl": "[variables('DSCConfigModulesURL')]",
+              "configurationFunction": "[variables('DSCConfigurationFunction')]",
+              "properties": {
+                "domainName": "[parameters('existingdomainName')]",
+                "domainuserCreds": {
+                  "userName": "[parameters('domainUserName')]",
+                  "password": "PrivateSettingsRef:domainuserPassword"
+                }
+              }
+            },
+            "protectedSettings": {
+              "configurationUrlSasToken": "[parameters('_artifactsLocationSasToken')]",
+              "domainuserPassword": "[parameters('domainuserPassword')]"
+            }
+          }
+        }
+      ]
+    }
+   ],
+  "outputs": {},
+  "variables": {
+    "mssqlstorageName": "[concat('mssqlstorage', uniqueString(resourceGroup().id))]",
+    "mssqlImagePublisher": "MicrosoftSQLServer",
+    "mssqlOSDiskName": "mssqlOSDisk",
+    "mssqlVmSize": "Standard_D2_v2",
+    "mssqlVnetID": "[resourceId(parameters('existingvirtualNetworkResourceGroup'), 'Microsoft.Network/virtualNetworks', parameters('existingvirtualNetworkName'))]",
+    "mssqlSubnetRef": "[concat(variables('mssqlVnetID'), '/subnets/', parameters('existingSubnetName'))]",
+    "mssqlStorageAccountContainerName": "vhds",
+    "mssqlNicName": "[concat(parameters('VMName'), 'NetworkInterface')]",
+    "DSCConfigModulesURL": "[concat(parameters('_artifactsLocation'), '/dsc/sqlconfig.ps1.zip', parameters('_artifactsLocationSasToken'))]",
+    "DSCConfigurationFunction": "SQLConfig.ps1\\SQLConfig"
+  }
+}
