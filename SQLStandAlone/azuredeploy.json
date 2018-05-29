@@ -213,7 +213,7 @@
    ],
   "outputs": {},
   "variables": {
-    "mssqlstorageName": "[concat('mssqlstorage', uniqueString(resourceGroup().id))]",
+    "mssqlstorageName": "[concat('sqlstg', uniqueString(resourceGroup().id))]",
     "mssqlImagePublisher": "MicrosoftSQLServer",
     "mssqlOSDiskName": "mssqlOSDisk",
     "mssqlVmSize": "Standard_D2_v2",
