@@ -80,7 +80,8 @@
       "type": "string",
       "metadata": {
         "description": "Auto-generated container in staging storage account to receive post-build staging folder upload"
-      }
+      },
+      "defaultValue": "https://raw.githubusercontent.com/aultt/ARM/master/SQLStandAlone" 
     },
     "_artifactsLocationSasToken": {
       "type": "securestring",
