@@ -201,7 +201,6 @@
                   "password": "PrivateSettingsRef:domainuserPassword"
                 }
               }
-            }
             },
             "protectedSettings": {
               "items": {
@@ -210,6 +209,7 @@
               }
           }
         }
+      }
       ]
     }
    ],
@@ -224,6 +224,6 @@
     "mssqlStorageAccountContainerName": "vhds",
     "mssqlNicName": "[concat(parameters('VMName'), 'NetworkInterface')]",
     "DSCConfigModulesURL": "[concat(parameters('_artifactsLocation'), '/dsc/StandAlone.ps1.zip', parameters('_artifactsLocationSasToken'))]",
-    "DSCConfigurationFunction": "StandAlone.ps1\\SQLConfig"
+    "DSCConfigurationFunction": "StandAlone.ps1\\StandAlone"
   }
 }
