@@ -22,7 +22,7 @@
     "domainUsername": {
       "value": "YourDomain\\user1"
     },
-    "domainuserPassword": {
+    "domainUserPassword": {
       "reference": {
         "keyVault": {
           "id": "/subscriptions/<YourSubID>/resourceGroups/<YourRG>/providers/Microsoft.KeyVault/vaults/<YourKeyVaultName>"

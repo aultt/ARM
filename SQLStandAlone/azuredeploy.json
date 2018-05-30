@@ -221,7 +221,7 @@
     "mssqlSubnetRef": "[concat(variables('mssqlVnetID'), '/subnets/', parameters('existingSubnetName'))]",
     "mssqlStorageAccountContainerName": "vhds",
     "mssqlNicName": "[concat(parameters('VMName'), 'NetworkInterface')]",
-    "DSCConfigModulesURL": "[concat(parameters('_artifactsLocation'), '/dsc/sqlconfig.ps1.zip', parameters('_artifactsLocationSasToken'))]",
-    "DSCConfigurationFunction": "SQLConfig.ps1\\SQLConfig"
+    "DSCConfigModulesURL": "[concat(parameters('_artifactsLocation'), '/dsc/StandAlone.ps1.zip', parameters('_artifactsLocationSasToken'))]",
+    "DSCConfigurationFunction": "StandAlone.ps1\\SQLConfig"
   }
 }
