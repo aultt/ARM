@@ -42,6 +42,8 @@ configuration StandAlone
             ServerName           = $env:COMPUTERNAME
             InstanceName         = 'MSSQLSERVER'
             PsDscRunAsCredential = $localAdminCreds
+
+            dependson = '[xComputer]DomainJoin'
         }
 
     }
