@@ -40,19 +40,6 @@ configuration StandAlone
             dependson = '[xComputer]DomainJoin'
         }
 
-        sqlsetup  'Default'
-        {
-            InstanceName = 'MSSQLSERVER'
-            Features             = 'SQLENGINE'
-            SourcePath = 'C:\SQLServerFull'
-            InstallSharedDir           = 'C:\Program Files\Microsoft SQL Server'
-            InstallSharedWOWDir        = 'C:\Program Files (x86)\Microsoft SQL Server'
-            InstanceDir                = 'C:\Program Files\Microsoft SQL Server'
-            
-            PsDscRunAsCredential = $localAdminCreds
-            dependson = '[xPendingReboot]Reboot1'
-        }
-
         SqlServerLogin Add_DBAGroup
         {
             Ensure               = 'Present'
