@@ -34,6 +34,18 @@ configuration StandAlone
             DomainName = $DomainName
             Credential = $domainuserCreds
         }
+
+        SqlServerLogin Add_DBAGroup
+        {
+            Ensure               = 'Present'
+            Name                 = 'TAMZ\DBA'
+            LoginType            = 'WindowsGroup'
+            ServerName           = $env:COMPUTERNAME
+            InstanceName         = 'MSSQLSERVER'
+            PsDscRunAsCredential = $localAdminCreds
+
+            dependson = '[xComputer]DomainJoin'
+        }
         SqlServerRole AddDBAToSysAdmin
         {
             Ensure               = 'Present'
@@ -43,7 +55,7 @@ configuration StandAlone
             InstanceName         = 'MSSQLSERVER'
             PsDscRunAsCredential = $localAdminCreds
 
-            dependson = '[xComputer]DomainJoin'
+            dependson = '[SqlServerLogin]Add_DBAGroup'
         }
 
     }
