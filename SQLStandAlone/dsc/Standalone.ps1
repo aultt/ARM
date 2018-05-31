@@ -10,7 +10,7 @@ configuration StandAlone
         [System.Management.Automation.PSCredential]$domainuserCreds,
 
         [Parameter(Mandatory)]
-        [System.Management.Automation.PSCredential]$localuserCreds,
+        [System.Management.Automation.PSCredential]$localAdminCreds,
 
         [Int]$RetryCount = 20,
         [Int]$RetryIntervalSec = 30
@@ -41,7 +41,7 @@ configuration StandAlone
             Members              = 'TAMZ\DBA'
             ServerName           = $env:COMPUTERNAME
             InstanceName         = 'MSSQLSERVER'
-            PsDscRunAsCredential = $localuserCreds
+            PsDscRunAsCredential = $localAdminCreds
         }
     }
 }
