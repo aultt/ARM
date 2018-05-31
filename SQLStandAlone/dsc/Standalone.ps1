@@ -30,9 +30,7 @@ configuration StandAlone
             Name       = $env:COMPUTERNAME
             DomainName = $DomainName
             Credential = $domainuserCreds
-            DependsOn  = "[xWaitForADDomain]DscForestWait"
         }
-    
     }
 }
 
