@@ -43,6 +43,7 @@ configuration StandAlone
             InstanceName         = 'MSSQLSERVER'
             PsDscRunAsCredential = $localAdminCreds
         }
+        
     }
 }
 
