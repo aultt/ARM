@@ -8,7 +8,10 @@ configuration StandAlone
 
         [Parameter(Mandatory)]
         [System.Management.Automation.PSCredential]$domainuserCreds,
-        
+
+        [Parameter(Mandatory)]
+        [System.Management.Automation.PSCredential]$localuserCreds,
+
         [Int]$RetryCount = 20,
         [Int]$RetryIntervalSec = 30
 
@@ -30,6 +33,15 @@ configuration StandAlone
             Name       = $env:COMPUTERNAME
             DomainName = $DomainName
             Credential = $domainuserCreds
+        }
+        SqlServerRole Add_ServerRole_AdminSqlforBI
+        {
+            Ensure               = 'Present'
+            ServerRoleName       = 'sysadmin'
+            Members              = 'TAMZ\DBA'
+            ServerName           = $env:COMPUTERNAME
+            InstanceName         = 'MSSQLSERVER'
+            PsDscRunAsCredential = $localuserCreds
         }
     }
 }

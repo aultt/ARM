@@ -199,20 +199,25 @@
                 "domainuserCreds": {
                   "userName": "[parameters('domainUserName')]",
                   "password": "PrivateSettingsRef:domainuserPassword"
+                  },
+                  "localadminCreds": {
+                    "userName": "[parameters('localadminuserName')]",
+                    "password": "PrivateSettingsRef:localadminPassword"  
+                  }
                 }
-              }
-            },
+              },
             "protectedSettings": {
               "items": {
               "configurationUrlSasToken": "[parameters('_artifactsLocationSasToken')]",
-              "domainuserPassword": "[parameters('domainuserPassword')]"
+              "domainuserPassword": "[parameters('domainuserPassword')]",
+              "localAdminPassword": "[parameters('localAdminPassword')]"
               }
+            }
+            } 
           }
-        }
+        ]
       }
-      ]
-    }
-   ],
+    ],
   "outputs": {},
   "variables": {
     "mssqlstorageName": "[concat('sqlstg', uniqueString(resourceGroup().id))]",
