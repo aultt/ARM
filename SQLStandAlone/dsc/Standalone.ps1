@@ -34,6 +34,20 @@ configuration StandAlone
             DomainName = $DomainName
             Credential = $domainuserCreds
         }
+        xPendingReboot Reboot1
+        {
+            Name = 'Reboot1'
+            dependson = '[xComputer]DomainJoin'
+        }
+        
+        sqlsetup  'Default'
+        {
+            InstanceName = 'MSSQLSERVER'
+            Features             = 'SQLENGINE'
+
+            PsDscRunAsCredential = $localAdminCreds
+            dependson = '[xPendingReboot]Reboot1'
+        }
 
         SqlServerLogin Add_DBAGroup
         {
@@ -44,7 +58,7 @@ configuration StandAlone
             InstanceName         = 'MSSQLSERVER'
             PsDscRunAsCredential = $localAdminCreds
 
-            dependson = '[xComputer]DomainJoin'
+            dependson = '[sqlsetup]Default'
         }
         SqlServerRole AddDBAToSysAdmin
         {
