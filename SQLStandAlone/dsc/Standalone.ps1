@@ -34,16 +34,16 @@ configuration StandAlone
             DomainName = $DomainName
             Credential = $domainuserCreds
         }
-        SqlServerRole Add_ServerRole_AdminSqlforBI
+        SqlServerRole AddDBAToSysAdmin
         {
             Ensure               = 'Present'
             ServerRoleName       = 'sysadmin'
-            Members              = 'TAMZ\DBA'
+            MembersToInclude     = 'TAMZ\DBA'
             ServerName           = $env:COMPUTERNAME
             InstanceName         = 'MSSQLSERVER'
             PsDscRunAsCredential = $localAdminCreds
         }
-        
+
     }
 }
 
