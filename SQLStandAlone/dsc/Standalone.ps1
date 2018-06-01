@@ -39,17 +39,22 @@ configuration StandAlone
             Name = 'Reboot1'
             dependson = '[xComputer]DomainJoin'
         }
+        service sqlserver
+        {
+            Name = "MSSQLSERVER"
+            State = "Running"
+        }
 
         SqlServerLogin Add_DBAGroup
         {
             Ensure               = 'Present'
             Name                 = 'TAMZ\DBA'
             LoginType            = 'WindowsGroup'
-            ServerName           = "."
+            ServerName           = $env:COMPUTERNAME
             InstanceName         = 'MSSQLSERVER'
             PsDscRunAsCredential = $localAdminCreds
 
-            dependson = "[xPendingReboot]Reboot1"
+            dependson = "[service]MSSQLSERVER"
         }
         SqlServerRole AddDBAToSysAdmin
         {
