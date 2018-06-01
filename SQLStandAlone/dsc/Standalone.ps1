@@ -54,7 +54,7 @@ configuration StandAlone
             InstanceName         = 'MSSQLSERVER'
             PsDscRunAsCredential = $localAdminCreds
 
-            dependson = "[service]MSSQLSERVER"
+            dependson = "[service]sqlserver"
         }
         SqlServerRole AddDBAToSysAdmin
         {
