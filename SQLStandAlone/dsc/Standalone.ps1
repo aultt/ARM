@@ -45,11 +45,11 @@ configuration StandAlone
             Ensure               = 'Present'
             Name                 = 'TAMZ\DBA'
             LoginType            = 'WindowsGroup'
-            ServerName           = $env:COMPUTERNAME
+            ServerName           = "."
             InstanceName         = 'MSSQLSERVER'
             PsDscRunAsCredential = $localAdminCreds
 
-            dependson = '[xPendingReboot]Reboot1'
+            dependson = "[xPendingReboot]Reboot1"
         }
         SqlServerRole AddDBAToSysAdmin
         {
