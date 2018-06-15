@@ -68,6 +68,24 @@ configuration StandAlone
             dependson = '[SqlServerLogin]Add_DBAGroup'
         }
 
+        Script AddDataDisks {
+            SetScript  = 
+@"            
+                        New-StoragePool -FriendlyName 'SQLPool' -StorageSubSystemFriendlyName "Windows Storage*" -PhysicalDisks $physicalDisks 
+                        New-Volume -StoragePoolFriendlyName SQLPool* -FriendlyName Data -FileSystem NTFS -AllocationUnitSize 65536 -DriveLetter G -size 5GB;
+                        New-Volume -StoragePoolFriendlyName SQLPool* -FriendlyName Data -FileSystem NTFS -AllocationUnitSize 65536 -DriveLetter F -size 5GB;
+                        New-Volume -StoragePoolFriendlyName SQLPool* -FriendlyName Data -FileSystem NTFS -AllocationUnitSize 65536 -DriveLetter T -size 5GB;
+"@
+            TestScript = "(Get-StoragePool -FriendlyName SQLPool*).OperationalStatus -eq 'OK'"
+            GetScript  = "@{Ensure = if ((Get-StoragePool -FriendlyName SQLPool*).OperationalStatus -eq 'OK') {'Present'} Else {'Absent'}}"
+        }
+        $physicalDisks = (Get-PhysicalDisk -canpool $true)
+        New-StoragePool -FriendlyName 'SQLPool' -StorageSubSystemFriendlyName "Windows Storage*" -PhysicalDisks $physicalDisks 
+        New-Volume -StoragePoolFriendlyName SQLPool* -FriendlyName Data -FileSystem NTFS -AllocationUnitSize 65536 -DriveLetter G -size 5GB;
+        New-Volume -StoragePoolFriendlyName SQLPool* -FriendlyName Data -FileSystem NTFS -AllocationUnitSize 65536 -DriveLetter F -size 5GB;
+        New-Volume -StoragePoolFriendlyName SQLPool* -FriendlyName Data -FileSystem NTFS -AllocationUnitSize 65536 -DriveLetter T -size 5GB;
+
+
     }
 }
 

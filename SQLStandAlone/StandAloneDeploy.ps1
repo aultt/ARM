@@ -1,6 +1,6 @@
 Login-AzureRmAccount
 Select-AzureRmSubscription -SubscriptionName TAMZ_InternalApps
-$RG = 'sqlRG'
+$RG = 'sqlRG2'
 
 $templateFile = 'C:\Users\troyault\OneDrive - TAMZ\Git\ARM\SQLStandAlone\azuredeploy.json'
 $templateParm = 'C:\Users\troyault\OneDrive - TAMZ\Git\MyParmFiles\StandAlone.parameters.json' 
@@ -9,6 +9,3 @@ New-AzureRmResourceGroupDeployment -Name NewSQL -ResourceGroupName $RG -Template
 
 Remove-AzureRmResourceGroup -Name $RG -Force
 clear-host
-
-
-     
