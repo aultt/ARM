@@ -76,6 +76,13 @@
       "type": "string",
       "defaultValue": "data"
     },
+    "vmSize": {
+      "type": "string",
+      "metadata": {
+        "description": "Size of the VMs to be created"
+      },
+      "defaultValue": "Standard_D2s_v3"
+    },
     "vmDiskSize": {
       "type": "int",
       "minValue": 64,
@@ -165,7 +172,7 @@
       },
       "properties": {
         "hardwareProfile": {
-          "vmSize": "[variables('mssqlVmSize')]"
+          "vmSize": "[parameters('vmsize')]"
         },
         "osProfile": {
           "computerName": "[parameters('VMName')]",
@@ -257,7 +264,6 @@
   "variables": {
     "mssqlstorageName": "[concat('sqlstg', uniqueString(resourceGroup().id))]",
     "mssqlImagePublisher": "MicrosoftSQLServer",
-    "mssqlVmSize": "Standard_D2s_v3",
     "mssqlVnetID": "[resourceId(parameters('existingvirtualNetworkResourceGroup'), 'Microsoft.Network/virtualNetworks', parameters('existingvirtualNetworkName'))]",
     "mssqlSubnetRef": "[concat(variables('mssqlVnetID'), '/subnets/', parameters('existingSubnetName'))]",
     "mssqlNicName": "[concat(parameters('VMName'), 'NetworkInterface')]",
