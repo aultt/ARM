@@ -9,3 +9,6 @@ New-AzureRmResourceGroupDeployment -Name NewSQL -ResourceGroupName $RG -Template
 
 Remove-AzureRmResourceGroup -Name $RG -Force
 clear-host
+
+
+     
