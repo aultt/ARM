@@ -2,17 +2,6 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "mssqlstorageType": {
-      "type": "string",
-      "defaultValue": "Standard_LRS",
-      "allowedValues": [
-        "Standard_LRS",
-        "Standard_ZRS",
-        "Standard_GRS",
-        "Standard_RAGRS",
-        "Premium_LRS"
-      ]
-    },
     "VMName": {
       "type": "string",
       "minLength": 8
@@ -105,6 +94,69 @@
       "type": "string",
       "defaultValue": "ReadOnly"
     },
+        "datadriveLetter" :{
+      "type": "string",
+      "metadata": {
+        "description": "Drive letter for the Data drive which will be created on Storage Space"
+      },
+      "defaultValue": "G"
+    },
+    "datadrivelabel" :{
+      "type": "string",
+      "metadata":{
+        "description": "Label to associate with Data drive once formated"
+      },
+      "defaultValue": "SQLDATA"
+    },
+    "datadrivesize" :{
+      "type": "string",
+      "metadata": {
+        "description": "Size of volume to be created for Data Drive"
+      },
+      "defaultValue": "5GB"
+    },
+    "logdriveLetter" :{
+      "type": "string",
+      "metadata": {
+        "description": "Drive letter for the Log drive which will be created on Storage Space"
+      },
+      "defaultValue": "F"
+    },
+    "logdrivelabel" :{
+      "type": "string",
+      "metadata":{
+        "description": "Label to associate with Log drive once formated"
+      },
+      "defaultValue": "Logs"
+    },
+    "logdrivesize" :{
+      "type": "string",
+      "metadata": {
+        "description": "Size of volume to be created for Log Drive"
+      },
+      "defaultValue": "5GB"
+    },
+    "tempdbdriveLetter" :{
+      "type": "string",
+      "metadata": {
+        "description": "Drive letter for the TempDB drive which will be created on Storage Space"
+      },
+      "defaultValue": "T"
+    },
+    "tempdbdrivelabel" :{
+      "type": "string",
+      "metadata":{
+        "description": "Label to associate with TempDB drive once formated"
+      },
+      "defaultValue": "TempDB"
+    },
+    "tempdbdrivesize" :{
+      "type": "string",
+      "metadata": {
+        "description": "Size of volume to be created for TempDB Drive"
+      },
+      "defaultValue": "5GB"
+    },
     "_artifactsLocation": {
       "type": "string",
       "metadata": {
@@ -121,20 +173,6 @@
     }
   },
   "resources": [
-    {
-      "name": "[variables('mssqlstorageName')]",
-      "type": "Microsoft.Storage/storageAccounts",
-      "location": "[resourceGroup().location]",
-      "apiVersion": "2016-01-01",
-      "sku": {
-        "name": "[parameters('mssqlstorageType')]"
-      },
-      "dependsOn": [ ],
-      "tags": {
-        "displayName": "mssqlstorage"
-      },
-      "kind": "Storage"
-    },
     {
       "name": "[variables('mssqlNicName')]",
       "type": "Microsoft.Network/networkInterfaces",
@@ -164,7 +202,6 @@
       "location": "[resourceGroup().location]",
       "apiVersion": "2016-04-30-preview",
       "dependsOn": [
-        "[resourceId('Microsoft.Storage/storageAccounts', variables('mssqlstorageName'))]",
         "[resourceId('Microsoft.Network/networkInterfaces', variables('mssqlNicName'))]"
       ],
       "tags": {
@@ -187,7 +224,7 @@
             "version": "latest"
           },
           "osDisk": {
-            "name": "mssqlOSDisk",
+            "name": "[concat(parameters('vmName'),'-OSDisk')]",
             "caching": "ReadWrite",
             "createOption": "FromImage",
             "managedDisk": {
@@ -262,7 +299,6 @@
     ],
   "outputs": {},
   "variables": {
-    "mssqlstorageName": "[concat('sqlstg', uniqueString(resourceGroup().id))]",
     "mssqlImagePublisher": "MicrosoftSQLServer",
     "mssqlVnetID": "[resourceId(parameters('existingvirtualNetworkResourceGroup'), 'Microsoft.Network/virtualNetworks', parameters('existingvirtualNetworkName'))]",
     "mssqlSubnetRef": "[concat(variables('mssqlVnetID'), '/subnets/', parameters('existingSubnetName'))]",
