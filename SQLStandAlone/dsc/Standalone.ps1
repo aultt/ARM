@@ -11,9 +11,19 @@ configuration StandAlone
 
         [Parameter(Mandatory)]
         [System.Management.Automation.PSCredential]$localAdminCreds,
-
+        [string]$datadriveLetter,
+        [string]$datadrivelabel,
+        [string]$datadriveSize,
+        [string]$logdriveLetter,
+        [string]$logdrivelabel,
+        [string]$logdriveSize,
+        [string]$tempdbdriveLetter,
+        [string]$tempdbdrivelabel,
+        [string]$tempdbdriveSize,
+        
         [Int]$RetryCount = 20,
         [Int]$RetryIntervalSec = 30
+
 
     )
 
@@ -72,9 +82,9 @@ configuration StandAlone
             SetScript  = 
 @"            
                         New-StoragePool -FriendlyName 'SQLPool' -StorageSubSystemFriendlyName "Windows Storage*" -PhysicalDisks $physicalDisks 
-                        New-Volume -StoragePoolFriendlyName SQLPool* -FriendlyName Data -FileSystem NTFS -AllocationUnitSize 65536 -DriveLetter G -size 5GB;
-                        New-Volume -StoragePoolFriendlyName SQLPool* -FriendlyName Data -FileSystem NTFS -AllocationUnitSize 65536 -DriveLetter F -size 5GB;
-                        New-Volume -StoragePoolFriendlyName SQLPool* -FriendlyName Data -FileSystem NTFS -AllocationUnitSize 65536 -DriveLetter T -size 5GB;
+                        New-Volume -StoragePoolFriendlyName SQLPool* -FriendlyName ${datadrivelabel} -FileSystem NTFS -AllocationUnitSize 65536 -DriveLetter ${datadriveLetter} -size ${datadriveSize};
+                        New-Volume -StoragePoolFriendlyName SQLPool* -FriendlyName ${logdrivelabel} -FileSystem NTFS -AllocationUnitSize 65536 -DriveLetter ${logdriveLetter} -size ${logdriveSize};
+                        New-Volume -StoragePoolFriendlyName SQLPool* -FriendlyName ${tempdbdrivelabel} -FileSystem NTFS -AllocationUnitSize 65536 -DriveLetter ${tempdbdriveLetter} -size ${tempdbdriveSize};
 "@
             TestScript = "(Get-StoragePool -FriendlyName SQLPool*).OperationalStatus -eq 'OK'"
             GetScript  = "@{Ensure = if ((Get-StoragePool -FriendlyName SQLPool*).OperationalStatus -eq 'OK') {'Present'} Else {'Absent'}}"

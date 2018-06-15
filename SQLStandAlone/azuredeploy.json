@@ -282,7 +282,16 @@
                   "localadminCreds": {
                     "userName": "[parameters('localadminuserName')]",
                     "password": "PrivateSettingsRef:localadminPassword"  
-                  }
+                  },
+                  "datadriveletter" : "[parameters('datadriveletter')]",
+                  "datadrivesize" : "[parameters('datadrivesize')]",
+                  "datadrivelabel" : "[parameters('datadrivelabel')]",
+                  "logdriveletter" : "[parameters('logdriveletter')]",
+                  "logdrivesize" : "[parameters('logdrivesize')]",
+                  "logdrivelabel" : "[parameters('logdrivelabel')]",
+                  "tempdbdriveletter" : "[parameters('tempdbdriveletter')]",
+                  "tempdbdrivesize" : "[parameters('tempdbdrivesize')]",
+                  "tempdbdrivelabel" : "[parameters('tempdbdrivelabel')]"
                 }
               },
             "protectedSettings": {
