@@ -30,6 +30,7 @@ configuration StandAlone
     )
 
     Import-DscResource -ModuleName xComputerManagement, xActiveDirectory, xPendingReboot, sqlserverdsc
+$SQLVersion = 'MSQL14'
 
     Node localhost
     {
@@ -55,8 +56,8 @@ configuration StandAlone
         Script CleanSQL
         {
             SetScript = 'C:\SQLServerFull\Setup.exe /Action=Uninstall /FEATURES=SQL,AS,IS,RS /INSTANCENAME=MSSQLSERVER /Q'
-            TestScript = '(test-path -Path "C:\Program Files\Microsoft SQL Server\MSSQL13.MSSQLSERVER\MSSQL\DATA\master.mdf") -eq $false'
-            GetScript = '@{Ensure = if ((test-path -Path "C:\Program Files\Microsoft SQL Server\MSSQL13.MSSQLSERVER\MSSQL\DATA\master.mdf") -eq $false) {"Present"} Else {"Absent"}}'
+            TestScript = "(test-path -Path `"C:\Program Files\Microsoft SQL Server\$SQLVersion.MSSQLSERVER\MSSQL\DATA\master.mdf`") -eq $false"
+            GetScript = "@{Ensure = if ((test-path -Path `"C:\Program Files\Microsoft SQL Server\$SQLVersion.MSSQLSERVER\MSSQL\DATA\master.mdf`") -eq $false) {`"Present`"} Else {`"Absent`"}}"
             DependsOn = "[xComputer]DomainJoin"
         }
 
