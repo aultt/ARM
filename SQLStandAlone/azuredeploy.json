@@ -164,7 +164,7 @@
       },
       "defaultValue": "SQLENGINE"
     },
-    "InstanceName" :{
+    "SQLInstanceName" :{
       "type": "string",
       "metadata": {
         "description": "SQL Server Instance Name"
@@ -307,7 +307,7 @@
                   "tempdbdrivesize" : "[parameters('tempdbdrivesize')]",
                   "tempdbdrivelabel" : "[parameters('tempdbdrivelabel')]",
                   "sqlfeatures" : "[parameters('SQLFeatures')]",
-                  "instancename" : "[parameters('InstanceName')]"
+                  "sqlinstancename" : "[parameters('sqlInstanceName')]"
                 }
               },
             "protectedSettings": {
