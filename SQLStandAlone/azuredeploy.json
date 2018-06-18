@@ -157,6 +157,20 @@
       },
       "defaultValue": "5GB"
     },
+    "SQLFeatures" :{
+      "type": "string",
+      "metadata": {
+        "description": "Features to install"
+      },
+      "defaultValue": "SQLENGINE"
+    },
+    "InstanceName" :{
+      "type": "string",
+      "metadata": {
+        "description": "SQL Server Instance Name"
+      },
+      "defaultValue": "MSSQLSERVER"
+    },
     "_artifactsLocation": {
       "type": "string",
       "metadata": {
@@ -291,7 +305,9 @@
                   "logdrivelabel" : "[parameters('logdrivelabel')]",
                   "tempdbdriveletter" : "[parameters('tempdbdriveletter')]",
                   "tempdbdrivesize" : "[parameters('tempdbdrivesize')]",
-                  "tempdbdrivelabel" : "[parameters('tempdbdrivelabel')]"
+                  "tempdbdrivelabel" : "[parameters('tempdbdrivelabel')]",
+                  "sqlfeatures" : "[parameters('SQLFeatures')]",
+                  "instancename" : "[parameters('InstanceName')]"
                 }
               },
             "protectedSettings": {

@@ -11,6 +11,8 @@ configuration StandAlone
 
         [Parameter(Mandatory)]
         [System.Management.Automation.PSCredential]$localAdminCreds,
+        [string]$SQLFeatures,
+        [string]$InstanceName,
         [string]$datadriveLetter,
         [string]$datadrivelabel,
         [string]$datadriveSize,
@@ -49,38 +51,19 @@ configuration StandAlone
             Name = 'Reboot1'
             dependson = '[xComputer]DomainJoin'
         }
-        service sqlserver
-        {
-            Name = "MSSQLSERVER"
-            State = "Running"
-        }
 
-        SqlServerLogin Add_DBAGroup
+        Script CleanSQL
         {
-            Ensure               = 'Present'
-            Name                 = 'TAMZ\DBA'
-            LoginType            = 'WindowsGroup'
-            ServerName           = $env:COMPUTERNAME
-            InstanceName         = 'MSSQLSERVER'
-            PsDscRunAsCredential = $localAdminCreds
-
-            dependson = "[service]sqlserver"
-        }
-        SqlServerRole AddDBAToSysAdmin
-        {
-            Ensure               = 'Present'
-            ServerRoleName       = 'sysadmin'
-            MembersToInclude     = 'TAMZ\DBA'
-            ServerName           = $env:COMPUTERNAME
-            InstanceName         = 'MSSQLSERVER'
-            PsDscRunAsCredential = $localAdminCreds
-
-            dependson = '[SqlServerLogin]Add_DBAGroup'
+            SetScript = 'C:\SQLServerFull\Setup.exe /Action=Uninstall /FEATURES=SQL,AS,IS,RS /INSTANCENAME=MSSQLSERVER /Q'
+            TestScript = '(test-path -Path "C:\Program Files\Microsoft SQL Server\MSSQL13.MSSQLSERVER\MSSQL\DATA\master.mdf") -eq $false'
+            GetScript = '@{Ensure = if ((test-path -Path "C:\Program Files\Microsoft SQL Server\MSSQL13.MSSQLSERVER\MSSQL\DATA\master.mdf") -eq $false) {"Present"} Else {"Absent"}}'
+            DependsOn = "[xComputer]DomainJoin"
         }
 
         Script AddDataDisks {
             SetScript  = 
-@"            
+@"                      
+                        $physicalDisks = (Get-PhysicalDisk -canpool $true)
                         New-StoragePool -FriendlyName 'SQLPool' -StorageSubSystemFriendlyName "Windows Storage*" -PhysicalDisks $physicalDisks 
                         New-Volume -StoragePoolFriendlyName SQLPool* -FriendlyName ${datadrivelabel} -FileSystem NTFS -AllocationUnitSize 65536 -DriveLetter ${datadriveLetter} -size ${datadriveSize};
                         New-Volume -StoragePoolFriendlyName SQLPool* -FriendlyName ${logdrivelabel} -FileSystem NTFS -AllocationUnitSize 65536 -DriveLetter ${logdriveLetter} -size ${logdriveSize};
@@ -89,13 +72,54 @@ configuration StandAlone
             TestScript = "(Get-StoragePool -FriendlyName SQLPool*).OperationalStatus -eq 'OK'"
             GetScript  = "@{Ensure = if ((Get-StoragePool -FriendlyName SQLPool*).OperationalStatus -eq 'OK') {'Present'} Else {'Absent'}}"
         }
-        $physicalDisks = (Get-PhysicalDisk -canpool $true)
-        New-StoragePool -FriendlyName 'SQLPool' -StorageSubSystemFriendlyName "Windows Storage*" -PhysicalDisks $physicalDisks 
-        New-Volume -StoragePoolFriendlyName SQLPool* -FriendlyName Data -FileSystem NTFS -AllocationUnitSize 65536 -DriveLetter G -size 5GB;
-        New-Volume -StoragePoolFriendlyName SQLPool* -FriendlyName Data -FileSystem NTFS -AllocationUnitSize 65536 -DriveLetter F -size 5GB;
-        New-Volume -StoragePoolFriendlyName SQLPool* -FriendlyName Data -FileSystem NTFS -AllocationUnitSize 65536 -DriveLetter T -size 5GB;
 
+        SqlSetup 'InstallNamedInstance'
+        {
+            InstanceName          = $InstanceName
+            Features              = $SQLFeatures
+            SQLCollation          = 'SQL_Latin1_General_CP1_CI_AS'
+            SQLSysAdminAccounts   = 'TAMZ\DBA'
+            InstallSharedDir      = 'C:\Program Files\Microsoft SQL Server'
+            InstallSharedWOWDir   = 'C:\Program Files (x86)\Microsoft SQL Server'
+            InstanceDir           = 'G:\Program Files\Microsoft SQL Server'
+            InstallSQLDataDir     = "G:\Program Files\Microsoft SQL Server\MSSQL13.$InstanceName\MSSQL\Data"
+            SQLUserDBDir          = "G:\Program Files\Microsoft SQL Server\MSSQL13.$InstanceName\MSSQL\Data"
+            SQLUserDBLogDir       = "F:\Program Files\Microsoft SQL Server\MSSQL13.$InstanceName\MSSQL\Data"
+            SQLTempDBDir          = "T:\Program Files\Microsoft SQL Server\MSSQL13.$InstanceName\MSSQL\Data"
+            SQLTempDBLogDir       = "T:\Program Files\Microsoft SQL Server\MSSQL13.$InstanceName\MSSQL\Data"
+            SQLBackupDir          = "G:\Program Files\Microsoft SQL Server\MSSQL13.$InstanceName\MSSQL\Backup"
+            SourcePath            = 'C:\SQLServerFull'
+            UpdateEnabled         = 'False'
+            ForceReboot           = $false
+            BrowserSvcStartupType = 'Automatic'
 
+            PsDscRunAsCredential  = $localAdminCreds
+
+            DependsOn             = '[Script]CleanSQL','[Script]AddDataDisks'
+        }
+
+        #SqlServerLogin Add_DBAGroup
+        #{
+        #    Ensure               = 'Present'
+        #    Name                 = 'TAMZ\DBA'
+        #    LoginType            = 'WindowsGroup'
+        #    ServerName           = $env:COMPUTERNAME
+        #    InstanceName         = 'MSSQLSERVER'
+        #    PsDscRunAsCredential = $localAdminCreds
+#
+        #    dependson = "[sqlSetup]InstallNamedInstance"
+        #}
+        #SqlServerRole AddDBAToSysAdmin
+        #{
+        #    Ensure               = 'Present'
+        #    ServerRoleName       = 'sysadmin'
+        #    MembersToInclude     = 'TAMZ\DBA'
+        #    ServerName           = $env:COMPUTERNAME
+        #    InstanceName         = 'MSSQLSERVER'
+        #    PsDscRunAsCredential = $localAdminCreds
+#
+        #    dependson = '[SqlServerLogin]Add_DBAGroup'
+        #}
     }
 }
 
