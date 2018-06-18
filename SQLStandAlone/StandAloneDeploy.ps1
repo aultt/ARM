@@ -1,6 +1,6 @@
 Login-AzureRmAccount
 Select-AzureRmSubscription -SubscriptionName TAMZ_InternalApps
-$RG = 'sqlRG2'
+$RG = 'sqlRG'
 
 $templateFile = 'C:\Users\troyault\OneDrive - TAMZ\Git\ARM\SQLStandAlone\azuredeploy.json'
 $templateParm = 'C:\Users\troyault\OneDrive - TAMZ\Git\MyParmFiles\StandAlone.parameters.json' 

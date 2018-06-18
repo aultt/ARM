@@ -12,7 +12,7 @@ configuration StandAlone
         [Parameter(Mandatory)]
         [System.Management.Automation.PSCredential]$localAdminCreds,
         [string]$SQLFeatures,
-        [string]$InstanceName,
+        [string]$SQLInstanceName,
         [string]$datadriveLetter,
         [string]$datadrivelabel,
         [string]$datadriveSize,
@@ -75,19 +75,19 @@ configuration StandAlone
 
         SqlSetup 'InstallNamedInstance'
         {
-            InstanceName          = $InstanceName
+            InstanceName          = $SQLInstanceName
             Features              = $SQLFeatures
             SQLCollation          = 'SQL_Latin1_General_CP1_CI_AS'
             SQLSysAdminAccounts   = 'TAMZ\DBA'
             InstallSharedDir      = 'C:\Program Files\Microsoft SQL Server'
             InstallSharedWOWDir   = 'C:\Program Files (x86)\Microsoft SQL Server'
             InstanceDir           = 'G:\Program Files\Microsoft SQL Server'
-            InstallSQLDataDir     = "G:\Program Files\Microsoft SQL Server\MSSQL13.$InstanceName\MSSQL\Data"
-            SQLUserDBDir          = "G:\Program Files\Microsoft SQL Server\MSSQL13.$InstanceName\MSSQL\Data"
-            SQLUserDBLogDir       = "F:\Program Files\Microsoft SQL Server\MSSQL13.$InstanceName\MSSQL\Data"
-            SQLTempDBDir          = "T:\Program Files\Microsoft SQL Server\MSSQL13.$InstanceName\MSSQL\Data"
-            SQLTempDBLogDir       = "T:\Program Files\Microsoft SQL Server\MSSQL13.$InstanceName\MSSQL\Data"
-            SQLBackupDir          = "G:\Program Files\Microsoft SQL Server\MSSQL13.$InstanceName\MSSQL\Backup"
+            InstallSQLDataDir     = "G:\Program Files\Microsoft SQL Server\MSSQL13.$SQLInstanceName\MSSQL\Data"
+            SQLUserDBDir          = "G:\Program Files\Microsoft SQL Server\MSSQL13.$SQLInstanceName\MSSQL\Data"
+            SQLUserDBLogDir       = "F:\Program Files\Microsoft SQL Server\MSSQL13.$SQLInstanceName\MSSQL\Data"
+            SQLTempDBDir          = "T:\Program Files\Microsoft SQL Server\MSSQL13.$SQLInstanceName\MSSQL\Data"
+            SQLTempDBLogDir       = "T:\Program Files\Microsoft SQL Server\MSSQL13.$SQLInstanceName\MSSQL\Data"
+            SQLBackupDir          = "G:\Program Files\Microsoft SQL Server\MSSQL13.$SQLInstanceName\MSSQL\Backup"
             SourcePath            = 'C:\SQLServerFull'
             UpdateEnabled         = 'False'
             ForceReboot           = $false
