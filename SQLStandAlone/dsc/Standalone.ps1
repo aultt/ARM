@@ -64,16 +64,15 @@ $SQLVersion = 'MSQL14'
         Script AddDataDisks {
             SetScript  = 
 @"                      
-                        $physicalDisks = (Get-PhysicalDisk -canpool $true)
-                        New-StoragePool -FriendlyName 'SQLPool' -StorageSubSystemFriendlyName "Windows Storage*" -PhysicalDisks $physicalDisks 
-                        New-Volume -StoragePoolFriendlyName SQLPool* -FriendlyName ${datadrivelabel} -FileSystem NTFS -AllocationUnitSize 65536 -DriveLetter ${datadriveLetter} -size ${datadriveSize};
-                        New-Volume -StoragePoolFriendlyName SQLPool* -FriendlyName ${logdrivelabel} -FileSystem NTFS -AllocationUnitSize 65536 -DriveLetter ${logdriveLetter} -size ${logdriveSize};
-                        New-Volume -StoragePoolFriendlyName SQLPool* -FriendlyName ${tempdbdrivelabel} -FileSystem NTFS -AllocationUnitSize 65536 -DriveLetter ${tempdbdriveLetter} -size ${tempdbdriveSize};
+                        New-StoragePool -FriendlyName 'SQLPool' -StorageSubSystemFriendlyName "Windows Storage*" -PhysicalDisks (Get-PhysicalDisk -canpool:1) 
+                        New-Volume -StoragePoolFriendlyName SQLPool* -FriendlyName $datadrivelabel -FileSystem NTFS -AllocationUnitSize 65536 -DriveLetter G -size 5GB;
+                        New-Volume -StoragePoolFriendlyName SQLPool* -FriendlyName $logdrivelabel -FileSystem NTFS -AllocationUnitSize 65536 -DriveLetter F -size 5GB;
+                        New-Volume -StoragePoolFriendlyName SQLPool* -FriendlyName $tempdbdrivelabel -FileSystem NTFS -AllocationUnitSize 65536 -DriveLetter T -size 5GB;
 "@
             TestScript = "(Get-StoragePool -FriendlyName SQLPool*).OperationalStatus -eq 'OK'"
             GetScript  = "@{Ensure = if ((Get-StoragePool -FriendlyName SQLPool*).OperationalStatus -eq 'OK') {'Present'} Else {'Absent'}}"
         }
-
+ 
         SqlSetup 'InstallNamedInstance'
         {
             InstanceName          = $SQLInstanceName
