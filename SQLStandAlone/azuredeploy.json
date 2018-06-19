@@ -306,6 +306,7 @@
                   "tempdbdriveletter" : "[parameters('tempdbdriveletter')]",
                   "tempdbdrivesize" : "[parameters('tempdbdrivesize')]",
                   "tempdbdrivelabel" : "[parameters('tempdbdrivelabel')]",
+                  "imageoffer" : "[parameters('imageOffer')]",
                   "sqlfeatures" : "[parameters('SQLFeatures')]",
                   "sqlinstancename" : "[parameters('sqlInstanceName')]"
                 }

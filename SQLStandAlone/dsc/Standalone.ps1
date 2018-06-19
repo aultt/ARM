@@ -11,6 +11,7 @@ configuration StandAlone
 
         [Parameter(Mandatory)]
         [System.Management.Automation.PSCredential]$localAdminCreds,
+        [string]$imageoffer,
         [string]$SQLFeatures,
         [string]$SQLInstanceName,
         [string]$datadriveLetter,
@@ -30,7 +31,8 @@ configuration StandAlone
     )
 
     Import-DscResource -ModuleName xComputerManagement, xActiveDirectory, xPendingReboot, sqlserverdsc
-$SQLVersion = 'MSQL14'
+    $SQLVersion = $imageoffer.Substring(5,2)
+    $SQLLocation = "MSSQL$(switch ($SQLVersion){17 {14} 16 {13}})"
 
     Node localhost
     {
@@ -81,12 +83,12 @@ $SQLVersion = 'MSQL14'
             InstallSharedDir      = 'C:\Program Files\Microsoft SQL Server'
             InstallSharedWOWDir   = 'C:\Program Files (x86)\Microsoft SQL Server'
             InstanceDir           = 'G:\Program Files\Microsoft SQL Server'
-            InstallSQLDataDir     = "G:\Program Files\Microsoft SQL Server\MSSQL14.$SQLInstanceName\MSSQL\Data"
-            SQLUserDBDir          = "G:\Program Files\Microsoft SQL Server\MSSQL14.$SQLInstanceName\MSSQL\Data"
-            SQLUserDBLogDir       = "F:\Program Files\Microsoft SQL Server\MSSQL14.$SQLInstanceName\MSSQL\Data"
-            SQLTempDBDir          = "T:\Program Files\Microsoft SQL Server\MSSQL14.$SQLInstanceName\MSSQL\Data"
-            SQLTempDBLogDir       = "T:\Program Files\Microsoft SQL Server\MSSQL14.$SQLInstanceName\MSSQL\Data"
-            SQLBackupDir          = "G:\Program Files\Microsoft SQL Server\MSSQL14.$SQLInstanceName\MSSQL\Backup"
+            InstallSQLDataDir     = "G:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\"
+            SQLUserDBDir          = "G:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\Data"
+            SQLUserDBLogDir       = "F:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\Log"
+            SQLTempDBDir          = "T:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\TempDb"
+            SQLTempDBLogDir       = "T:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\TempDb"
+            SQLBackupDir          = "G:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\Backup"
             SourcePath            = 'C:\SQLServerFull'
             UpdateEnabled         = 'False'
             ForceReboot           = $false
