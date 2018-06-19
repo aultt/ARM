@@ -33,7 +33,6 @@ configuration StandAlone
     Import-DscResource -ModuleName xComputerManagement, xActiveDirectory, xPendingReboot, sqlserverdsc
     $SQLVersion = $imageoffer.Substring(5,2)
     $SQLLocation = "MSSQL$(switch ($SQLVersion){17 {14} 16 {13}})"
-    $masterdbpath = "C:\Program Files\Microsoft SQL Server\$SQLLocation.MSSQLSERVER\MSSQL\DATA\master.mdf"
 
     Node localhost
     {
@@ -59,8 +58,8 @@ configuration StandAlone
         Script CleanSQL
         {
             SetScript  = 'C:\SQLServerFull\Setup.exe /Action=Uninstall /FEATURES=SQL,AS,RS,IS /INSTANCENAME=MSSQLSERVER /Q'
-            TestScript = "(test-path -Path $masterdbpath) -eq:0"
-            GetScript  = "@{Ensure = if ((test-path -Path $masterdbpath) -eq:0) {'Present'} Else {'Absent'}}"
+            TestScript = "(test-path -Path `"C:\Program Files\Microsoft SQL Server\$SQLLocation.MSSQLSERVER\MSSQL\DATA\master.mdf`") -eq `$false"
+            GetScript  = "@{Ensure = if ((test-path -Path `"C:\Program Files\Microsoft SQL Server\$SQLLocation.MSSQLSERVER\MSSQL\DATA\master.mdf`") -eq `$false) {'Present'} Else {'Absent'}}"
         }
 
         Script AddDataDisks {
