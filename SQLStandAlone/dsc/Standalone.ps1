@@ -33,6 +33,7 @@ configuration StandAlone
     Import-DscResource -ModuleName xComputerManagement, xActiveDirectory, xPendingReboot, sqlserverdsc
     $SQLVersion = $imageoffer.Substring(5,2)
     $SQLLocation = "MSSQL$(switch ($SQLVersion){17 {14} 16 {13}})"
+    $masterdbpath = "C:\Program Files\Microsoft SQL Server\$SQLLocation.MSSQLSERVER\MSSQL\DATA\master.mdf"
 
     Node localhost
     {
@@ -58,8 +59,8 @@ configuration StandAlone
         Script CleanSQL
         {
             SetScript  = 'C:\SQLServerFull\Setup.exe /Action=Uninstall /FEATURES=SQL,AS,RS,IS /INSTANCENAME=MSSQLSERVER /Q'
-            TestScript = '(test-path -Path "C:\Program Files\Microsoft SQL Server\MSSQL14.MSSQLSERVER\MSSQL\DATA\master.mdf") -eq $false'
-            GetScript  = '@{Ensure = if ((test-path -Path "C:\Program Files\Microsoft SQL Server\MSSQL14.MSSQLSERVER\MSSQL\DATA\master.mdf") -eq $false) {"Present"} Else {"Absent"}}'
+            TestScript = "(test-path -Path $masterdbpath) -eq:0"
+            GetScript  = "@{Ensure = if ((test-path -Path $masterdbpath) -eq:0) {'Present'} Else {'Absent'}}"
         }
 
         Script AddDataDisks {
@@ -82,13 +83,13 @@ configuration StandAlone
             SQLSysAdminAccounts   = 'TAMZ\DBA'
             InstallSharedDir      = 'C:\Program Files\Microsoft SQL Server'
             InstallSharedWOWDir   = 'C:\Program Files (x86)\Microsoft SQL Server'
-            InstanceDir           = 'G:\Program Files\Microsoft SQL Server'
-            InstallSQLDataDir     = "G:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\"
-            SQLUserDBDir          = "G:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\Data"
-            SQLUserDBLogDir       = "F:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\Log"
-            SQLTempDBDir          = "T:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\TempDb"
-            SQLTempDBLogDir       = "T:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\TempDb"
-            SQLBackupDir          = "G:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\Backup"
+            InstanceDir           = "$datadriveletter:\Program Files\Microsoft SQL Server"
+            InstallSQLDataDir     = "$datadriveletter:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\"
+            SQLUserDBDir          = "$datadriveletter:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\Data"
+            SQLUserDBLogDir       = "$logdriveletter:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\Log"
+            SQLTempDBDir          = "$tempdbdriveletter:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\TempDb"
+            SQLTempDBLogDir       = "$tempdbdriveletter:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\TempDb"
+            SQLBackupDir          = "$datadriveletter:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\Backup"
             SourcePath            = 'C:\SQLServerFull'
             UpdateEnabled         = 'False'
             ForceReboot           = $false
@@ -98,31 +99,8 @@ configuration StandAlone
 
             DependsOn             = '[Script]CleanSQL','[Script]AddDataDisks'
         }
-
-        #SqlServerLogin Add_DBAGroup
-        #{
-        #    Ensure               = 'Present'
-        #    Name                 = 'TAMZ\DBA'
-        #    LoginType            = 'WindowsGroup'
-        #    ServerName           = $env:COMPUTERNAME
-        #    InstanceName         = 'MSSQLSERVER'
-        #    PsDscRunAsCredential = $localAdminCreds
-#
-        #    dependson = "[sqlSetup]InstallNamedInstance"
-        #}
-        #SqlServerRole AddDBAToSysAdmin
-        #{
-        #    Ensure               = 'Present'
-        #    ServerRoleName       = 'sysadmin'
-        #    MembersToInclude     = 'TAMZ\DBA'
-        #    ServerName           = $env:COMPUTERNAME
-        #    InstanceName         = 'MSSQLSERVER'
-        #    PsDscRunAsCredential = $localAdminCreds
-#
-        #    dependson = '[SqlServerLogin]Add_DBAGroup'
-        #}
     }
 }
-
+ 
 
 
