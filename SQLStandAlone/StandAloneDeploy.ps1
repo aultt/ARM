@@ -7,5 +7,5 @@ $templateParm = 'C:\Users\troyault\OneDrive - TAMZ\Git\MyParmFiles\StandAlone.pa
 New-AzureRmResourceGroup -Name $RG -Location "East US"
 New-AzureRmResourceGroupDeployment -Name NewSQL -ResourceGroupName $RG -TemplateFile $templateFile -TemplateParameterFile $templateParm  -Verbose
 
-Remove-AzureRmResourceGroup -Name $RG -Force
-clear-host
+Remove-AzureRmResourceGroup -Name $RG -Force 
+clear-host 

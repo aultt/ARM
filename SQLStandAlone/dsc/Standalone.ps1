@@ -55,19 +55,18 @@ $SQLVersion = 'MSQL14'
 
         Script CleanSQL
         {
-            SetScript = 'C:\SQLServerFull\Setup.exe /Action=Uninstall /FEATURES=SQL,AS,IS,RS /INSTANCENAME=MSSQLSERVER /Q'
-            TestScript = "(test-path -Path `"C:\Program Files\Microsoft SQL Server\$SQLVersion.MSSQLSERVER\MSSQL\DATA\master.mdf`") -eq $false"
-            GetScript = "@{Ensure = if ((test-path -Path `"C:\Program Files\Microsoft SQL Server\$SQLVersion.MSSQLSERVER\MSSQL\DATA\master.mdf`") -eq $false) {`"Present`"} Else {`"Absent`"}}"
-            DependsOn = "[xComputer]DomainJoin"
+            SetScript  = 'C:\SQLServerFull\Setup.exe /Action=Uninstall /FEATURES=SQL,AS,RS,IS /INSTANCENAME=MSSQLSERVER /Q'
+            TestScript = '(test-path -Path "C:\Program Files\Microsoft SQL Server\MSSQL14.MSSQLSERVER\MSSQL\DATA\master.mdf") -eq $false'
+            GetScript  = '@{Ensure = if ((test-path -Path "C:\Program Files\Microsoft SQL Server\MSSQL14.MSSQLSERVER\MSSQL\DATA\master.mdf") -eq $false) {"Present"} Else {"Absent"}}'
         }
 
         Script AddDataDisks {
             SetScript  = 
 @"                      
                         New-StoragePool -FriendlyName 'SQLPool' -StorageSubSystemFriendlyName "Windows Storage*" -PhysicalDisks (Get-PhysicalDisk -canpool:1) 
-                        New-Volume -StoragePoolFriendlyName SQLPool* -FriendlyName $datadrivelabel -FileSystem NTFS -AllocationUnitSize 65536 -DriveLetter G -size 5GB;
-                        New-Volume -StoragePoolFriendlyName SQLPool* -FriendlyName $logdrivelabel -FileSystem NTFS -AllocationUnitSize 65536 -DriveLetter F -size 5GB;
-                        New-Volume -StoragePoolFriendlyName SQLPool* -FriendlyName $tempdbdrivelabel -FileSystem NTFS -AllocationUnitSize 65536 -DriveLetter T -size 5GB;
+                        New-Volume -StoragePoolFriendlyName SQLPool* -FriendlyName $datadrivelabel -FileSystem NTFS -AllocationUnitSize 65536 -DriveLetter $datadriveletter -size $datadriveSize,;
+                        New-Volume -StoragePoolFriendlyName SQLPool* -FriendlyName $logdrivelabel -FileSystem NTFS -AllocationUnitSize 65536 -DriveLetter $logdriveletter -size $logdrivesize;
+                        New-Volume -StoragePoolFriendlyName SQLPool* -FriendlyName $tempdbdrivelabel -FileSystem NTFS -AllocationUnitSize 65536 -DriveLetter $tempdbdriveletter -size $tempdbdriveSize;
 "@
             TestScript = "(Get-StoragePool -FriendlyName SQLPool*).OperationalStatus -eq 'OK'"
             GetScript  = "@{Ensure = if ((Get-StoragePool -FriendlyName SQLPool*).OperationalStatus -eq 'OK') {'Present'} Else {'Absent'}}"
