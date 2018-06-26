@@ -98,6 +98,37 @@ configuration StandAlone
 
             DependsOn             = '[Script]CleanSQL','[Script]AddDataDisks'
         }
+
+        SqlServerMaxDop Set_SQLServerMaxDop_ToAuto
+        {
+            Ensure                  = 'Present'
+            DynamicAlloc            = $true
+            InstanceName            = $SQLInstanceName
+            PsDscRunAsCredential    = $localAdminCreds
+
+            DependsOn = '[SqlSetup]InstallNamedInstance'
+        }
+
+        SqlServerMemory Set_SQLServerMaxMemory_ToAuto
+        {
+            Ensure                  = 'Present'
+            DynamicAlloc            = $true
+            InstanceName            = $SQLInstanceName
+            PsDscRunAsCredential    = $localAdminCreds
+
+            DependsOn = '[SqlSetup]InstallNamedInstance'
+        }
+
+        SqlWindowsFirewall Create_FirewallRules
+        {
+            Ensure           = 'Present'
+            Features         = 'SQLENGINE'
+            InstanceName     = $SQLInstanceName
+            SourcePath       = 'C:\SQLServerFull'
+
+            DependsOn = '[SqlSetup]InstallNamedInstance'
+        }
+
     }
 }
  
