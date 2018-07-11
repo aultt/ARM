@@ -3,67 +3,56 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "namePrefix": {
-      "value": "aesql100"
+      "value": "SQLCluster001"
     },
     "vmSize": {
       "value": "Standard_D2s_v3"
     },
     "vmDiskSize": {
-      "value": 128
+      "value": 64
     },
     "vmDiskCount": {
       "value": 2
     },
-    "DomainName": {
-      "value": "tamz.local"
+    "existingDomainName": {
+      "value": "yourdomain.local"
     },
-    "localadminusername": {
-      "value": "tamzadmin"
+    "adminUsername": {
+      "value": "localAdmin"
     },
-    "localadminPassword": {
+    "adminPassword": {
       "reference": {
         "keyVault": {
-          "id": "/subscriptions/3a1cbafc-8869-447c-8f82-7164262f97ce/resourceGroups/tia-core-prod-rg/providers/Microsoft.KeyVault/vaults/TAMZ-Prod-KeyVault"
-        },
-        "secretName": "DomainAdmin"
-      }
-    },
-    "domainUsername": {
-      "value": "TAMZ\\troyault"
-    },
-    "domainuserPassword": {
-      "reference": {
-        "keyVault": {
-          "id": "/subscriptions/3a1cbafc-8869-447c-8f82-7164262f97ce/resourceGroups/tia-core-prod-rg/providers/Microsoft.KeyVault/vaults/TAMZ-Prod-KeyVault"
+          "id": "/subscriptions/<YourSubID>/resourceGroups/<YourRG>/providers/Microsoft.KeyVault/vaults/<YourKeyVaultName>"
         },
         "secretName": "DomainAdmin"
       }
     },
     "svcUsername": {
-      "value": "TAMZ\\AzureSqlService"
+      "value": "AzureSqlService"
     },
     "svcPassword": {
       "reference": {
         "keyVault": {
-          "id": "/subscriptions/3a1cbafc-8869-447c-8f82-7164262f97ce/resourceGroups/tia-core-prod-rg/providers/Microsoft.KeyVault/vaults/TAMZ-Prod-KeyVault"
+          "id": "/subscriptions/<YourSubID>/resourceGroups/<YourRG>/providers/Microsoft.KeyVault/vaults/<YourKeyVaultName>"
         },
         "secretName": "AzureSQLAcct"
       }
     },
     "existingVirtualNetworkRGName": {
-      "value": "tsb-core-prod-rg"
+      "value": "YourResourceGroup"
     },
     "existingVirtualNetworkName": {
-      "value": "tsb-prod-vnet"
+      "value": "YourVnet"
     },
     "existingSubnetName": {
-      "value": "data"
+      "value": "YourSubnet"
     },
     "clusterIP": {
-      "value": "10.40.4.101"
+      "value": "YourIP"
     },
     "sqlinstance": {
-      "value" : "TAMZFCI"
+      "value" : "SQLFCI"
     },
     "logdrivesize":{
       "value": "10GB"
@@ -73,17 +62,6 @@
     },
     "tempdbdrivesize" :{
       "value": "10GB"
-    },
-    "_artifactsLocation": {
-      "value": "https://template001.blob.core.windows.net/fcitemplate"
-    },
-    "_artifactsLocationSasToken": {
-      "reference": {
-        "keyVault": {
-          "id": "/subscriptions/3a1cbafc-8869-447c-8f82-7164262f97ce/resourceGroups/tia-core-prod-rg/providers/Microsoft.KeyVault/vaults/TAMZ-Prod-KeyVault"
-        },
-        "secretName": "TemplateKey"
-      }
     }
   }
 }

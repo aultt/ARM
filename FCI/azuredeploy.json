@@ -1,4 +1,4 @@
-﻿{
+{
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
@@ -7,19 +7,76 @@
       "minLength": 3,
       "maxLength": 9,
       "metadata": {
-        "description": "Naming prefix for each new resource created. 3-char min, 9-char max, lowercase alphanumeric"
+        "description": "Naming prefix for each new resource created. 3-char min, 9-char max, lowercase alphanumeric."
       }
     },
-    "existingVirtualNetworkRGName":{
+    "vmSize": {
+      "type": "string",
+      "metadata": {
+        "description": "Size of the VMs to be created.  Select a SKU which supports SSD."
+      },
+      "defaultValue": "Standard_D2s_v3"
+    },
+    "vmDiskSize": {
+      "type": "int",
+      "minValue": 64,
+      "maxValue": 1023,
+      "metadata": {
+        "description": "Size of each data disk in GB on each VM (Min=128, Max=1023)."
+      },
+      "defaultValue": 1023
+    },
+    "vmDiskCount": {
+      "type": "int",
+      "minValue": 2,
+      "maxValue": 32,
+      "metadata": {
+        "description": "Number of data disks on eachSFCI VM (Min=2, Max=32). Ensure that the VM size you've selected will support this number of data disks."
+      },
+      "defaultValue": 2
+    },
+    "existingDomainName": {
+      "type": "string",
+      "metadata": {
+        "description": "DNS domain name for existing Active Directory domain."
+      }
+    },
+    "adminUsername": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of an Administrator account in the Active Directory Domain."
+      }
+    },
+    "adminPassword": {
+      "type": "securestring",
+      "minLength": 12,
+      "metadata": {
+        "description": "Password for the Administrator account."
+      }
+    },
+    "svcUsername": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the SQL Service Account.  Must already exist in the domain."
+      }
+    },
+    "svcPassword": {
+      "type": "securestring",
+      "minLength": 12,
+      "metadata": {
+        "description": "Password for the SQL Service Account."
+      }
+    },
+    "existingVirtualNetworkRGName": {
       "type": "string",
       "metadata": {
         "description": "Name of a resource group which contains a pre-existing vNet to connect the SQL Cluster to."
       }
     },
-    "existingVirtualNetworkName":{
+    "existingVirtualNetworkName": {
       "type": "string",
-      "metadata":{
-        "description":"Name of a pre-existing vNet to connect the SQL Cluster to."
+      "metadata": {
+        "description": "Name of a pre-existing vNet to connect the SQL Cluster to."
       }
     },
     "existingSubnetName": {
@@ -28,103 +85,11 @@
         "description": "Name of a pre-existing subnet to connect the SQL Cluster to."
       }
     },
-    "domainName": {
-      "type": "string",
-      "metadata": {
-        "description": "DNS domain name for existing Active Directory domain"
-      }
-    },    
-    "domainUsername": {
-      "type": "string",
-      "metadata": {
-        "description": "Name of the domain user in the existing Active Directory Domain with permissions to Add Computers"
-      }
-    },
-    "domainUserPassword": {
-      "type": "securestring",
-      "minLength": 12,
-      "metadata": {
-        "description": "Password for the domain user in the existing Active Directory Domain with permissions to Add Computers"
-      }
-    },
-    "localadminUsername": {
-      "type": "string",
-      "metadata": {
-        "description": "Name of the local builtin Administrator"
-      }
-    },
-    "localadminPassword": {
-      "type": "securestring",
-      "minLength": 12,
-      "metadata": {
-        "description": "Password for the local builtin Administrator"
-      }
-    },
-    "svcUsername": {
-      "type": "string",
-      "metadata": {
-        "description": "Name of the Service Account in the existing Active Directory Domain"
-      }
-    },
-    "svcPassword": {
-      "type": "securestring",
-      "minLength": 12,
-      "metadata": {
-        "description": "Password for the Service Account in the existing Active Directory Domain"
-      }
-    },
     "clusterIP": {
       "type": "string",
       "metadata": {
-        "description": "IP Address of the cluster"
+        "description": "A free IP Address on the selected subnet for the SQL Cluster & load balancer."
       }
-    },
-    "vmSize": {
-      "type": "string",
-      "metadata": {
-        "description": "Size of the VMs to be created"
-      }
-    },
-    "vmCount": {
-      "type": "int",
-      "minValue": 2,
-      "maxValue": 3,
-      "metadata": {
-        "description": "Number of VMs to be created in cluster (Min=2, Max=2)"
-      },
-      "defaultValue": 2
-    },
-    "vmDiskSize": {
-      "type": "int",
-      "minValue": 64,
-      "maxValue": 1023,
-      "metadata": {
-        "description": "Size of each data disk in GB on each VM (Min=128, Max=1023)"
-      }
-    },
-    "vmDiskCount": {
-      "type": "int",
-      "minValue": 2,
-      "maxValue": 32,
-      "metadata": {
-        "description": "Number of data disks on each VM (Min=2, Max=32). Ensure that the VM size you've selected will support this number of data disks."
-      }
-    },
-    "imagePublisher": {
-      "type": "string",
-      "defaultValue": "MicrosoftSQLServer"
-    },
-    "imageOffer": {
-      "type": "string",
-      "defaultValue": "SQL2016SP1-WS2016"
-    },
-    "imageSKU": {
-      "type": "string",
-      "defaultValue": "Standard"
-    },
-    "imageVersion": {
-      "type": "string",
-      "defaultValue": "latest"
     },
     "datadriveLetter" :{
       "type": "string",
@@ -145,14 +110,14 @@
       "metadata": {
         "description": "Size of volume to be created for Data Drive"
       },
-      "defaultValue": "60GB"
+      "defaultValue": "5GB"
     },
     "logdriveLetter" :{
       "type": "string",
       "metadata": {
         "description": "Drive letter for the Log drive which will be created on Storage Space"
       },
-      "defaultValue": "L"
+      "defaultValue": "F"
     },
     "logdrivelabel" :{
       "type": "string",
@@ -166,14 +131,14 @@
       "metadata": {
         "description": "Size of volume to be created for Log Drive"
       },
-      "defaultvalue": "20GB"
+      "defaultValue": "5GB"
     },
     "tempdbdriveLetter" :{
       "type": "string",
       "metadata": {
         "description": "Drive letter for the TempDB drive which will be created on Storage Space"
       },
-      "defaultvalue": "T"
+      "defaultValue": "T"
     },
     "tempdbdrivelabel" :{
       "type": "string",
@@ -187,7 +152,7 @@
       "metadata": {
         "description": "Size of volume to be created for TempDB Drive"
       },
-      "defaultValue": "20GB"
+      "defaultValue": "5GB"
     },
     "SQLFeatures" :{
       "type": "string",
@@ -208,7 +173,7 @@
       "metadata": {
         "description": "Location of resources that the script is dependent on such as linked templates and DSC modules"
       },
-      "defaultValue": "https://raw.githubusercontent.com/aultt/ARM/master/FCI"
+      "defaultValue": "https://raw.githubusercontent.com/aultt/ARM/master/FCI" 
     },
     "_artifactsLocationSasToken": {
       "type": "securestring",
@@ -219,331 +184,102 @@
     }
   },
   "variables": {
-    "apiVersionStorage": "2016-01-01",
-    "witnessStorageName": "[concat(parameters('namePrefix'),uniqueString(resourceGroup().id),'cw')]",
-    "witnessStorageType": "Standard_LRS",
-    "vmNamePrefix": "[concat(parameters('namePrefix'),'-N0')]",
-    "vmAvailabilitySetName": "[concat(parameters('namePrefix'),'as')]",
-    "clusterName": "[concat(parameters('namePrefix'),'c')]",
-    "sqlClusterName": "[concat(parameters('namePrefix'),'sql')]",
-    "ConfigNode1ModulesURL": "[concat(parameters('_artifactsLocation'),'/dsc/config-node-1.ps1.zip',parameters('_artifactsLocationSasToken'))]",
-    "ConfigNode1Function": "Config-Node-1.ps1\\ConfigNode1",
-    "ConfigNodeNModulesURL": "[concat(parameters('_artifactsLocation'),'/dsc/config-node-n.ps1.zip',parameters('_artifactsLocationSasToken'))]",
-    "ConfigNodeNFunction": "Config-Node-n.ps1\\ConfigNodeN",
-    "ilbName": "[concat(parameters('namePrefix'),'-ilb')]",
-    "ilbID": "[resourceId('Microsoft.Network/loadBalancers',variables('ilbName'))]",
-    "ilbFE": "[concat(parameters('namePrefix'),'-ilb-fe')]",
-    "ilbBE": "[concat(parameters('namePrefix'),'-ilb-be')]",
-    "ilbFEConfigID1": "[concat(variables('ilbID'),'/frontendIPConfigurations/',variables('ilbFE'))]",
-    "ilbBEAddressPoolID": "[concat(variables('ilbID'),'/backendAddressPools/',variables('ilbBE'))]",
-    "ilbProbe1": "[concat(parameters('namePrefix'),'ilbp1')]",
-    "ilbProbeID1": "[concat(variables('ilbID'),'/probes/',variables('ilbProbe1'))]",
-    "nicSubnetUri": "[resourceId(parameters('existingVirtualNetworkRGName'),'Microsoft.Network/virtualNetworks/subnets',parameters('existingVirtualNetworkName'),parameters('existingSubnetName'))]"
+    "subnetRef": "[resourceId(parameters('existingVirtualNetworkRGName'),'Microsoft.Network/virtualNetworks/subnets',parameters('existingVirtualNetworkName'),parameters('existingSubnetName'))]",
+    "deploySFCIClusterTemplateURL": "[concat(parameters('_artifactsLocation'),'/nestedtemplates/deploy-cluster.json',parameters('_artifactsLocationSasToken'))]",
+    "deploySFCICluster": "deploySFCICluster",
+    "vmCount": 2
   },
   "resources": [
     {
-      "type": "Microsoft.Compute/availabilitySets",
-      "name": "[variables('vmAvailabilitySetName')]",
-      "apiVersion": "2017-03-30",
-      "location": "[resourceGroup().location]",
-      "properties": {
-        "platformFaultDomainCount": 2,
-        "platformUpdateDomainCount": 2
-      },
-      "sku": {
-        "name": "Aligned"
-      },
-      "comments": "This is the availability set for the cluster nodes.  It's configured as aligned to support managed disks"
-    },
-    {
-      "type": "Microsoft.Storage/storageAccounts",
-      "name": "[variables('witnessStorageName')]",
-      "apiVersion": "2017-10-01",
-      "location": "[resourceGroup().location]",
-      "sku": {
-        "name": "[variables('witnessStorageType')]"
-      },
-      "kind": "Storage",
-      "comments": "The storage account used for the SQL Cloud Witness"
-    },
-    {
-      "apiVersion": "2017-10-01",
-      "name": "[variables('ilbName')]",
-      "type": "Microsoft.Network/loadBalancers",
-      "location": "[resourceGroup().location]",
+      "name": "[variables('deploySFCICluster')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2017-05-10",
       "dependsOn": [],
       "properties": {
-        "frontendIPConfigurations": [
-          {
-            "name": "[variables('ilbFE')]",
-            "properties": {
-              "privateIPAllocationMethod": "Static",
-              "privateIPAddress": "[parameters('clusterIP')]",
-              "subnet": {
-                "id": "[variables('nicSubnetUri')]"
-              }
-            }
-          }
-        ],
-        "backendAddressPools": [
-          {
-            "name": "[variables('ilbBE')]"
-          }
-        ],
-        "loadBalancingRules": [
-          {
-            "name": "sql-1433",
-            "properties": {
-              "frontendIPConfiguration": {
-                "id": "[variables('ilbFEConfigID1')]"
-              },
-              "backendAddressPool": {
-                "id": "[variables('ilbBEAddressPoolID')]"
-              },
-              "probe": {
-                "id": "[variables('ilbProbeID1')]"
-              },
-              "protocol": "Tcp",
-              "frontendPort": 1433,
-              "backendPort": 1433,
-              "enableFloatingIP": true
-            }
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('deploySFCIClusterTemplateURL')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "namePrefix": {
+            "value": "[parameters('namePrefix')]"
           },
-          {
-            "name": "sql-445",
-            "properties": {
-              "frontendIPConfiguration": {
-                "id": "[variables('ilbFEConfigID1')]"
-              },
-              "backendAddressPool": {
-                "id": "[variables('ilbBEAddressPoolID')]"
-              },
-              "probe": {
-                "id": "[variables('ilbProbeID1')]"
-              },
-              "protocol": "Tcp",
-              "frontendPort": 445,
-              "backendPort": 445,
-              "enableFloatingIP": true
-            }
-          }
-        ],
-        "probes": [
-          {
-            "name": "[variables('ilbProbe1')]",
-            "properties": {
-              "protocol": "Tcp",
-              "port": 37000,
-              "intervalInSeconds": 5,
-              "numberOfProbes": 2
-            }
-          }
-        ]
-      },
-      "comments": "The load balancer to enable communication with the SQL cluster resource"
-    },
-    {
-      "name": "[concat(variables('vmNamePrefix'), copyindex(1), '-nic1')]",
-      "type": "Microsoft.Network/networkInterfaces",
-      "location": "[resourceGroup().location]",
-      "apiVersion": "2017-10-01",
-      "copy": {
-        "name": "nicLoop",
-        "count": "[parameters('vmCount')]"
-      },
-      "dependsOn": [
-        "[variables('ilbID')]"
-      ],
-      "properties": {
-        "ipConfigurations": [
-          {
-            "name": "ipconfig1",
-            "properties": {
-              "privateIPAllocationMethod": "Dynamic",
-              "subnet": {
-                "id": "[variables('nicSubnetUri')]"
-              },
-              "loadBalancerBackendAddressPools": [
-                {
-                  "id": "[variables('ilbBEAddressPoolID')]"
-                }
-              ]
-            }
-          }
-        ]
-      },
-      "comments": "The NICs for the SQL cluster nodes"
-    },
-    {
-      "type": "Microsoft.Compute/virtualMachines",
-      "apiVersion": "2016-04-30-preview",
-      "location":"[resourceGroup().location]",
-      "copy": {
-        "name": "virtualMachineLoop",
-        "count": "[parameters('vmCount')]"
-      },
-      "name": "[concat(variables('vmNamePrefix'),copyindex(1))]",
-      "dependsOn": [
-        "nicLoop",
-        "[resourceId('Microsoft.Compute/availabilitySets', variables('vmAvailabilitySetName'))]"
-      ],
-      "properties":{
-        "osProfile": {
-          "computerName": "[concat(variables('vmNamePrefix'),copyindex(1))]",
-          "adminUsername": "[parameters('localadminusername')]",
-          "adminPassword": "[parameters('localadminPassword')]"
-        },
-        "hardwareProfile": {
-          "vmSize": "[parameters('vmSize')]"
-        },
-        "storageProfile": {
-          "imageReference": {
-              "publisher": "[parameters('imagePublisher')]",
-              "offer": "[parameters('imageOffer')]",
-              "sku": "[parameters('imageSku')]",
-              "version": "[parameters('imageVersion')]"
+          "domainName": {
+            "value": "[parameters('existingDomainName')]"
           },
-          "osDisk": {
-              "name": "[concat(variables('vmNamePrefix'),copyindex(1),'-os')]",
-              "caching": "ReadWrite",
-              "createOption": "FromImage",
-              "managedDisk": {
-                  "storageAccountType": "Premium_LRS"
-              }
+          "adminUsername": {
+            "value": "[parameters('adminUsername')]"
           },
-          "copy": [
-              {
-                  "name": "datadisks",
-                  "count": "[parameters('vmDiskCount')]",
-                  "input": {
-                      "diskSizeGB": "[parameters('vmDiskSize')]",
-                      "lun": "[copyIndex('datadisks')]",
-                      "name": "[concat(variables('vmNamePrefix'),copyindex(1),'-data',copyIndex('dataDisks'))]",
-                      "createOption": "Empty",
-                      "caching":"ReadOnly"
-                  }
-              }
-          ]
-        },
-        "networkProfile": {
-          "networkInterfaces": [
-              {
-                  "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('vmNamePrefix'),copyindex(1),'-nic1'))]"
-              }
-          ]
-        },
-        "availabilitySet":
-        {
-          "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('vmAvailabilitySetName'))]"
-        }
-      } 
-    },
-    {
-      "type": "Microsoft.Compute/virtualMachines/extensions",
-      "name": "[concat(variables('vmNamePrefix'),'1/confignode1')]",
-      "apiVersion": "2017-12-01",
-      "location": "[resourceGroup().location]",
-      "dependsOn": [
-        "virtualMachineLoop",
-        "[resourceId('Microsoft.Compute/availabilitySets', variables('vmAvailabilitySetName'))]",
-        "[resourceId('Microsoft.Storage/storageAccounts', variables('witnessStorageName'))]"
-      ],
-      "properties": {
-        "publisher": "Microsoft.Powershell",
-        "type": "DSC",
-        "typeHandlerVersion": "2.20",
-        "autoUpgradeMinorVersion": true,
-        "settings": {
-          "modulesUrl": "[variables('ConfigNode1ModulesURL')]",
-          "configurationFunction": "[variables('ConfigNode1Function')]",
-          "properties": {
-            "domainName": "[parameters('domainName')]",
-            "clusterName": "[variables('clusterName')]",
-            "sqlClusterName": "[variables('sqlClusterName')]",
-            "clusterIP": "[parameters('clusterIP')]",
-            "vmNamePrefix": "[variables('vmNamePrefix')]",
-            "vmCount": "[parameters('vmCount')]",
-            "vmDiskSize": "[parameters('vmDiskSize')]",
-            "vmDiskSize": "[parameters('vmDiskSize')]",
-            "witnessStorageName": "[variables('witnessStorageName')]",
-            "witnessStorageKey": {
-              "userName": "PLACEHOLDER-DO-NOT-USE",
-              "password": "PrivateSettingsRef:witnessStorageKey"
-            },
-            "domainuserCreds": {
-              "userName": "[parameters('domainUserName')]",
-              "password": "PrivateSettingsRef:domainuserPassword"
-            },
-            "svcCreds": {
-              "userName": "[parameters('svcUserName')]",
-              "password": "PrivateSettingsRef:svcPassword"
-            },     
-            "datadriveletter" : "[parameters('datadriveletter')]",
-            "datadrivesize" : "[parameters('datadrivesize')]",
-            "datadrivelabel" : "[parameters('datadrivelabel')]",
-            "logdriveletter" : "[parameters('logdriveletter')]",
-            "logdrivesize" : "[parameters('logdrivesize')]",
-            "logdrivelabel" : "[parameters('logdrivelabel')]",
-            "tempdbdriveletter" : "[parameters('tempdbdriveletter')]",
-            "tempdbdrivesize" : "[parameters('tempdbdrivesize')]",
-            "tempdbdrivelabel" : "[parameters('tempdbdrivelabel')]",
-            "sqlFeatures": "[parameters('SQLFeatures')]",
-            "sqlInstance": "[parameters('SQLInstance')]"
+          "adminPassword": {
+            "value": "[parameters('adminPassword')]"
+          },
+          "svcUsername": {
+            "value": "[parameters('svcUsername')]"
+          },
+          "svcPassword": {
+            "value": "[parameters('svcPassword')]"
+          },
+          "nicSubnetUri": {
+            "value": "[variables('subnetRef')]"
+          },
+          "vmSize": {
+            "value": "[parameters('vmSize')]"
+          },
+          "vmCount": {
+            "value": "[variables('vmCount')]"
+          },
+          "vmDiskSize": {
+            "value": "[parameters('vmDiskSize')]"
+          },
+          "vmDiskCount": {
+            "value": "[parameters('vmDiskCount')]"
+          },
+          "clusterIP": {
+            "value": "[parameters('clusterIP')]"
+          },
+          "datadriveletter": {
+            "value": "[parameters('datadriveletter')]"
+          },
+          "datadrivelabel":{
+            "value":"[parameters('datadrivelabel')]"
+          },
+          "datadrivesize":{
+            "value":"[parameters('datadrivesize')]"
+          },
+          "logdriveletter": {
+            "value": "[parameters('logdriveletter')]"
+          },
+          "logdrivelabel":{
+            "value":"[parameters('logdrivelabel')]"
+          },
+          "logdrivesize":{
+            "value":"[parameters('logdrivesize')]"
+          },
+          "tempdbdriveletter": {
+            "value": "[parameters('tempdbdriveletter')]"
+          },
+          "tempdbdrivelabel":{
+            "value":"[parameters('tempdbdrivelabel')]"
+          },
+          "tempdbdrivesize":{
+            "value":"[parameters('tempdbdrivesize')]"
+          },
+          "sqlfeatures" :{
+            "value":"[parameters('SQLFeatures')]"
+          },
+          "sqlinstance" :{
+            "value":"[parameters('SQLInstance')]"
+          },
+          "_artifactsLocation": {
+            "value": "[parameters('_artifactsLocation')]"
+          },
+          "_artifactsLocationSasToken": {
+            "value": "[parameters('_artifactsLocationSasToken')]"
           }
-        },
-        "protectedSettings": {
-          "items": {
-            "domainuserPassword": "[parameters('domainuserPassword')]",
-            "svcPassword": "[parameters('svcPassword')]",
-            "witnessStorageKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts',variables('witnessStorageName')),variables('apiVersionStorage')).keys[0].value]"
-          }
-        }
-      }
-    },
-    {
-      "type": "Microsoft.Compute/virtualMachines/extensions",
-      "name": "[concat(variables('vmNamePrefix'),copyindex(2),'/ConfigNodeN')]",
-      "apiVersion": "2017-12-01",
-      "location": "[resourceGroup().location]",
-      "dependsOn": [
-        "virtualMachineLoop",
-        "[resourceId('Microsoft.Compute/availabilitySets', variables('vmAvailabilitySetName'))]",
-        "[resourceId('Microsoft.Storage/storageAccounts', variables('witnessStorageName'))]"
-      ],
-      "copy": {
-        "name": "virtualMachineExtensionLoop",
-        "count": "[sub(parameters('vmCount'),1)]"
+        }        
       },
-      "properties": {
-        "publisher": "Microsoft.Powershell",
-        "type": "DSC",
-        "typeHandlerVersion": "2.20",
-        "autoUpgradeMinorVersion": true,
-        "settings": {
-          "modulesUrl": "[variables('ConfigNodeNModulesURL')]",
-          "configurationFunction": "[variables('ConfigNodeNFunction')]",
-          "properties": {
-            "domainName": "[parameters('domainName')]",
-            "domainuserCreds": {
-              "userName": "[parameters('domainUserName')]",
-              "password": "PrivateSettingsRef:domainuserPassword"
-            },
-            "svcCreds": {
-              "userName": "[parameters('svcUserName')]",
-              "password": "PrivateSettingsRef:svcPassword"
-            },
-            "sqlFeatures": "[parameters('SQLFeatures')]",
-            "sqlInstance": "[parameters('SQLInstance')]"
-          }
-        },
-        "protectedSettings": {
-          "items": {
-            "domainuserPassword": "[parameters('domainuserPassword')]",
-            "svcPassword": "[parameters('svcPassword')]"
-          }
-        }
-      },
-      "comments": "This VM DSC extension prepares the 1st Cluster Node"
+      "comments": "Deploys the SQL failover cluster via a nested template"
     }
   ]
 }
