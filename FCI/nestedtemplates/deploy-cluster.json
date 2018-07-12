@@ -177,29 +177,29 @@
     "apiVersionStorage": "2016-01-01",
     "witnessStorageName": "[concat(parameters('namePrefix'),uniqueString(resourceGroup().id),'cw')]",
     "witnessStorageType": "Standard_LRS",
-    "vmNamePrefix": "[concat(parameters('namePrefix'),'-N0')]",
-    "vmAvailabilitySetName": "[concat(parameters('namePrefix'),'as')]",
-    "clusterName": "[concat(parameters('namePrefix'),'c')]",
-    "sqlClusterName": "[concat(parameters('namePrefix'),'sql')]",
-    "vmLoopTemplateURL": "[concat(parameters('_artifactsLocation'),'/nestedtemplates/newVM.json',parameters('_artifactsLocationSasToken'))]",
-    "sfciPrepModulesURL": "[concat(parameters('_artifactsLocation'),'/dsc/prep-sfci.ps1.zip',parameters('_artifactsLocationSasToken'))]",
-    "sfciPrepFunction": "PrepSFCI.ps1\\PrepSFCI",
-    "sfciConfigModulesURL": "[concat(parameters('_artifactsLocation'),'/dsc/config-sfci.ps1.zip',parameters('_artifactsLocationSasToken'))]",
-    "sfciConfigFunction": "ConfigSFCI.ps1\\ConfigSFCI",
-    "ilbName": "[concat(parameters('namePrefix'),'-ilb')]",
-    "ilbID": "[resourceId('Microsoft.Network/loadBalancers',variables('ilbName'))]",
-    "ilbFE": "[concat(parameters('namePrefix'),'-ilb-fe')]",
-    "ilbBE": "[concat(parameters('namePrefix'),'-ilb-be')]",
-    "ilbFEConfigID1": "[concat(variables('ilbID'),'/frontendIPConfigurations/',variables('ilbFE'))]",
-    "ilbBEAddressPoolID": "[concat(variables('ilbID'),'/backendAddressPools/',variables('ilbBE'))]",
-    "ilbProbe1": "[concat(parameters('namePrefix'),'ilbp1')]",
-    "ilbProbeID1": "[concat(variables('ilbID'),'/probes/',variables('ilbProbe1'))]"
-  },
-  "resources": [
-    {
-      "type": "Microsoft.Compute/availabilitySets",
-      "name": "[variables('vmAvailabilitySetName')]",
-      "apiVersion": "2017-03-30",
+      "vmNamePrefix": "[concat(parameters('namePrefix'),'-fci-')]",
+      "vmAvailabilitySetName": "[concat(variables('vmNamePrefix'),'as')]",
+      "clusterName": "[concat(variables('vmNamePrefix'),'c')]",
+      "sqlClusterName": "[concat(variables('vmNamePrefix'),'sql')]",
+      "vmLoopTemplateURL": "[concat(parameters('_artifactsLocation'),'/nestedtemplates/newVM.json',parameters('_artifactsLocationSasToken'))]",
+      "sfciPrepModulesURL": "[concat(parameters('_artifactsLocation'),'/dsc/prep-sfci.ps1.zip',parameters('_artifactsLocationSasToken'))]",
+      "sfciPrepFunction": "PrepSFCI.ps1\\PrepSFCI",
+      "sfciConfigModulesURL": "[concat(parameters('_artifactsLocation'),'/dsc/config-sfci.ps1.zip',parameters('_artifactsLocationSasToken'))]",
+      "sfciConfigFunction": "ConfigSFCI.ps1\\ConfigSFCI",
+      "ilbName": "[concat(parameters('namePrefix'),'-ilb')]",
+      "ilbID": "[resourceId('Microsoft.Network/loadBalancers',variables('ilbName'))]",
+      "ilbFE": "[concat(parameters('namePrefix'),'-ilb-fe')]",
+      "ilbBE": "[concat(parameters('namePrefix'),'-ilb-be')]",
+      "ilbFEConfigID1": "[concat(variables('ilbID'),'/frontendIPConfigurations/',variables('ilbFE'))]",
+      "ilbBEAddressPoolID": "[concat(variables('ilbID'),'/backendAddressPools/',variables('ilbBE'))]",
+      "ilbProbe1": "[concat(parameters('namePrefix'),'ilbp1')]",
+      "ilbProbeID1": "[concat(variables('ilbID'),'/probes/',variables('ilbProbe1'))]"
+    },
+    "resources": [
+      {
+        "type": "Microsoft.Compute/availabilitySets",
+        "name": "[variables('vmAvailabilitySetName')]",
+        "apiVersion": "2017-12-01",
       "location": "[resourceGroup().location]",
       "properties": {
         "platformFaultDomainCount": 2,
@@ -298,7 +298,7 @@
       "comments": "The load balancer to enable communication with the SQL cluster resource"
     },
     {
-      "name": "[concat(variables('vmNamePrefix'), copyindex(1), '-nic')]",
+        "name": "[concat(variables('vmNamePrefix'), copyindex(), '-nic')]",
       "type": "Microsoft.Network/networkInterfaces",
       "location": "[resourceGroup().location]",
       "apiVersion": "2017-10-01",
@@ -336,7 +336,7 @@
         "name": "virtualMachineLoop",
         "count": "[parameters('vmCount')]"
       },
-      "name": "[concat(variables('vmNamePrefix'),copyindex(1),'-newVM')]",
+        "name": "[concat(variables('vmNamePrefix'),copyindex(),'-newVM')]",
       "dependsOn": [
         "nicLoop",
         "[resourceId('Microsoft.Compute/availabilitySets', variables('vmAvailabilitySetName'))]"
@@ -348,7 +348,7 @@
         },
         "parameters": {
           "vmName": {
-            "value": "[concat(variables('vmNamePrefix'), copyindex(1))]"
+              "value": "[concat(variables('vmNamePrefix'), copyindex())]"
           },
           "vmAvailabilitySetName": {
             "value": "[variables('vmAvailabilitySetName')]"
@@ -386,7 +386,7 @@
     },
     {
       "type": "Microsoft.Compute/virtualMachines/extensions",
-      "name": "[concat(variables('vmNamePrefix'),copyindex(2),'/sfciPrep')]",
+        "name": "[concat(variables('vmNamePrefix'),copyindex(1),'/sfciPrep')]",
       "apiVersion": "2017-12-01",
       "location": "[resourceGroup().location]",
       "dependsOn": [
@@ -429,7 +429,7 @@
     },
     {
       "type": "Microsoft.Compute/virtualMachines/extensions",
-      "name": "[concat(variables('vmNamePrefix'),'1/sfciConfig')]",
+        "name": "[concat(variables('vmNamePrefix'),'0/sfciConfig')]",
       "apiVersion": "2017-12-01",
       "location": "[resourceGroup().location]",
       "dependsOn": [
