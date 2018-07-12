@@ -62,15 +62,6 @@ configuration PrepSFCI
             Ensure = "Present"
         }
 
-        xWaitForADDomain DscForestWait
-        { 
-            DomainName = $DomainName 
-            DomainUserCredential = $domainCreds
-            RetryCount = $RetryCount 
-            RetryIntervalSec = $RetryIntervalSec 
-            DependsOn = "[WindowsFeature]ADPS"
-        }
-
         xComputer DomainJoin
         {
             Name = $env:COMPUTERNAME
