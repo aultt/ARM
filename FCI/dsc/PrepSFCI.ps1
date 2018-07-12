@@ -9,7 +9,7 @@ configuration PrepSFCI
         [Parameter(Mandatory)]
         [System.Management.Automation.PSCredential]$svcCreds,      
         [String]$DomainNetbiosName = (Get-NetBIOSName -DomainName $DomainName),
-        [Int]$RetryCount = 20,
+        [Int]$RetryCount = 60,
         [Int]$RetryIntervalSec = 30,
         [string]$SQLFeatures,
         [string]$SQLInstance,
