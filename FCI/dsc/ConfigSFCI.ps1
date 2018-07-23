@@ -71,7 +71,7 @@ configuration ConfigSFCI
     [System.Management.Automation.PSCredential]$ServiceFQDNCreds = New-Object System.Management.Automation.PSCredential ("${DomainName}\$($svcCreds.UserName)", $svcCreds.Password)
     
     [System.Collections.ArrayList]$Nodes = @()
-    For ($count = 0; $count -lt $vmCount+1; $count++) {
+    For ($count = 0; $count -lt $vmCount; $count++) {
         $Nodes.Add($vmNamePrefix + $Count.ToString())
     }
 
