@@ -95,6 +95,8 @@ configuration PrepSFCI
             InstanceName = $SQLInstance
             FailoverClusterNetworkName = $SQLClusterName
             SQLSvcAccount = $ServiceCreds
+
+            PsDscRunAsCredential  = $domainCreds
         }
 
         xFirewall SQLFirewall
