@@ -67,7 +67,6 @@ configuration PrepSFCI
             Name = $env:COMPUTERNAME
             DomainName = $DomainName
             Credential = $domainCreds
-            DependsOn = "[xWaitForADDomain]DscForestWait"
         }
 
         Script CleanSQL
