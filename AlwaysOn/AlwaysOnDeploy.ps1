@@ -1,12 +1,13 @@
-Login-AzureRmAccount
-Select-AzureRmSubscription -SubscriptionName TAMZ_MS
+Import-Module Az
+Enable-AzureRmAlias -Scope CurrentUser
+Connect-AzureRmAccount
 $RG = 'tim-SQLAO-prod'
 
-$templateFile = 'D:\Users\troyault\OneDrive - TAMZ\Git\ARM\AlwaysOn\azuredeploy.json'
-$templateParm = 'D:\Users\troyault\OneDrive - TAMZ\Git\MyParmFiles\AlwaysOn.parameters.json'
+$templateFile = '/Users/troyault/Documents/GitHub/ARM/AlwaysOn/azuredeploy.json'
+$templateParm = '/Users/troyault/Documents/GitHub/ParameterFiles/AlwaysOn.parameters.json'
 
 New-AzureRmResourceGroup -Name $RG -Location "East US"
 New-AzureRmResourceGroupDeployment -Name NewSQL -ResourceGroupName $RG -TemplateFile $templateFile -TemplateParameterFile $templateParm  -Verbose
 
 #Remove-AzureRmResourceGroup -Name $RG -Force
-#clear-host
+#clear-hostg
