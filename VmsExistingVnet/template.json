@@ -22,6 +22,9 @@
         "virtualNetworkName": {
             "type": "string"
         },
+        "domainName": {
+            "type": "string"
+        },
         "networkSecurityGroupName":{
             "type": "string"
         },
@@ -91,10 +94,18 @@
             "type": "string"
         },
         "_artifactsLocation": {
-            "type": "string"
+            "type": "string",
+            "metadata": {
+              "description": "Location of resources that the script is dependent on such as linked templates and DSC modules"
+            },
+            "defaultValue": "https://raw.githubusercontent.com/aultt/ARM/master/VmsExistingVnet" 
           },
           "_artifactsLocationSasToken": {
-            "type": "string"
+            "type": "securestring",
+            "metadata": {
+              "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated."
+            },
+            "defaultValue": ""
           }
     },
     "variables": {
@@ -190,7 +201,7 @@
         },
         {
             "type": "Microsoft.Compute/virtualMachines/extensions",
-            "name": "[concat(variables('vmNamePrefix'), copyIndex(1)),'/', variables('vmExtensionName'))]",
+            "name": "[concat(variables('vmNamePrefix'), copyIndex(1),'/DSC')]",
             "apiVersion": "2015-05-01-preview",
             "location": "[parameters('location')]",
             "copy": {
@@ -198,17 +209,21 @@
                 "count": "[parameters('vmCount')]"
               },
             "dependsOn": [
-              "[concat('Microsoft.Compute/virtualMachines/', concat(variables('vmNamePrefix'), copyIndex(1))]"
+              "[concat('Microsoft.Compute/virtualMachines/', variables('vmNamePrefix'), copyIndex(1))]"
             ],
             "properties": {
               "publisher": "Microsoft.Powershell",
               "type": "DSC",
-              "typeHandlerVersion": "2.19",
+              "typeHandlerVersion": "2.73",
               "autoUpgradeMinorVersion": true,
               "settings": {
-                "ModulesUrl": "[concat(parameters('_artifactsLocation'),'/dsc/Join-machines-domain.ps1.zip',parameters('_artifactsLocationSasToken'))]",
-                "ConfigurationFunction": "AddMachinetoDomain.ps1\\AddMachinetoDomain",
-                "Properties": {
+                  "wmfversion" :"latest",
+                  "configuration": {
+                      "url": "https://raw.githubusercontent.com/aultt/ARM/master/VmsExistingVnet/dsc/Join-machines-domain.ps1.zip",
+                      "script": "Join-machines-domain.ps1",
+                      "function" : "AddMachinetoDomain"
+                  },
+                "configurationArguements": {
                     "domainName": "[parameters('domainName')]",
                     "adminCreds": {
                         "userName": "[parameters('adminUsername')]",

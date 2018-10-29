@@ -14,6 +14,9 @@
         "virtualMachineSize": {
             "value": "Standard_D2s_v3"
         },
+        "domainName": {
+            "value": null
+        },
         "adminUsername": {
             "value": null
         },
