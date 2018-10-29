@@ -1,0 +1,84 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "value": "eastus"
+        },
+        "namePrefix": {
+            "value": "AES1000"
+        },
+        "vmcount": {
+            "value": 2
+        },
+        "virtualMachineSize": {
+            "value": "Standard_D2s_v3"
+        },
+        "adminUsername": {
+            "value": null
+        },
+        "virtualNetworkName": {
+            "value": null
+        },
+        "networkSecurityGroupName":{
+            "value": "AESQL1000-nsg"
+        },
+        "adminPassword": {
+            "value": null
+        },
+        "availabilitySetName": {
+            "value": "SQL-AvailabilitySet3"
+        },
+        "diagnosticsStorageAccountName": {
+            "value": null
+        },
+        "diagnosticsStorageAccountId": {
+            "value": null
+        },
+        "subnetName": {
+            "value": "data"
+        },
+        "msiExtensionName": {
+            "value": "ManagedIdentityExtensionForWindows"
+        },
+        "sqlConnectivityType": {
+            "value": "Private"
+        },
+        "sqlPortNumber": {
+            "value": 1433
+        },
+        "sqlStorageDisksCount": {
+            "value": 1
+        },
+        "sqlStorageWorkloadType": {
+            "value": "GENERAL"
+        },
+        "sqlStorageDisksConfigurationType": {
+            "value": "NEW"
+        },
+        "sqlStorageStartingDeviceId": {
+            "value": 2
+        },
+        "sqlStorageDeploymentToken": {
+            "value": 79628
+        },
+        "sqlAutopatchingDayOfWeek": {
+            "value": "Sunday"
+        },
+        "sqlAutopatchingStartHour": {
+            "value": "2"
+        },
+        "sqlAutopatchingWindowDuration": {
+            "value": "60"
+        },
+        "sqlAuthenticationLogin": {
+            "value": null
+        },
+        "sqlAuthenticationPassword": {
+            "value": null
+        },
+        "rServicesEnabled": {
+            "value": "false"
+        }
+    }
+}
