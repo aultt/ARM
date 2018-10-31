@@ -25,6 +25,12 @@
         "domainName": {
             "type": "string"
         },
+        "domainUserName":{
+            "type":"string"
+        },
+        "domainUserPassword": {
+            "type": "securestring"
+        },
         "networkSecurityGroupName":{
             "type": "string"
         },
@@ -223,20 +229,19 @@
                       "script": "Join-machines-domain.ps1",
                       "function" : "AddMachinetoDomain"
                   },
-                "configurationArguements": {
-                    "domainName": "[parameters('domainName')]",
-                    "adminCreds": {
-                        "userName": "[parameters('adminUsername')]",
-                        "password": "PrivateSettingsRef:adminPassword"
-                      }
-                }
-              },
+                "configurationArguments": {
+                    "domainName": "[parameters('domainName')]"
+                    }
+                },
               "protectedSettings": {
-              "items": {
-                "adminPassword": "[parameters('adminPassword')]"
-                }
+                "configurationArguments": {
+                    "adminCreds": {
+                    "userName": "[parameters('domainUsername')]",
+                    "password": "[parameters('domainUserPassword')]"
+                        }
+                    }
+                }   
             }
-        }
         },
         {
             "name": "[concat(variables('vmNamePrefix'), copyIndex(1), '-nic')]",
