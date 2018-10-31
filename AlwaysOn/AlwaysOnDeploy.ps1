@@ -1,7 +1,7 @@
 Import-Module Az
 Enable-AzureRmAlias -Scope CurrentUser
 Connect-AzureRmAccount
-$RG = 'tim-SQLAO-prod'
+$RG = 'tim-SQLAO2-prod'
 
 $templateFile = '/Users/troyault/Documents/GitHub/ARM/AlwaysOn/azuredeploy.json'
 $templateParm = '/Users/troyault/Documents/GitHub/ParameterFiles/AlwaysOn.parameters.json'

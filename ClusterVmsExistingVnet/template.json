@@ -118,7 +118,7 @@
         "vnetId": "[resourceId('tim-core-prod-rg','Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
         "subnetRef": "[concat(variables('vnetId'), '/subnets/', parameters('subnetName'))]",
         "diagnosticsExtensionName": "Microsoft.Insights.VMDiagnosticsSettings",
-        "vmNamePrefix": "[concat(parameters('namePrefix'),'-N')]"
+        "vmNamePrefix": "[concat(parameters('namePrefix'),'-')]"
     },
     "resources": [
         {
@@ -225,7 +225,7 @@
               "settings": {
                   "wmfversion" :"latest",
                   "configuration": {
-                      "url": "https://raw.githubusercontent.com/aultt/ARM/master/VmsExistingVnet/dsc/Join-machines-domain.ps1.zip",
+                      "url": "https://raw.githubusercontent.com/aultt/ARM/master/ClusterVmsExistingVnet/dsc/Join-machines-domain.ps1.zip",
                       "script": "Join-machines-domain.ps1",
                       "function" : "AddMachinetoDomain"
                   },
