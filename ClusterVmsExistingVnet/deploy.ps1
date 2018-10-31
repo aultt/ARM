@@ -1,6 +1,6 @@
 $resourceGroupName = 'ClusterTesting3'
 $resourceGroupLocation = "East US"
-$templateFile = '/Users/troyault/Documents/GitHub/ARM/VMsExistingVnet/template.json'
+$templateFile = '/Users/troyault/Documents/GitHub/ARM/ClusterVMsExistingVnet/template.json'
 $templateParm = '/Users/troyault/Documents/GitHub/ParameterFiles/ClusterVMsToNetparameters.json'
 
 Import-Module Az
