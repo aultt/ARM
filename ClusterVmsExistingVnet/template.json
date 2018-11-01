@@ -104,7 +104,7 @@
             "metadata": {
               "description": "Location of resources that the script is dependent on such as linked templates and DSC modules"
             },
-            "defaultValue": "https://raw.githubusercontent.com/aultt/ARM/master/ClusterVmsExistingVnet/" 
+            "defaultValue": "https://raw.githubusercontent.com/aultt/ARM/master/ClusterVmsExistingVnet" 
           },
           "_artifactsLocationSasToken": {
             "type": "securestring",
@@ -225,7 +225,7 @@
               "settings": {
                   "wmfversion" :"latest",
                   "configuration": {
-                      "url": "https://raw.githubusercontent.com/aultt/ARM/master/ClusterVmsExistingVnet/dsc/Join-machines-domain.ps1.zip",
+                      "url": "https://raw.githubusercontent.com/aultt/ARM/master/ClusterVmsExistingVnet/DSC/Join-machines-domain.ps1.zip",
                       "script": "Join-machines-domain.ps1",
                       "function" : "AddMachinetoDomain"
                   },

@@ -1,4 +1,4 @@
-$resourceGroupName = 'ClusterTesting3'
+$resourceGroupName = 'ClusterTestingWithFC'
 $resourceGroupLocation = "East US"
 $templateFile = '/Users/troyault/Documents/GitHub/ARM/ClusterVMsExistingVnet/template.json'
 $templateParm = '/Users/troyault/Documents/GitHub/ParameterFiles/ClusterVMsToNetparameters.json'
