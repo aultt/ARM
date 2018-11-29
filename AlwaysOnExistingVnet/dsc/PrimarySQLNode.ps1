@@ -32,9 +32,9 @@ configuration AlwaysOnSQLServer
     )
 
     Import-DscResource -ModuleName ComputerManagementdsc,sqlserverdsc,xFailOverCluster
-    [System.Management.Automation.PSCredential]$DomainCreds = New-Object System.Management.Automation.PSCredential ($Admincreds.UserName, $Admincreds.Password)
-    [System.Management.Automation.PSCredential]$DomainFQDNCreds = New-Object System.Management.Automation.PSCredential ($Admincreds.UserName, $Admincreds.Password)
-    [System.Management.Automation.PSCredential]$SQLCreds = New-Object System.Management.Automation.PSCredential ($Admincreds.UserName, $Admincreds.Password)
+    #[System.Management.Automation.PSCredential]$DomainCreds = New-Object System.Management.Automation.PSCredential ($Admincreds.UserName, $Admincreds.Password)
+    #[System.Management.Automation.PSCredential]$DomainFQDNCreds = New-Object System.Management.Automation.PSCredential ($Admincreds.UserName, $Admincreds.Password)
+    #[System.Management.Automation.PSCredential]$SQLCreds = New-Object System.Management.Automation.PSCredential ($Admincreds.UserName, $Admincreds.Password)
 
     $SQLVersion = $imageoffer.Substring(5,2)
     $SQLLocation = "MSSQL$(switch ($SQLVersion){17 {14} 16 {13}})"
@@ -73,7 +73,7 @@ configuration AlwaysOnSQLServer
         {
             Name                          = $ClusterName
             StaticIPAddress               = $ClusterStaticIP
-            DomainAdministratorCredential = $DomainCreds
+            DomainAdministratorCredential = $Admincreds
             DependsOn                     = '[Computer]DomainJoin'
         }
 
@@ -129,7 +129,7 @@ configuration AlwaysOnSQLServer
             ForceReboot           = $false
             BrowserSvcStartupType = 'Automatic'
 
-            PsDscRunAsCredential  = $localAdminCreds
+            PsDscRunAsCredential  = $AdminCreds
 
             DependsOn             = '[Script]CleanSQL'
         }
@@ -139,7 +139,7 @@ configuration AlwaysOnSQLServer
             Ensure                  = 'Present'
             DynamicAlloc            = $true
             InstanceName            = $SQLInstanceName
-            PsDscRunAsCredential    = $localAdminCreds
+            PsDscRunAsCredential    = $AdminCreds
 
             DependsOn = '[SqlSetup]InstallNamedInstance'
         }
@@ -149,7 +149,7 @@ configuration AlwaysOnSQLServer
             Ensure                  = 'Present'
             DynamicAlloc            = $true
             InstanceName            = $SQLInstanceName
-            PsDscRunAsCredential    = $localAdminCreds
+            PsDscRunAsCredential    = $AdminCreds
 
             DependsOn = '[SqlSetup]InstallNamedInstance'
         }
@@ -170,7 +170,7 @@ configuration AlwaysOnSQLServer
             ServerName           = 'LOCALHOST'
             InstanceName         = 'MSSQLSERVER'
             RestartTimeout       = 120
-            PsDscRunAsCredential = $localAdminCreds
+            PsDscRunAsCredential = $AdminCreds
             DependsOn = '[SqlSetup]InstallNamedInstance', '[xCluster]CreateCluster'
         }
 
