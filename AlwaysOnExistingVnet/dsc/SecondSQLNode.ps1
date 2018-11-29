@@ -23,7 +23,10 @@ configuration AlwaysOnSqlServer
         [string]$tempdbdriveLetter = 'D',
         #[string]$tempdbdrivelabel,
         #[string]$tempdbdriveSize,
-        
+        [string]$ClusterName,
+        [string]$ClusterStaticIP,
+        [string]$FirstNode,
+
         [Int]$RetryCount = 20,
         [Int]$RetryIntervalSec = 30
     )
@@ -64,7 +67,7 @@ configuration AlwaysOnSqlServer
 
         xWaitForCluster WaitForCluster
         {
-            Name             = 'MyLatestAttempt'
+            Name             = $ClusterName,
             RetryIntervalSec = 10
             RetryCount       = 60
             DependsOn        = '[WindowsFeature]AddRemoteServerAdministrationToolsClusteringCmdInterfaceFeature'
@@ -72,9 +75,9 @@ configuration AlwaysOnSqlServer
 
         xCluster JoinSecondNodeToCluster
         {
-            Name                          = 'MyLatestAttempt'
-            FirstNode                     = 'AES2000-1'
-            StaticIPAddress               = '10.50.2.51/24'
+            Name                          = $ClusterName
+            FirstNode                     = $FirstNode
+            StaticIPAddress               = $ClusterStaticIP
             DomainAdministratorCredential = $DomainCreds
             DependsOn                     = '[xWaitForCluster]WaitForCluster','[Computer]DomainJoin'
         }
@@ -171,8 +174,9 @@ configuration AlwaysOnSqlServer
             ServerName           = 'LOCALHOST'
             InstanceName         = 'MSSQLSERVER'
             RestartTimeout       = 120
-
             PsDscRunAsCredential = $localAdminCreds
+
+            DependsOn = '[SqlSetup]InstallNamedInstance','[xCluster]JoinSecondNodeToCluster'
         }
 
     }

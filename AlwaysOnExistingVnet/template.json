@@ -225,13 +225,15 @@
               "settings": {
                   "wmfversion" :"latest",
                   "configuration": {
-                      "url": "https://raw.githubusercontent.com/aultt/ARM/master/AlwaysOnExistingVnet/DSC/Cluster.ps1.zip",
-                      "script": "[if(equals(copyIndex(),0),PrimarySQLNode.ps1,SecondSQLNode.ps1)]",
+                      "url": "https://raw.githubusercontent.com/aultt/ARM/master/AlwaysOnExistingVnet/dsc/Cluster.ps1.zip",
+                      "script": "[if(equals(copyIndex(),0),'PrimarySQLNode.ps1','SecondSQLNode.ps1')]",
                       "function" : "AlwaysOnSQLServer"
                   },
                 "configurationArguments": {
-                    "domainName": "[parameters('domainName')]"
-                    }
+                    "domainName": "[parameters('domainName')]",
+                    "ClusterName":"[concat(variables('vmnamePrefix'),'C']",
+                    "FirstNode": "[concat(variables('vmNamePrefix'), 1)]",
+                    "ClusterStaticIP": "10.50.2.55/24"
                 },
               "protectedSettings": {
                 "configurationArguments": {
@@ -241,6 +243,7 @@
                         }
                     }
                 }   
+            }   
             }
         },
         {
@@ -268,7 +271,7 @@
                     }
                 ],
                 "networkSecurityGroup": {
-                    "id": "[resourceId('tim-sql-prod-rg', 'Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]"
+                    "id": "[resourceId('AlwaysOnFCTesting', 'Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]"
                 }
             }
         },

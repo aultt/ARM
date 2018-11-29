@@ -14,14 +14,17 @@ configuration AlwaysOnSQLServer
         [string]$SQLFeatures = "SQLENGINE",
         [string]$SQLInstanceName = "MSSQLSERVER",
         [string]$datadriveLetter = 'C',
-        [string]$datadrivelabel,
-        [string]$datadriveSize,
+        #[string]$datadrivelabel,
+        #[string]$datadriveSize,
         [string]$logdriveLetter = 'C',
-        [string]$logdrivelabel,
-        [string]$logdriveSize,
+        #[string]$logdrivelabel,
+        #[string]$logdriveSize,
         [string]$tempdbdriveLetter = 'D',
-        [string]$tempdbdrivelabel,
-        [string]$tempdbdriveSize,
+        #[string]$tempdbdrivelabel,
+        #[string]$tempdbdriveSize,
+        [string]$ClusterName,
+        [string]$ClusterStaticIP,
+        [string]$FirstNode,
         
         [Int]$RetryCount = 20,
         [Int]$RetryIntervalSec = 30
@@ -68,8 +71,8 @@ configuration AlwaysOnSQLServer
         
         xCluster CreateCluster
         {
-            Name                          = 'MyLatestAttempt'
-            StaticIPAddress               = '10.50.2.51/24'
+            Name                          = $ClusterName
+            StaticIPAddress               = $ClusterStaticIP
             DomainAdministratorCredential = $DomainCreds
             DependsOn                     = '[Computer]DomainJoin'
         }
@@ -167,8 +170,8 @@ configuration AlwaysOnSQLServer
             ServerName           = 'LOCALHOST'
             InstanceName         = 'MSSQLSERVER'
             RestartTimeout       = 120
-
             PsDscRunAsCredential = $localAdminCreds
+            DependsOn = '[SqlSetup]InstallNamedInstance', '[xCluster]CreateCluster'
         }
 
     }

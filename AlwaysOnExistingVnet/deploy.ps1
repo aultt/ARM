@@ -1,7 +1,7 @@
-$resourceGroupName = 'ClusterTestingWithFC'
+$resourceGroupName = 'AlwaysOnFCTesting'
 $resourceGroupLocation = "East US"
 $templateFile = 'D:\GitHub\ARM\AlwaysOnExistingVnet\template.json'
-$templateParm = 'D:\GitHub\ParameterFiles\AlwaysOnExitingVNetparameters.json'
+$templateParm = 'D:\ParameterFiles\AlwaysOnExitingVNetparameters.json'
 
 Import-Module Az
 Login-AzAccount 
@@ -23,4 +23,5 @@ else{
 }
 
 # Start the deployment
-New-AZResourceGroupDeployment -ResourceGroupName $resourceGroupName -TemplateFile $templateFile -TemplateParameterFile $templateParm  -Verbose;
+New-AZResourceGroupDeployment  -ResourceGroupName $resourceGroupName -TemplateFile $templateFile -TemplateParameterFile $templateParm  -Verbose;
+
