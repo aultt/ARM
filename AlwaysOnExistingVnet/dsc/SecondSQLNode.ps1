@@ -67,7 +67,7 @@ configuration AlwaysOnSqlServer
 
         xWaitForCluster WaitForCluster
         {
-            Name             = $ClusterName,
+            Name             = $ClusterName
             RetryIntervalSec = 10
             RetryCount       = 60
             DependsOn        = '[WindowsFeature]AddRemoteServerAdministrationToolsClusteringCmdInterfaceFeature'
