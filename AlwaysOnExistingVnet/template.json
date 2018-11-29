@@ -104,7 +104,7 @@
             "metadata": {
               "description": "Location of resources that the script is dependent on such as linked templates and DSC modules"
             },
-            "defaultValue": "https://raw.githubusercontent.com/aultt/ARM/master/ClusterVmsExistingVnet" 
+            "defaultValue": "https://raw.githubusercontent.com/aultt/ARM/master/AlwaysOnExistingVnet" 
           },
           "_artifactsLocationSasToken": {
             "type": "securestring",
@@ -225,9 +225,9 @@
               "settings": {
                   "wmfversion" :"latest",
                   "configuration": {
-                      "url": "https://raw.githubusercontent.com/aultt/ARM/master/ClusterVmsExistingVnet/DSC/Join-machines-domain.ps1.zip",
-                      "script": "Join-machines-domain.ps1",
-                      "function" : "AddMachinetoDomain"
+                      "url": "https://raw.githubusercontent.com/aultt/ARM/master/AlwaysOnExistingVnet/DSC/Cluster.ps1.zip",
+                      "script": "[if(equals(copyIndex(),0),PrimarySQLNode.ps1,SecondSQLNode.ps1)]",
+                      "function" : "AlwaysOnSQLServer"
                   },
                 "configurationArguments": {
                     "domainName": "[parameters('domainName')]"

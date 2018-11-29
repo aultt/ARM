@@ -203,5 +203,5 @@ $ConfigData = @{
 
 #$AdminCreds = Get-Credential
 #$SvcCreds = $AdminCreds
- PrimaryAlwaysOnSQLServer -DomainName tamz.local -Admincreds $AdminCreds -SQLServicecreds $SvcCreds -Verbose -ConfigurationData $ConfigData -OutputPath d:\
- Start-DscConfiguration -wait -Force -Verbose -Path D:\
+ #PrimaryAlwaysOnSQLServer -DomainName tamz.local -Admincreds $AdminCreds -SQLServicecreds $SvcCreds -Verbose -ConfigurationData $ConfigData -OutputPath d:\
+ #Start-DscConfiguration -wait -Force -Verbose -Path D:\
