@@ -73,6 +73,7 @@ configuration AlwaysOnSQLServer
         {
             Name                          = $ClusterName
             StaticIPAddress               = $ClusterStaticIP
+            FirstNode                     = $FirstNode
             DomainAdministratorCredential = $Admincreds
             DependsOn                     = '[Computer]DomainJoin'
         }

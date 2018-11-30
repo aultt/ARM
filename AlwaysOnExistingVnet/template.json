@@ -234,6 +234,7 @@
                     "ClusterName":"[concat(variables('vmnamePrefix'),'C')]",
                     "FirstNode": "[concat(variables('vmNamePrefix'), 1)]",
                     "ClusterStaticIP": "10.50.2.55/24"
+                    }
                 },
               "protectedSettings": {
                 "configurationArguments": {
@@ -242,8 +243,7 @@
                     "password": "[parameters('domainUserPassword')]"
                         }
                     }
-                }   
-            }   
+                }      
             }
         },
         {
