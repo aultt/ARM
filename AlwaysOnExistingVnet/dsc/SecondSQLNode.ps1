@@ -55,7 +55,7 @@ configuration AlwaysOnSqlServer
         { 
             Ensure = "Present" 
             Name = "RSAT-Clustering-Mgmt"
-			DependsOn = "[WindowsFeature]FC"
+			DependsOn = "[WindowsFeature]AddFailoverFeature"
         }
 
         WindowsFeature AddRemoteServerAdministrationToolsClusteringPowerShellFeature
