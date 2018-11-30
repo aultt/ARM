@@ -32,7 +32,7 @@ configuration AlwaysOnSqlServer
     )
 
     
-    Import-DscResource -ModuleName ComputerManagementdsc,sqlserverdsc,xFailOverCluster
+    Import-DscResource -ModuleName ComputerManagementdsc, sqlserverdsc, xFailOverCluster, xPendingReboot
     #[System.Management.Automation.PSCredential]$DomainCreds = New-Object System.Management.Automation.PSCredential ($Admincreds.UserName, $Admincreds.Password)
     #[System.Management.Automation.PSCredential]$DomainFQDNCreds = New-Object System.Management.Automation.PSCredential ($Admincreds.UserName, $Admincreds.Password)
     #[System.Management.Automation.PSCredential]$SQLCreds = New-Object System.Management.Automation.PSCredential ($Admincreds.UserName, $Admincreds.Password)
@@ -49,6 +49,13 @@ configuration AlwaysOnSqlServer
         {
             Ensure = 'Present'
             Name   = 'Failover-clustering'
+        }
+
+		WindowsFeature FailoverClusterTools 
+        { 
+            Ensure = "Present" 
+            Name = "RSAT-Clustering-Mgmt"
+			DependsOn = "[WindowsFeature]FC"
         }
 
         WindowsFeature AddRemoteServerAdministrationToolsClusteringPowerShellFeature
@@ -113,6 +120,13 @@ configuration AlwaysOnSqlServer
             GetScript  = "@{Ensure = if ((test-path -Path `"C:\Program Files\Microsoft SQL Server\$SQLLocation.MSSQLSERVER\MSSQL\DATA\master.mdf`") -eq `$false) {'Present'} Else {'Absent'}}"
         }
 
+        xPendingReboot Reboot1
+        {
+            Name = 'BeforeSoftwareInstall'
+            
+            DependsOn  = '[Script]CleanSQL'
+        }
+
         SqlSetup 'InstallNamedInstance'
         {
             InstanceName          = $SQLInstanceName
@@ -135,7 +149,7 @@ configuration AlwaysOnSqlServer
 
             PsDscRunAsCredential  = $Admincreds
 
-            DependsOn             = '[Script]CleanSQL'
+            DependsOn             = '[Script]CleanSQL','[xPendingReboot]Reboot1'
         }
 
         SqlServerMaxDop Set_SQLServerMaxDop_ToAuto
