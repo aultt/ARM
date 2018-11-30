@@ -232,7 +232,7 @@
                 "configurationArguments": {
                     "domainName": "[parameters('domainName')]",
                     "ClusterName":"[concat(variables('vmnamePrefix'),'C')]",
-                    "FirstNode": "[concat(variables('vmNamePrefix'), 1)]",
+                    "FirstNode":  "[concat(variables('vmNamePrefix'), '1')]",
                     "ClusterStaticIP": "10.50.2.55/24"
                     }
                 },
