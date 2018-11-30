@@ -114,7 +114,7 @@ configuration AlwaysOnSQLServer
         {
             Name = 'BeforeSoftwareInstall'
 
-            DependsOn  = '[Script]CleanSQL'
+            DependsOn  = '[Computer]DomainJoin'
         }
 
         SqlSetup 'InstallNamedInstance'
@@ -139,7 +139,7 @@ configuration AlwaysOnSQLServer
 
             PsDscRunAsCredential  = $AdminCreds
 
-            DependsOn             = '[Script]CleanSQL','[xPendingReboot]Reboot1'
+            DependsOn             = '[Script]CleanSQL'
         }
 
         SqlServerMaxDop Set_SQLServerMaxDop_ToAuto
