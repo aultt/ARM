@@ -123,7 +123,14 @@ configuration AlwaysOnSqlServer
         xPendingReboot Reboot1
         {
             Name = 'BeforeSoftwareInstall'
-            
+
+            DependsOn  = '[Script]CleanSQL'
+        }
+        
+        xPendingReboot Reboot1
+        {
+            Name = 'BeforeSoftwareInstall'
+
             DependsOn  = '[Computer]DomainJoin'
         }
 
