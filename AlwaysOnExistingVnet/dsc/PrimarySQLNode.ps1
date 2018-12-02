@@ -116,10 +116,10 @@ configuration AlwaysOnSQLServer
 
             DependsOn  = '[Script]CleanSQL'
         }
-        
+
         xPendingReboot Reboot1
         {
-            Name = 'BeforeSoftwareInstall'
+            Name = 'BeforeSoftwareInstall2'
 
             DependsOn  = '[Computer]DomainJoin'
         }
