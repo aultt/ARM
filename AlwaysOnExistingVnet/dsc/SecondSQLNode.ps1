@@ -47,6 +47,7 @@ configuration AlwaysOnSqlServer
         LocalConfigurationManager 
         {
             RebootNodeIfNeeded = $True
+            ActionAfterReboot = 'ContinueConfiguration'
         }
 
         WindowsFeature AddFailoverFeature
@@ -147,7 +148,7 @@ configuration AlwaysOnSqlServer
 
             PsDscRunAsCredential  = $Admincreds
 
-            DependsOn             = '[xComputer]DomainJoin','[Script]CleanSQL'
+            DependsOn             = '[Computer]DomainJoin','[Script]CleanSQL'
         }
 
         SqlServerMaxDop Set_SQLServerMaxDop_ToAuto

@@ -46,6 +46,7 @@ configuration AlwaysOnSQLServer
         LocalConfigurationManager 
         {
             RebootNodeIfNeeded = $true
+            ActionAfterReboot = 'ContinueConfiguration'
         }
 
         WindowsFeature FC
