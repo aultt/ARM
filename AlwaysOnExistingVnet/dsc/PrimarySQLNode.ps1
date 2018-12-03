@@ -111,10 +111,9 @@ configuration AlwaysOnSQLServer
         xPendingReboot Reboot1
         {
             Name = 'Reboot1'
-            dependson = '[xComputer]DomainJoin','[Script]CleanSQL'
+            dependson = '[Computer]DomainJoin','[Script]CleanSQL'
         }
 
-        }
         SqlSetup 'InstallNamedInstance'
         {
             InstanceName          = $SQLInstanceName
@@ -211,5 +210,5 @@ $ConfigData = @{
 
 #$AdminCreds = Get-Credential
 #$SvcCreds = $AdminCreds
- #PrimaryAlwaysOnSQLServer -DomainName tamz.local -Admincreds $AdminCreds -SQLServicecreds $SvcCreds -Verbose -ConfigurationData $ConfigData -OutputPath d:\
+ # AlwaysOnSQLServer -DomainName tamz.local -Admincreds $AdminCreds -ClusterName AES3000-c -ClusterStaticIP "10.50.2.55/24" -Verbose -ConfigurationData $ConfigData -OutputPath d:\
  #Start-DscConfiguration -wait -Force -Verbose -Path D:\

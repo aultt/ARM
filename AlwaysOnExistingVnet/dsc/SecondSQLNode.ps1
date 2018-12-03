@@ -122,7 +122,7 @@ configuration AlwaysOnSqlServer
         xPendingReboot Reboot1
         {
             Name = 'Reboot1'
-            dependson = '[xComputer]DomainJoin','[Script]CleanSQL'
+            dependson = '[Computer]DomainJoin','[Script]CleanSQL'
         }
 
         SqlSetup 'InstallNamedInstance'
