@@ -44,6 +44,10 @@ configuration AlwaysOnSqlServer
 
     Node localhost
     {
+        LocalConfigurationManager 
+        {
+            RebootNodeIfNeeded = $True
+        }
 
         WindowsFeature AddFailoverFeature
         {
@@ -72,6 +76,13 @@ configuration AlwaysOnSqlServer
             DependsOn = '[WindowsFeature]AddRemoteServerAdministrationToolsClusteringPowerShellFeature'
         }
 
+        Computer DomainJoin
+        {
+            Name = $env:COMPUTERNAME
+            DomainName = $DomainName
+            Credential = $Admincreds
+        }
+
         xWaitForCluster WaitForCluster
         {
             Name             = $ClusterName
@@ -88,13 +99,6 @@ configuration AlwaysOnSqlServer
             DomainAdministratorCredential = $Admincreds
             DependsOn                     = '[xWaitForCluster]WaitForCluster','[Computer]DomainJoin'
         }
-
-        Computer DomainJoin
-        {
-            Name = $env:COMPUTERNAME
-            DomainName = $DomainName
-            Credential = $Admincreds
-        }
         
         PowerPlan HighPerf
         {
@@ -107,26 +111,13 @@ configuration AlwaysOnSqlServer
             IsSingleInstance = 'Yes'
             TimeZone         = 'Eastern Standard Time'
         }
-
-        LocalConfigurationManager 
-        {
-            RebootNodeIfNeeded = $True
-        }
         
         Script CleanSQL
         {
             SetScript  = 'C:\SQLServerFull\Setup.exe /Action=Uninstall /FEATURES=SQL,AS,RS,IS /INSTANCENAME=MSSQLSERVER /Q'
             TestScript = "(test-path -Path `"C:\Program Files\Microsoft SQL Server\$SQLLocation.MSSQLSERVER\MSSQL\DATA\master.mdf`") -eq `$false"
             GetScript  = "@{Ensure = if ((test-path -Path `"C:\Program Files\Microsoft SQL Server\$SQLLocation.MSSQLSERVER\MSSQL\DATA\master.mdf`") -eq `$false) {'Present'} Else {'Absent'}}"
-        }
-
-        xPendingReboot Reboot1
-        {
-            Name = 'BeforeSoftwareInstall'
-
-            DependsOn  = '[Script]CleanSQL'
-        }
-        
+        }     
 
         SqlSetup 'InstallNamedInstance'
         {
@@ -150,7 +141,7 @@ configuration AlwaysOnSqlServer
 
             PsDscRunAsCredential  = $Admincreds
 
-            DependsOn             = '[xPendingReboot]Reboot1'
+            DependsOn             = '[Script]CleanSQL'
         }
 
         SqlServerMaxDop Set_SQLServerMaxDop_ToAuto

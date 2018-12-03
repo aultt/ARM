@@ -43,6 +43,10 @@ configuration AlwaysOnSQLServer
 
     Node localhost
     {
+        LocalConfigurationManager 
+        {
+            RebootNodeIfNeeded = $true
+        }
 
         WindowsFeature FC
         {
@@ -68,7 +72,14 @@ configuration AlwaysOnSQLServer
             Name = "RSAT-AD-PowerShell"
             Ensure = "Present"
         }
-        
+
+        Computer DomainJoin
+        {
+            Name = $env:COMPUTERNAME
+            DomainName = $DomainName
+            Credential = $AdminCreds
+        }
+
         xCluster CreateCluster
         {
             Name                          = $ClusterName
@@ -76,13 +87,6 @@ configuration AlwaysOnSQLServer
             FirstNode                     = $FirstNode
             DomainAdministratorCredential = $Admincreds
             DependsOn                     = '[Computer]DomainJoin'
-        }
-
-        Computer DomainJoin
-        {
-            Name = $env:COMPUTERNAME
-            DomainName = $DomainName
-            Credential = $AdminCreds
         }
 
         PowerPlan HighPerf
@@ -97,24 +101,11 @@ configuration AlwaysOnSQLServer
             TimeZone         = 'Eastern Standard Time'
         }
 
-
-        LocalConfigurationManager 
-        {
-            RebootNodeIfNeeded = $true
-        }
-
         Script CleanSQL
         {
             SetScript  = 'C:\SQLServerFull\Setup.exe /Action=Uninstall /FEATURES=SQL,AS,RS,IS /INSTANCENAME=MSSQLSERVER /Q'
             TestScript = "(test-path -Path `"C:\Program Files\Microsoft SQL Server\$SQLLocation.MSSQLSERVER\MSSQL\DATA\master.mdf`") -eq `$false"
             GetScript  = "@{Ensure = if ((test-path -Path `"C:\Program Files\Microsoft SQL Server\$SQLLocation.MSSQLSERVER\MSSQL\DATA\master.mdf`") -eq `$false) {'Present'} Else {'Absent'}}"
-        }
-
-        xPendingReboot Reboot1
-        {
-            Name = 'BeforeSoftwareInstall'
-
-            DependsOn  = '[Script]CleanSQL'
         }
 
         SqlSetup 'InstallNamedInstance'
