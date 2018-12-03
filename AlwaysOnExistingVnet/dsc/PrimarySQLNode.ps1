@@ -108,6 +108,13 @@ configuration AlwaysOnSQLServer
             GetScript  = "@{Ensure = if ((test-path -Path `"C:\Program Files\Microsoft SQL Server\$SQLLocation.MSSQLSERVER\MSSQL\DATA\master.mdf`") -eq `$false) {'Present'} Else {'Absent'}}"
         }
 
+        xPendingReboot Reboot1
+        {
+            Name = 'Reboot1'
+            dependson = '[xComputer]DomainJoin','Script CleanSQL'
+        }
+
+        }
         SqlSetup 'InstallNamedInstance'
         {
             InstanceName          = $SQLInstanceName

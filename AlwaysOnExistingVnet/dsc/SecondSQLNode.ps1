@@ -117,7 +117,13 @@ configuration AlwaysOnSqlServer
             SetScript  = 'C:\SQLServerFull\Setup.exe /Action=Uninstall /FEATURES=SQL,AS,RS,IS /INSTANCENAME=MSSQLSERVER /Q'
             TestScript = "(test-path -Path `"C:\Program Files\Microsoft SQL Server\$SQLLocation.MSSQLSERVER\MSSQL\DATA\master.mdf`") -eq `$false"
             GetScript  = "@{Ensure = if ((test-path -Path `"C:\Program Files\Microsoft SQL Server\$SQLLocation.MSSQLSERVER\MSSQL\DATA\master.mdf`") -eq `$false) {'Present'} Else {'Absent'}}"
-        }     
+        }
+             
+        xPendingReboot Reboot1
+        {
+            Name = 'Reboot1'
+            dependson = '[xComputer]DomainJoin','Script CleanSQL'
+        }
 
         SqlSetup 'InstallNamedInstance'
         {
