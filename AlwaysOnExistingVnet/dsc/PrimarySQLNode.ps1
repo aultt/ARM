@@ -111,7 +111,7 @@ configuration AlwaysOnSQLServer
         xPendingReboot Reboot1
         {
             Name = 'Reboot1'
-            dependson = '[xComputer]DomainJoin','Script CleanSQL'
+            dependson = '[xComputer]DomainJoin','[Script]CleanSQL'
         }
 
         }
@@ -179,7 +179,6 @@ configuration AlwaysOnSQLServer
             PsDscRunAsCredential = $AdminCreds
             DependsOn = '[SqlSetup]InstallNamedInstance', '[xCluster]CreateCluster'
         }
-
     }
 }
 

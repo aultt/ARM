@@ -118,11 +118,11 @@ configuration AlwaysOnSqlServer
             TestScript = "(test-path -Path `"C:\Program Files\Microsoft SQL Server\$SQLLocation.MSSQLSERVER\MSSQL\DATA\master.mdf`") -eq `$false"
             GetScript  = "@{Ensure = if ((test-path -Path `"C:\Program Files\Microsoft SQL Server\$SQLLocation.MSSQLSERVER\MSSQL\DATA\master.mdf`") -eq `$false) {'Present'} Else {'Absent'}}"
         }
-             
+
         xPendingReboot Reboot1
         {
             Name = 'Reboot1'
-            dependson = '[xComputer]DomainJoin','Script CleanSQL'
+            dependson = '[xComputer]DomainJoin','[Script]CleanSQL'
         }
 
         SqlSetup 'InstallNamedInstance'
@@ -147,7 +147,7 @@ configuration AlwaysOnSqlServer
 
             PsDscRunAsCredential  = $Admincreds
 
-            DependsOn             = '[Script]CleanSQL','[Computer]DomainJoin'
+            DependsOn             = '[xComputer]DomainJoin','[Script]CleanSQL'
         }
 
         SqlServerMaxDop Set_SQLServerMaxDop_ToAuto
