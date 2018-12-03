@@ -130,7 +130,7 @@ configuration AlwaysOnSQLServer
 
             PsDscRunAsCredential  = $AdminCreds
 
-            DependsOn             = '[Script]CleanSQL'
+            DependsOn             = '[Script]CleanSQL','[Computer]DomainJoin'
         }
 
         SqlServerMaxDop Set_SQLServerMaxDop_ToAuto
