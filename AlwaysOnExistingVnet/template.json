@@ -40,12 +40,15 @@
         "availabilitySetName": {
             "type": "string"
         },
+        "ClusterStaticIP": {
+            "type": "string"
+        },
         "vmcount": {
             "type": "int",
             "minValue": 2,
-            "maxValue": 3,
+            "maxValue": 8,
             "metadata": {
-                "description": "Number of VMs to be created in cluster (Min=2, Max=3)"
+                "description": "Number of VMs to be created in cluster (Min=2, Max=8)"
             }
         },
         "diagnosticsStorageAccountName": {
@@ -57,47 +60,11 @@
         "subnetName": {
             "type": "string"
         },
-        "msiExtensionName": {
-            "type": "string"
-        },
-        "sqlConnectivityType": {
-            "type": "string"
-        },
-        "sqlPortNumber": {
-            "type": "int"
-        },
-        "sqlStorageDisksCount": {
-            "type": "int"
-        },
-        "sqlStorageWorkloadType": {
-            "type": "string"
-        },
-        "sqlStorageDisksConfigurationType": {
-            "type": "string"
-        },
-        "sqlStorageStartingDeviceId": {
-            "type": "int"
-        },
-        "sqlStorageDeploymentToken": {
-            "type": "int"
-        },
-        "sqlAutopatchingDayOfWeek": {
-            "type": "string"
-        },
-        "sqlAutopatchingStartHour": {
-            "type": "string"
-        },
-        "sqlAutopatchingWindowDuration": {
-            "type": "string"
-        },
         "sqlAuthenticationLogin": {
             "type": "string"
         },
         "sqlAuthenticationPassword": {
             "type": "securestring"
-        },
-        "rServicesEnabled": {
-            "type": "string"
         },
         "_artifactsLocation": {
             "type": "string",
@@ -233,7 +200,7 @@
                     "domainName": "[parameters('domainName')]",
                     "ClusterName":"[concat(variables('vmnamePrefix'),'C')]",
                     "FirstNode":  "[concat(variables('vmNamePrefix'), '1')]",
-                    "ClusterStaticIP": "10.50.2.55/24"
+                    "ClusterStaticIP": "[parameters('ClusterStaticIP')]"
                     }
                 },
               "protectedSettings": {

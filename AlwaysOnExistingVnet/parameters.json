@@ -65,15 +65,6 @@
         "sqlStorageDeploymentToken": {
             "value": 79628
         },
-        "sqlAutopatchingDayOfWeek": {
-            "value": "Sunday"
-        },
-        "sqlAutopatchingStartHour": {
-            "value": "2"
-        },
-        "sqlAutopatchingWindowDuration": {
-            "value": "60"
-        },
         "sqlAuthenticationLogin": {
             "value": null
         },
