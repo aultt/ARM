@@ -3,10 +3,10 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "location": {
-            "value": "eastus"
+            "value": "East US"
         },
         "namePrefix": {
-            "value": "AES1000"
+            "value": "AES3000"
         },
         "vmcount": {
             "value": 2
@@ -14,65 +14,71 @@
         "virtualMachineSize": {
             "value": "Standard_D2s_v3"
         },
-        "domainName": {
-            "value": null
+        "existingVirtualNetworkRGName":{
+            "value": ""
         },
-        "adminUsername": {
-            "value": null
+        "existingVirtualNetworkName":{
+            "value": ""
         },
-        "virtualNetworkName": {
-            "value": null
-        },
-        "networkSecurityGroupName":{
-            "value": "AESQL1000-nsg"
-        },
-        "adminPassword": {
-            "value": null
-        },
-        "availabilitySetName": {
-            "value": "SQL-AvailabilitySet3"
-        },
-        "diagnosticsStorageAccountName": {
-            "value": null
-        },
-        "diagnosticsStorageAccountId": {
-            "value": null
-        },
-        "subnetName": {
+        "existingSubnetName":{
             "value": "data"
         },
-        "msiExtensionName": {
-            "value": "ManagedIdentityExtensionForWindows"
+        "domainName": {
+            "value": "yourdomain"
         },
-        "sqlConnectivityType": {
-            "value": "Private"
+        "adminUsername": {
+            "value": "adminusername"
         },
-        "sqlPortNumber": {
-            "value": 1433
+        "virtualNetworkName": {
+            "value": "your network name"
         },
-        "sqlStorageDisksCount": {
-            "value": 1
+        "networkSecurityGroupName":{
+            "value": ""
         },
-        "sqlStorageWorkloadType": {
-            "value": "GENERAL"
+        "adminPassword": {
+            "reference": {
+                "keyVault": {
+                  "id": "Your Keyvault ID"
+                },
+                "secretName": "Your Keyvault Secret"
+              }
         },
-        "sqlStorageDisksConfigurationType": {
-            "value": "NEW"
+        "availabilitySetName": {
+            "value": ""
         },
-        "sqlStorageStartingDeviceId": {
-            "value": 2
+        "ClusterStaticIP": {
+            "value": "Grab a free IP in your Azure Vnet Load balancer will reserve it for you"
         },
-        "sqlStorageDeploymentToken": {
-            "value": 79628
+        "ClusterStaticIPSubnetClass":{
+            "value": "24"
+        },
+        "diagnosticsStorageAccountName": {
+            "value": "Your Storage Account Name"
+        },
+        "diagnosticsStorageAccountId": {
+            "value": "Your Storage AccountID"
         },
         "sqlAuthenticationLogin": {
-            "value": null
+            "value": "tamzadmin"
         },
         "sqlAuthenticationPassword": {
-            "value": null
+            "reference": {
+                "keyVault": {
+                  "id": "Your Keyvault ID"
+                },
+                "secretName": "Your Keyvault Secret"
+              }
         },
-        "rServicesEnabled": {
-            "value": "false"
-        }
+        "domainUsername": {
+            "value": "your domain username"
+          },
+        "domainUserPassword": {
+            "reference": {
+              "keyVault": {
+                "id": "Your Keyvault ID"
+              },
+              "secretName": "Your Keyvault Secret"
+            }
+          }
     }
 }
