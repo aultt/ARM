@@ -16,6 +16,15 @@
         "virtualMachineSize": {
             "type": "string"
         },
+        "existingVirtualNetworkRGName":{
+            "type": "string"
+        },
+        "existingVirtualNetworkName":{
+            "type": "string"
+        },
+        "existingSubnetName":{
+            "type": "string"
+        },
         "adminUsername": {
             "type": "string"
         },
@@ -43,6 +52,9 @@
         "ClusterStaticIP": {
             "type": "string"
         },
+        "ClusterStaticIPSubnetClass":{
+            "type": "string"
+        },
         "vmcount": {
             "type": "int",
             "minValue": 2,
@@ -55,9 +67,6 @@
             "type": "string"
         },
         "diagnosticsStorageAccountId": {
-            "type": "string"
-        },
-        "subnetName": {
             "type": "string"
         },
         "sqlAuthenticationLogin": {
@@ -82,10 +91,19 @@
           }
     },
     "variables": {
-        "vnetId": "[resourceId('tim-core-prod-rg','Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
-        "subnetRef": "[concat(variables('vnetId'), '/subnets/', parameters('subnetName'))]",
+        "vnetID": "[resourceID(parameters('existingVirtualNetworkRGName'),'Microsoft.Network/virtualNetworks',parameters('existingVirtualNetworkName'))]",
+        "subnetRef": "[concat(variables('vnetId'), '/subnets/', parameters('existingSubnetName'))]",
         "diagnosticsExtensionName": "Microsoft.Insights.VMDiagnosticsSettings",
-        "vmNamePrefix": "[concat(parameters('namePrefix'),'-')]"
+        "vmNamePrefix": "[concat(parameters('namePrefix'),'-')]",
+        "ilbname": "[concat(parameters('namePrefix'),'-ilb')]",
+        "ilbID": "[resourceID('Microsoft.Network/loadBalancers',variables('ilbName'))]",
+        "ilbFE" :"[concat(parameters('namePrefix'),'-ilb-fe')]",
+        "ilbBE" :"[concat(parameters('namePrefix'),'-ilb-be')]",
+        "ilbFEConfigID1": "[concat(variables('ilbID'),'/frontendIPConfigurations/',variables('ilbFE'))]",
+        "ilbBEAddressPoolID": "[concat(variables('ilbID'),'/backendAddressPools/',variables('ilbBE'))]",
+        "ilbProbe1":"[concat('namePrefix','ilbp1')]",
+        "ilbProbeID1" : "[concat(variables('ilbID'),'/probes/',variables('ilbProbe1'))]" ,
+        "clusteripwithsubnetclass": "[concat(parameters('ClusterStaticIP'),'/',parameters('ClusterStaticIPSubnetClass'))]"
     },
     "resources": [
         {
@@ -200,7 +218,7 @@
                     "domainName": "[parameters('domainName')]",
                     "ClusterName":"[concat(variables('vmnamePrefix'),'C')]",
                     "FirstNode":  "[concat(variables('vmNamePrefix'), '1')]",
-                    "ClusterStaticIP": "[parameters('ClusterStaticIP')]"
+                    "ClusterStaticIP": "[variables('clusteripwithsubnetclass')]"
                     }
                 },
               "protectedSettings": {
@@ -223,7 +241,7 @@
               "count": "[parameters('vmCount')]"  
             },
             "dependsOn": [
-                "[concat('Microsoft.Network/networkSecurityGroups/', parameters('networkSecurityGroupName'))]"
+                "[concat('Microsoft.Network/networkSecurityGroups/', parameters('networkSecurityGroupName'))]","[variables('ilbID')]"
             ],
             "properties": {
                 "ipConfigurations": [
@@ -233,6 +251,11 @@
                             "subnet": {
                                 "id": "[variables('subnetRef')]"
                             },
+                            "loadBalancerBackendAddressPools":[
+                                {
+                                    "id": "[variables('ilbBEAddressPoolID')]"
+                                }
+                            ],
                             "privateIPAllocationMethod": "Dynamic"
                         }
                     }
@@ -240,6 +263,81 @@
                 "networkSecurityGroup": {
                     "id": "[resourceId('AlwaysOnFCTesting', 'Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]"
                 }
+            }
+        },
+        {
+            "apiVersion": "2017-10-01",
+            "name": "[variables('ilbName')]",
+            "type": "Microsoft.Network/loadBalancers",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [],
+            "properties":{
+                "frontendIPConfigurations":[
+                    {
+                    "name": "[variables('ilbFE')]",
+                    "properties":{
+                        "privateIPAllocationMethod": "Static",
+                        "privateIPAddress": "[parameters('ClusterStaticIP')]",
+                        "subnet":{
+                            "id": "[variables('subnetRef')]"
+                        }
+                    }
+                }
+                ],
+                "backendAddressPools": [
+                    {
+                        "name": "[variables('ilbBE')]"
+                    }
+                ],
+                "loadBalancingRules":[
+                    {
+                        "name": "sql-1433",
+                        "properties":{
+                            "frontendIPConfiguration":{
+                                "id": "[variables('ilbFEConfigID1')]"
+                            },
+                            "backendAddressPool": {
+                                "id": "[variables('ilbBEAddressPoolID')]"
+                            },
+                            "probe":{
+                                "id":"[variables('ilbProbeID1')]"
+                            },
+                            "protocol": "Tcp",
+                            "frontendPort": 1433,
+                            "backendPort": 1433,
+                            "enableFloatingIP": true
+                        }
+                    },
+                    {
+                        "name": "sql-445",
+                        "properties":{
+                            "frontendIPConfiguration":{
+                                "id":"[variables('ilbFEConfigID1')]"
+                            },
+                            "backendAddressPool":{ 
+                                "id": "[variables('ilbBEAddressPoolID')]"
+                            },
+                            "probe": {
+                                "id": "[variables('ilbProbeID1')]"
+                            },
+                            "protocol": "Tcp",
+                            "frontendPort": 445,
+                            "backendPort": 445,
+                            "enableFloatingIP": true
+                        }
+                    }
+                ],
+                "probes":[
+                    {
+                        "name": "[variables('ilbProbe1')]",
+                        "properties": {
+                                "protocol":"Tcp",
+                                "port": 37000,
+                                "intervalInSeconds": 5,
+                                "numberOfProbes": 2
+                        }
+                    }
+                ]
             }
         },
         {
