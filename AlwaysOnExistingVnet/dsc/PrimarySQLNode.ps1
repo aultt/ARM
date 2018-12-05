@@ -170,6 +170,42 @@ configuration AlwaysOnSQLServer
             DependsOn = '[SqlSetup]InstallNamedInstance'
         }
         
+        SqlServerLogin AddNTServiceClusSvc
+        {
+            Ensure               = 'Present'
+            Name                 = 'NT SERVICE\ClusSvc'
+            LoginType            = 'WindowsUser'
+            ServerName           = $env:COMPUTERNAME
+            InstanceName         = $SQLInstanceName
+            PsDscRunAsCredential = $AdminCreds
+
+            DependsOn = '[SqlSetup]InstallNamedInstance', '[xCluster]CreateCluster'
+        }
+
+        # Add the required permissions to the cluster service login
+        SqlServerPermission AddNTServiceClusSvcPermissions
+        {
+            Ensure               = 'Present'
+            ServerName           = $env:COMPUTERNAME
+            InstanceName         = $SQLInstanceName
+            Principal            = 'NT SERVICE\ClusSvc'
+            Permission           = 'AlterAnyAvailabilityGroup', 'ViewServerState'
+            PsDscRunAsCredential = $AdminCreds
+            
+            DependsOn            = '[SqlServerLogin]AddNTServiceClusSvc'
+        }
+
+        # Create a DatabaseMirroring endpoint
+        SqlServerEndpoint HADREndpoint
+        {
+            EndPointName         = 'HADR'
+            Ensure               = 'Present'
+            Port                 = 5022
+            ServerName           = $env:COMPUTERNAME
+            InstanceName         = $SQLInstanceName
+            PsDscRunAsCredential = $AdminCreds
+            DependsOn = '[SqlSetup]InstallNamedInstance', '[xCluster]CreateCluster'
+        }
         SqlAlwaysOnService 'EnableAlwaysOn'
         {
             Ensure               = 'Present'
