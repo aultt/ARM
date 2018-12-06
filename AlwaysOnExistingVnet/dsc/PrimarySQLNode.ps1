@@ -8,20 +8,14 @@ configuration AlwaysOnSQLServer
         [Parameter(Mandatory)]
         [System.Management.Automation.PSCredential]$Admincreds,
 
-        #[Parameter(Mandatory)]
-        #[System.Management.Automation.PSCredential]$SQLServicecreds,
+        [Parameter(Mandatory)]
+        [System.Management.Automation.PSCredential]$SQLServicecreds,
         [string]$imageoffer = "SQL2016-WS2016",
         [string]$SQLFeatures = "SQLENGINE",
         [string]$SQLInstanceName = "MSSQLSERVER",
         [string]$datadriveLetter = 'C',
-        #[string]$datadrivelabel,
-        #[string]$datadriveSize,
         [string]$logdriveLetter = 'C',
-        #[string]$logdrivelabel,
-        #[string]$logdriveSize,
         [string]$tempdbdriveLetter = 'D',
-        #[string]$tempdbdrivelabel,
-        #[string]$tempdbdriveSize,
         [string]$ClusterName,
         [string]$ClusterStaticIP,
         [string]$FirstNode,
@@ -32,9 +26,6 @@ configuration AlwaysOnSQLServer
     )
 
     Import-DscResource -ModuleName ComputerManagementdsc,sqlserverdsc,xFailOverCluster,xPendingReboot
-    #[System.Management.Automation.PSCredential]$DomainCreds = New-Object System.Management.Automation.PSCredential ($Admincreds.UserName, $Admincreds.Password)
-    #[System.Management.Automation.PSCredential]$DomainFQDNCreds = New-Object System.Management.Automation.PSCredential ($Admincreds.UserName, $Admincreds.Password)
-    #[System.Management.Automation.PSCredential]$SQLCreds = New-Object System.Management.Automation.PSCredential ($Admincreds.UserName, $Admincreds.Password)
 
     $SQLVersion = $imageoffer.Substring(5,2)
     $SQLLocation = "MSSQL$(switch ($SQLVersion){17 {14} 16 {13}})"
@@ -120,6 +111,7 @@ configuration AlwaysOnSQLServer
             InstanceName          = $SQLInstanceName
             Features              = $SQLFeatures
             SQLCollation          = 'SQL_Latin1_General_CP1_CI_AS'
+            SQLSvcAccount         = $SQLServicecreds
             SQLSysAdminAccounts   = 'TAMZ\DBA'
             InstallSharedDir      = 'C:\Program Files\Microsoft SQL Server'
             InstallSharedWOWDir   = 'C:\Program Files (x86)\Microsoft SQL Server'
@@ -261,6 +253,6 @@ $ConfigData = @{
 }
 
 #  $AdminCreds = Get-Credential
-#$SvcCreds = $AdminCreds
- # AlwaysOnSQLServer -DomainName tamz.local -Admincreds $AdminCreds -ClusterName AES3000-c -ClusterStaticIP "10.50.2.55/24" -Verbose -ConfigurationData $ConfigData -OutputPath d:\
- # Start-DscConfiguration -wait -Force -Verbose -Path D:\
+# $SQLServicecreds = $AdminCreds
+# AlwaysOnSQLServer -DomainName tamz.local -Admincreds $AdminCreds -SQLServicecreds $SQLServicecreds -ClusterName AES3000-c -ClusterStaticIP "10.50.2.55/24" -Verbose -ConfigurationData $ConfigData -OutputPath d:\
+# Start-DscConfiguration -wait -Force -Verbose -Path D:\

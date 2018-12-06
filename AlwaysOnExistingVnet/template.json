@@ -40,6 +40,12 @@
         "domainUserPassword": {
             "type": "securestring"
         },
+        "sqlUserName":{
+            "type":"string"
+        },
+        "sqlUserPassword": {
+            "type": "securestring"
+        },
         "networkSecurityGroupName":{
             "type": "string"
         },
@@ -226,7 +232,11 @@
                     "adminCreds": {
                     "userName": "[parameters('domainUsername')]",
                     "password": "[parameters('domainUserPassword')]"
-                        }
+                        },
+                    "SQLServicecreds": {
+                      "userName": "[parameters('sqlUsername')]",
+                      "password": "[parameters('sqlUserPassword')]"
+                       }   
                     }
                 }      
             }
