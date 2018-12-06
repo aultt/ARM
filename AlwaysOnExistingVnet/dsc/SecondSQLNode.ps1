@@ -138,8 +138,8 @@ configuration AlwaysOnSqlServer
             InstallSQLDataDir     = "${datadriveletter}:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\"
             SQLUserDBDir          = "${datadriveletter}:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\Data"
             SQLUserDBLogDir       = "${logdriveletter}:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\Log"
-            SQLTempDBDir          = "${tempdbdriveletter}:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\TempDb"
-            SQLTempDBLogDir       = "${tempdbdriveletter}:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\TempDb"
+            SQLTempDBDir          = "${tempdbdriveletter}:\"
+            SQLTempDBLogDir       = "${tempdbdriveletter}:\"
             SQLBackupDir          = "${datadriveletter}:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\Backup"
             SourcePath            = 'C:\SQLServerFull'
             UpdateEnabled         = 'False'
