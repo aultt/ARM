@@ -181,6 +181,45 @@ configuration AlwaysOnSqlServer
             DependsOn = '[SqlSetup]InstallNamedInstance'
         }
         
+        SqlServerLogin AddNTServiceClusSvc
+        {
+            Ensure               = 'Present'
+            Name                 = 'NT SERVICE\ClusSvc'
+            LoginType            = 'WindowsUser'
+            ServerName           = $env:COMPUTERNAME
+            InstanceName         = $SQLInstanceName
+            PsDscRunAsCredential = $AdminCreds
+            
+            DependsOn = '[SqlSetup]InstallNamedInstance', '[xCluster]JoinSecondNodeToCluster'
+        }
+
+        # Add the required permissions to the cluster service login
+        SqlServerPermission AddNTServiceClusSvcPermissions
+        {
+            
+            Ensure               = 'Present'
+            ServerName           = $env:COMPUTERNAME
+            InstanceName         = $SQLInstanceName
+            Principal            = 'NT SERVICE\ClusSvc'
+            Permission           = 'AlterAnyAvailabilityGroup', 'ViewServerState'
+            PsDscRunAsCredential = $AdminCreds
+
+            DependsOn            = '[SqlServerLogin]AddNTServiceClusSvc'
+        }
+
+        # Create a DatabaseMirroring endpoint
+        SqlServerEndpoint HADREndpoint
+        {
+            EndPointName         = 'HADR'
+            Ensure               = 'Present'
+            Port                 = 5022
+            ServerName           = $env:COMPUTERNAME
+            InstanceName         = $SQLInstanceName
+            PsDscRunAsCredential = $AdminCreds
+
+            DependsOn = '[SqlSetup]InstallNamedInstance', '[xCluster]JoinSecondNodeToCluster'
+        }
+
         SqlAlwaysOnService 'EnableAlwaysOn'
         {
             Ensure               = 'Present'
@@ -222,7 +261,7 @@ $ConfigData = @{
     )
 }
 
-#$AdminCreds = Get-Credential
-#$SvcCreds = $AdminCreds
- #SecondaryAlwaysOnSqlServer -DomainName tamz.local -Admincreds $AdminCreds -SQLServicecreds $SvcCreds -Verbose -ConfigurationData $ConfigData -OutputPath d:\
- #Start-DscConfiguration -wait -Force -Verbose -Path D:\
+#  $AdminCreds = Get-Credential
+# AlwaysOnSQLServer -DomainName tamz.local -Admincreds $AdminCreds -ClusterName AES3000-c -ClusterStaticIP "10.50.2.55/24" -Verbose -ConfigurationData $ConfigData -OutputPath d:\
+# Start-DscConfiguration -wait -Force -Verbose -Path D:\
+

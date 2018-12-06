@@ -169,16 +169,67 @@ configuration AlwaysOnSQLServer
 
             DependsOn = '[SqlSetup]InstallNamedInstance'
         }
-        
+        # Adding the required service account to allow the cluster to log into SQL
+        SqlServerLogin AddNTServiceClusSvc
+        {
+            Ensure               = 'Present'
+            Name                 = 'NT SERVICE\ClusSvc'
+            LoginType            = 'WindowsUser'
+            ServerName           = $env:COMPUTERNAME
+            InstanceName         = $SQLInstanceName
+            PsDscRunAsCredential = $AdminCreds
+            
+            DependsOn = '[SqlSetup]InstallNamedInstance', '[xCluster]CreateCluster'
+        }
+
+        # Add the required permissions to the cluster service login
+        SqlServerPermission AddNTServiceClusSvcPermissions
+        {
+            
+            Ensure               = 'Present'
+            ServerName           = $env:COMPUTERNAME
+            InstanceName         = $SQLInstanceName
+            Principal            = 'NT SERVICE\ClusSvc'
+            Permission           = 'AlterAnyAvailabilityGroup', 'ViewServerState'
+            PsDscRunAsCredential = $AdminCreds
+
+            DependsOn            = '[SqlServerLogin]AddNTServiceClusSvc'
+        }
+
+        # Create a DatabaseMirroring endpoint
+        SqlServerEndpoint HADREndpoint
+        {
+            EndPointName         = 'HADR'
+            Ensure               = 'Present'
+            Port                 = 5022
+            ServerName           = $env:COMPUTERNAME
+            InstanceName         = $SQLInstanceName
+            PsDscRunAsCredential = $AdminCreds
+
+            DependsOn = '[SqlSetup]InstallNamedInstance', '[xCluster]CreateCluster'
+        }
+
         SqlAlwaysOnService 'EnableAlwaysOn'
         {
             Ensure               = 'Present'
-            ServerName           = 'LOCALHOST'
-            InstanceName         = 'MSSQLSERVER'
+            ServerName           = $env:COMPUTERNAME
+            InstanceName         = $SQLInstanceName
             RestartTimeout       = 120
             PsDscRunAsCredential = $AdminCreds
             DependsOn = '[SqlSetup]InstallNamedInstance', '[xCluster]CreateCluster'
         }
+
+        #SqlAG AddAG
+        #    {
+        #        Ensure               = 'Present'
+        #        Name                 = 'TestAG'
+        #        InstanceName         = $SQLInstanceName
+        #        ServerName           = $env:COMPUTERNAME
+        #
+        #        PsDscRunAsCredential = $AdminCreds
+        #
+        #        DependsOn            = '[SqlAlwaysOnService]EnableAlwaysOn', '[SqlServerEndpoint]HADREndpoint', '[SqlServerPermission]AddNTServiceClusSvcPermissions'
+        #    }
     }
 }
 
@@ -209,7 +260,7 @@ $ConfigData = @{
     )
 }
 
-#$AdminCreds = Get-Credential
+#  $AdminCreds = Get-Credential
 #$SvcCreds = $AdminCreds
  # AlwaysOnSQLServer -DomainName tamz.local -Admincreds $AdminCreds -ClusterName AES3000-c -ClusterStaticIP "10.50.2.55/24" -Verbose -ConfigurationData $ConfigData -OutputPath d:\
- #Start-DscConfiguration -wait -Force -Verbose -Path D:\
+ # Start-DscConfiguration -wait -Force -Verbose -Path D:\
