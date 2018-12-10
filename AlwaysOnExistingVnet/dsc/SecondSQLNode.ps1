@@ -230,11 +230,20 @@ configuration AlwaysOnSqlServer
             DependsOn = '[SqlSetup]InstallNamedInstance','[xCluster]JoinSecondNodeToCluster'
         }
 
+        SqlWaitForAG SQLConfigureAG-WaitAGTest1
+        {
+            Name                 = $AvailabilityGroupName
+            RetryIntervalSec     = 20
+            RetryCount           = 30
+
+            PsDscRunAsCredential = $SqlAdministratorCredential
+        }
+
         SqlAGReplica AddReplica
         {
             Ensure                     = 'Present'
             Name                       = $env:COMPUTERNAME
-            AvailabilityGroupName      = 'TestAG'
+            AvailabilityGroupName      = $AvailabilityGroupName
             ServerName                 = $env:COMPUTERNAME
             InstanceName               = $SQLInstanceName
             PrimaryReplicaServerName   = $FirstNode
