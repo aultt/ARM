@@ -61,6 +61,12 @@
         "ClusterStaticIPSubnetClass":{
             "type": "string"
         },
+        "availabilityGroupName":{
+            "type": "string"
+        },
+        "listenerStaticIP":{
+            "type": "string"
+        },
         "vmcount": {
             "type": "int",
             "minValue": 2,
@@ -224,7 +230,9 @@
                     "domainName": "[parameters('domainName')]",
                     "ClusterName":"[concat(variables('vmnamePrefix'),'C')]",
                     "FirstNode":  "[concat(variables('vmNamePrefix'), '1')]",
-                    "ClusterStaticIP": "[variables('clusteripwithsubnetclass')]"
+                    "ClusterStaticIP": "[variables('clusteripwithsubnetclass')]",
+                    "AvailabilityGroupName": "[parameters('availabilityGroupName')]",
+                    "ListenerStaticIP": "[parameters('listenerStaticIP')]"
                     }
                 },
               "protectedSettings": {

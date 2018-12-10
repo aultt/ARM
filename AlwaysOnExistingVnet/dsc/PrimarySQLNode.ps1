@@ -22,6 +22,11 @@ configuration AlwaysOnSQLServer
         [string]$ClusterStaticIP,
         [Parameter(Mandatory)]
         [string]$FirstNode,
+        [Parameter(Mandatory)]
+        [string]$AvailabilityGroupName,
+        [Parameter(Mandatory)]
+        [string]$ListenerStaticIP,
+
         
         [Int]$RetryCount = 20,
         [Int]$RetryIntervalSec = 30
@@ -90,7 +95,7 @@ configuration AlwaysOnSQLServer
           Name             = 'High performance'
         }
 
-        TimeZone TimeZoneExample
+        TimeZone SetTimeZone
         {
             IsSingleInstance = 'Yes'
             TimeZone         = 'Eastern Standard Time'
@@ -217,13 +222,28 @@ configuration AlwaysOnSQLServer
         SqlAG AddAG
         {
             Ensure               = 'Present'
-            Name                 = 'TestAG'
+            Name                 = $AvailabilityGroupName
             InstanceName         = $SQLInstanceName
             ServerName           = $env:COMPUTERNAME
         
             PsDscRunAsCredential = $AdminCreds
         
             DependsOn            = '[SqlAlwaysOnService]EnableAlwaysOn', '[SqlServerEndpoint]HADREndpoint', '[SqlServerPermission]AddNTServiceClusSvcPermissions'
+        }
+
+        SqlAGListener AvailabilityGroupListenerWithSameNameAsVCO
+        {
+            Ensure               = 'Present'
+            ServerName           = $env:COMPUTERNAME
+            InstanceName         = $SQLInstanceName
+            AvailabilityGroup    = $AvailabilityGroupName
+            Name                 = $AvailabilityGroupName
+            IpAddress            = $ListenerStaticIP
+            Port                 = 5301
+
+            PsDscRunAsCredential = $AdminCreds
+
+            DependsON = '[SqlAG]AddAG'
         }
     }
 }

@@ -23,7 +23,11 @@ configuration AlwaysOnSqlServer
         [string]$ClusterStaticIP,
         [Parameter(Mandatory)]
         [string]$FirstNode,
-
+        [Parameter(Mandatory)]
+        [string]$AvailabilityGroupName,
+        [Parameter(Mandatory)]
+        [string]$ListenerStaticIP,
+        
         [Int]$RetryCount = 20,
         [Int]$RetryIntervalSec = 30
     )
@@ -101,7 +105,7 @@ configuration AlwaysOnSqlServer
           Name             = 'High performance'
         }
 
-        TimeZone TimeZoneExample
+        TimeZone SetTimeZone
         {
             IsSingleInstance = 'Yes'
             TimeZone         = 'Eastern Standard Time'
