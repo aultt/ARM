@@ -16,8 +16,11 @@ configuration AlwaysOnSQLServer
         [string]$datadriveLetter = 'C',
         [string]$logdriveLetter = 'C',
         [string]$tempdbdriveLetter = 'D',
+        [Parameter(Mandatory)]
         [string]$ClusterName,
+        [Parameter(Mandatory)]
         [string]$ClusterStaticIP,
+        [Parameter(Mandatory)]
         [string]$FirstNode,
         
         [Int]$RetryCount = 20,
@@ -211,17 +214,17 @@ configuration AlwaysOnSQLServer
             DependsOn = '[SqlSetup]InstallNamedInstance', '[xCluster]CreateCluster'
         }
 
-        #SqlAG AddAG
-        #    {
-        #        Ensure               = 'Present'
-        #        Name                 = 'TestAG'
-        #        InstanceName         = $SQLInstanceName
-        #        ServerName           = $env:COMPUTERNAME
-        #
-        #        PsDscRunAsCredential = $AdminCreds
-        #
-        #        DependsOn            = '[SqlAlwaysOnService]EnableAlwaysOn', '[SqlServerEndpoint]HADREndpoint', '[SqlServerPermission]AddNTServiceClusSvcPermissions'
-        #    }
+        SqlAG AddAG
+        {
+            Ensure               = 'Present'
+            Name                 = 'TestAG'
+            InstanceName         = $SQLInstanceName
+            ServerName           = $env:COMPUTERNAME
+        
+            PsDscRunAsCredential = $AdminCreds
+        
+            DependsOn            = '[SqlAlwaysOnService]EnableAlwaysOn', '[SqlServerEndpoint]HADREndpoint', '[SqlServerPermission]AddNTServiceClusSvcPermissions'
+        }
     }
 }
 

@@ -17,8 +17,11 @@ configuration AlwaysOnSqlServer
         [string]$datadriveLetter = 'C',
         [string]$logdriveLetter = 'C',
         [string]$tempdbdriveLetter = 'D',
+        [Parameter(Mandatory)]
         [string]$ClusterName,
+        [Parameter(Mandatory)]
         [string]$ClusterStaticIP,
+        [Parameter(Mandatory)]
         [string]$FirstNode,
 
         [Int]$RetryCount = 20,
@@ -215,12 +218,27 @@ configuration AlwaysOnSqlServer
         SqlAlwaysOnService 'EnableAlwaysOn'
         {
             Ensure               = 'Present'
-            ServerName           = 'LOCALHOST'
-            InstanceName         = 'MSSQLSERVER'
+            ServerName           = $env:COMPUTERNAME
+            InstanceName         = $SQLInstanceName
             RestartTimeout       = 120
             PsDscRunAsCredential = $Admincreds
 
             DependsOn = '[SqlSetup]InstallNamedInstance','[xCluster]JoinSecondNodeToCluster'
+        }
+
+        SqlAGReplica AddReplica
+        {
+            Ensure                     = 'Present'
+            Name                       = $env:COMPUTERNAME
+            AvailabilityGroupName      = 'TestAG'
+            ServerName                 = $env:COMPUTERNAME
+            InstanceName               = $SQLInstanceName
+            PrimaryReplicaServerName   = $FirstNode
+            PrimaryReplicaInstanceName = $SQLInstanceName
+            ProcessOnlyOnActiveNode    = 1
+            PsDscRunAsCredential = $AdminCreds
+        
+            DependsOn                  = '[SqlAlwaysOnService]EnableAlwaysOn'
         }
 
     }
@@ -255,6 +273,6 @@ $ConfigData = @{
 
 #  $AdminCreds = Get-Credential
 # $SQLServicecreds = $AdminCreds
-# AlwaysOnSQLServer -DomainName tamz.local -Admincreds $AdminCreds -SQLServicecreds $SQLServicecreds -ClusterName AES3000-c -ClusterStaticIP "10.50.2.55/24" -Verbose -ConfigurationData $ConfigData -OutputPath d:\
+# AlwaysOnSQLServer -DomainName tamz.local -Admincreds $AdminCreds -SQLServicecreds $SQLServicecreds -ClusterName AES3000-c -FirstNode AES3000-1 -ClusterStaticIP "10.50.2.55/24" -Verbose -ConfigurationData $ConfigData -OutputPath d:\
 # Start-DscConfiguration -wait -Force -Verbose -Path D:\
 
