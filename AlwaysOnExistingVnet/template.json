@@ -222,7 +222,7 @@
               "settings": {
                   "wmfversion" :"latest",
                   "configuration": {
-                      "url": "https://raw.githubusercontent.com/aultt/ARM/dev/AlwaysOnExistingVnet/dsc/Cluster.ps1.zip",
+                      "url": "https://raw.githubusercontent.com/aultt/ARM/master/AlwaysOnExistingVnet/dsc/Cluster.ps1.zip",
                       "script": "[if(equals(copyIndex(),0),'PrimarySQLNode.ps1','SecondSQLNode.ps1')]",
                       "function" : "AlwaysOnSQLServer"
                   },
