@@ -26,7 +26,7 @@ configuration AlwaysOnSQLServer
         [string]$AvailabilityGroupName,
         [Parameter(Mandatory)]
         [string]$ListenerStaticIP,
-
+        [string]$SQLPort=1433,
         
         [Int]$RetryCount = 20,
         [Int]$RetryIntervalSec = 30
@@ -138,6 +138,19 @@ configuration AlwaysOnSQLServer
             PsDscRunAsCredential  = $AdminCreds
 
             DependsOn             = '[Script]CleanSQL','[Computer]DomainJoin'
+        }
+
+        SqlServerNetwork 'ChangeTcpIpOnDefaultInstance'
+        {
+            InstanceName         = $SQLInstanceName
+            ProtocolName         = 'Tcp'
+            IsEnabled            = $true
+            TCPDynamicPort       = $false
+            TCPPort              = $SQLPort
+            RestartService       = $true
+            DependsOn = '[SqlSetup]InstallNamedInstance'
+            
+            PsDscRunAsCredential = $AdminCreds
         }
 
         SqlServerMaxDop Set_SQLServerMaxDop_ToAuto

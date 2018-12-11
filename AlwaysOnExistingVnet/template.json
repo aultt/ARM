@@ -46,6 +46,9 @@
         "sqlUserPassword": {
             "type": "securestring"
         },
+        "sqlPort": {
+            "type": "int"
+        },
         "networkSecurityGroupName":{
             "type": "string"
         },
@@ -92,7 +95,7 @@
             "metadata": {
               "description": "Location of resources that the script is dependent on such as linked templates and DSC modules"
             },
-            "defaultValue": "https://raw.githubusercontent.com/aultt/ARM/dev/AlwaysOnExistingVnet" 
+            "defaultValue": "https://raw.githubusercontent.com/aultt/ARM/master/AlwaysOnExistingVnet" 
           },
           "_artifactsLocationSasToken": {
             "type": "securestring",
@@ -112,6 +115,7 @@
         "ilbFE" :"[concat(parameters('namePrefix'),'-ilb-fe')]",
         "ilbBE" :"[concat(parameters('namePrefix'),'-ilb-be')]",
         "ilbFEConfigID1": "[concat(variables('ilbID'),'/frontendIPConfigurations/',variables('ilbFE'))]",
+        "listenerConfigID1": "[concat(variables('ilbID'),'/frontendIPConfigurations/',parameters('availabilitygroupname')]",
         "ilbBEAddressPoolID": "[concat(variables('ilbID'),'/backendAddressPools/',variables('ilbBE'))]",
         "ilbProbe1":"[concat('namePrefix','ilbp1')]",
         "ilbProbeID1" : "[concat(variables('ilbID'),'/probes/',variables('ilbProbe1'))]" ,
@@ -232,7 +236,8 @@
                     "FirstNode":  "[concat(variables('vmNamePrefix'), '1')]",
                     "ClusterStaticIP": "[variables('clusteripwithsubnetclass')]",
                     "AvailabilityGroupName": "[parameters('availabilityGroupName')]",
-                    "ListenerStaticIP": "[parameters('listenerStaticIP')]"
+                    "ListenerStaticIP": "[parameters('listenerStaticIP')]",
+                    "sqlPort": "[parameters('sqlPort')]"                   
                     }
                 },
               "protectedSettings": {
@@ -299,8 +304,18 @@
                         "subnet":{
                             "id": "[variables('subnetRef')]"
                         }
+                        }
+                    },
+                    {                    
+                        "name": "[parameters('availabilityGroupName')]",
+                        "properties":{
+                            "privateIPAllocationMethod": "Static",
+                            "privateIPAddress": "[parameters('ListenerStaticIP')]",
+                            "subnet":{
+                                "id": "[variables('subnetRef')]"
+                            }
+                        }
                     }
-                }
                 ],
                 "backendAddressPools": [
                     {
@@ -309,10 +324,10 @@
                 ],
                 "loadBalancingRules":[
                     {
-                        "name": "sql-1433",
+                        "name": "SQL",
                         "properties":{
                             "frontendIPConfiguration":{
-                                "id": "[variables('ilbFEConfigID1')]"
+                                "id": "[variables('listenerConfigID1')]"
                             },
                             "backendAddressPool": {
                                 "id": "[variables('ilbBEAddressPoolID')]"
@@ -321,13 +336,13 @@
                                 "id":"[variables('ilbProbeID1')]"
                             },
                             "protocol": "Tcp",
-                            "frontendPort": 1433,
-                            "backendPort": 1433,
+                            "frontendPort": "[parameters('sqlPort')]",
+                            "backendPort": "[parameters('sqlPort')]",
                             "enableFloatingIP": true
                         }
                     },
                     {
-                        "name": "sql-445",
+                        "name": "FileSharing",
                         "properties":{
                             "frontendIPConfiguration":{
                                 "id":"[variables('ilbFEConfigID1')]"
