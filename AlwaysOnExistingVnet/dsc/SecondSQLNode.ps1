@@ -28,7 +28,7 @@ configuration AlwaysOnSqlServer
         [Parameter(Mandatory)]
         [string]$ListenerStaticIP,
         [string]$SQLPort=1433,
-        
+
         [Int]$RetryCount = 20,
         [Int]$RetryIntervalSec = 30
     )
@@ -244,13 +244,14 @@ configuration AlwaysOnSqlServer
             DependsOn = '[SqlSetup]InstallNamedInstance','[xCluster]JoinSecondNodeToCluster'
         }
 
-        SqlWaitForAG SQLConfigureAG-WaitAGTest1
+        SqlWaitForAG 'SQLConfigureAG-WaitAG'
         {
             Name                 = $AvailabilityGroupName
             RetryIntervalSec     = 20
             RetryCount           = 30
-
             PsDscRunAsCredential = $SqlAdministratorCredential
+
+            DependsOn = '[SqlAlwaysOnService]EnableAlwaysOn'
         }
 
         SqlAGReplica AddReplica
@@ -265,9 +266,8 @@ configuration AlwaysOnSqlServer
             ProcessOnlyOnActiveNode    = 1
             PsDscRunAsCredential = $AdminCreds
         
-            DependsOn                  = '[SqlAlwaysOnService]EnableAlwaysOn'
+            DependsOn                  = '[SqlWaitForAG]SQLConfigureAG-WaitAG'
         }
-
     }
 }
 

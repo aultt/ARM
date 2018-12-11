@@ -115,7 +115,7 @@
         "ilbFE" :"[concat(parameters('namePrefix'),'-ilb-fe')]",
         "ilbBE" :"[concat(parameters('namePrefix'),'-ilb-be')]",
         "ilbFEConfigID1": "[concat(variables('ilbID'),'/frontendIPConfigurations/',variables('ilbFE'))]",
-        "listenerConfigID1": "[concat(variables('ilbID'),'/frontendIPConfigurations/',parameters('availabilitygroupname')]",
+        "listenerConfigID1": "[concat(variables('ilbID'),'/frontendIPConfigurations/',parameters('availabilityGroupName'))]",
         "ilbBEAddressPoolID": "[concat(variables('ilbID'),'/backendAddressPools/',variables('ilbBE'))]",
         "ilbProbe1":"[concat('namePrefix','ilbp1')]",
         "ilbProbeID1" : "[concat(variables('ilbID'),'/probes/',variables('ilbProbe1'))]" ,
@@ -310,7 +310,7 @@
                         "name": "[parameters('availabilityGroupName')]",
                         "properties":{
                             "privateIPAllocationMethod": "Static",
-                            "privateIPAddress": "[parameters('ListenerStaticIP')]",
+                            "privateIPAddress": "10.50.2.56",
                             "subnet":{
                                 "id": "[variables('subnetRef')]"
                             }
