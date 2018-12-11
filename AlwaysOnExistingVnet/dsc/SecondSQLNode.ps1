@@ -9,33 +9,31 @@ configuration AlwaysOnSqlServer
         [Parameter(Mandatory)]
         [System.Management.Automation.PSCredential]$Admincreds,
 
-        #[Parameter(Mandatory)]
-        #[System.Management.Automation.PSCredential]$SQLServicecreds,
+        [Parameter(Mandatory)]
+        [System.Management.Automation.PSCredential]$SQLServicecreds,
         [string]$imageoffer = "SQL2016-WS2016",
         [string]$SQLFeatures = "SQLENGINE",
         [string]$SQLInstanceName = "MSSQLSERVER",
         [string]$datadriveLetter = 'C',
-        #[string]$datadrivelabel,
-        #[string]$datadriveSize,
         [string]$logdriveLetter = 'C',
-        #[string]$logdrivelabel,
-        #[string]$logdriveSize,
         [string]$tempdbdriveLetter = 'D',
-        #[string]$tempdbdrivelabel,
-        #[string]$tempdbdriveSize,
+        [Parameter(Mandatory)]
         [string]$ClusterName,
+        [Parameter(Mandatory)]
         [string]$ClusterStaticIP,
+        [Parameter(Mandatory)]
         [string]$FirstNode,
-
+        [Parameter(Mandatory)]
+        [string]$AvailabilityGroupName,
+        [Parameter(Mandatory)]
+        [string]$ListenerStaticIP,
+        
         [Int]$RetryCount = 20,
         [Int]$RetryIntervalSec = 30
     )
 
     
     Import-DscResource -ModuleName ComputerManagementdsc, sqlserverdsc, xFailOverCluster, xPendingReboot
-    #[System.Management.Automation.PSCredential]$DomainCreds = New-Object System.Management.Automation.PSCredential ($Admincreds.UserName, $Admincreds.Password)
-    #[System.Management.Automation.PSCredential]$DomainFQDNCreds = New-Object System.Management.Automation.PSCredential ($Admincreds.UserName, $Admincreds.Password)
-    #[System.Management.Automation.PSCredential]$SQLCreds = New-Object System.Management.Automation.PSCredential ($Admincreds.UserName, $Admincreds.Password)
 
     $SQLVersion = $imageoffer.Substring(5,2)
     $SQLLocation = "MSSQL$(switch ($SQLVersion){17 {14} 16 {13}})"
@@ -107,7 +105,7 @@ configuration AlwaysOnSqlServer
           Name             = 'High performance'
         }
 
-        TimeZone TimeZoneExample
+        TimeZone SetTimeZone
         {
             IsSingleInstance = 'Yes'
             TimeZone         = 'Eastern Standard Time'
@@ -131,6 +129,7 @@ configuration AlwaysOnSqlServer
             InstanceName          = $SQLInstanceName
             Features              = $SQLFeatures
             SQLCollation          = 'SQL_Latin1_General_CP1_CI_AS'
+            SQLSvcAccount         = $SQLServicecreds
             SQLSysAdminAccounts   = 'TAMZ\DBA'
             InstallSharedDir      = 'C:\Program Files\Microsoft SQL Server'
             InstallSharedWOWDir   = 'C:\Program Files (x86)\Microsoft SQL Server'
@@ -138,8 +137,8 @@ configuration AlwaysOnSqlServer
             InstallSQLDataDir     = "${datadriveletter}:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\"
             SQLUserDBDir          = "${datadriveletter}:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\Data"
             SQLUserDBLogDir       = "${logdriveletter}:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\Log"
-            SQLTempDBDir          = "${tempdbdriveletter}:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\TempDb"
-            SQLTempDBLogDir       = "${tempdbdriveletter}:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\TempDb"
+            SQLTempDBDir          = "${datadriveletter}:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\Data"
+            SQLTempDBLogDir       = "${datadriveletter}:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\Data"
             SQLBackupDir          = "${datadriveletter}:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\Backup"
             SourcePath            = 'C:\SQLServerFull'
             UpdateEnabled         = 'False'
@@ -181,15 +180,78 @@ configuration AlwaysOnSqlServer
             DependsOn = '[SqlSetup]InstallNamedInstance'
         }
         
+        SqlServerLogin AddNTServiceClusSvc
+        {
+            Ensure               = 'Present'
+            Name                 = 'NT SERVICE\ClusSvc'
+            LoginType            = 'WindowsUser'
+            ServerName           = $env:COMPUTERNAME
+            InstanceName         = $SQLInstanceName
+            PsDscRunAsCredential = $AdminCreds
+            
+            DependsOn = '[SqlSetup]InstallNamedInstance', '[xCluster]JoinSecondNodeToCluster'
+        }
+
+        # Add the required permissions to the cluster service login
+        SqlServerPermission AddNTServiceClusSvcPermissions
+        {
+            
+            Ensure               = 'Present'
+            ServerName           = $env:COMPUTERNAME
+            InstanceName         = $SQLInstanceName
+            Principal            = 'NT SERVICE\ClusSvc'
+            Permission           = 'AlterAnyAvailabilityGroup', 'ViewServerState'
+            PsDscRunAsCredential = $AdminCreds
+
+            DependsOn            = '[SqlServerLogin]AddNTServiceClusSvc'
+        }
+
+        # Create a DatabaseMirroring endpoint
+        SqlServerEndpoint HADREndpoint
+        {
+            EndPointName         = 'HADR'
+            Ensure               = 'Present'
+            Port                 = 5022
+            ServerName           = $env:COMPUTERNAME
+            InstanceName         = $SQLInstanceName
+            PsDscRunAsCredential = $AdminCreds
+
+            DependsOn = '[SqlSetup]InstallNamedInstance', '[xCluster]JoinSecondNodeToCluster'
+        }
+
         SqlAlwaysOnService 'EnableAlwaysOn'
         {
             Ensure               = 'Present'
-            ServerName           = 'LOCALHOST'
-            InstanceName         = 'MSSQLSERVER'
+            ServerName           = $env:COMPUTERNAME
+            InstanceName         = $SQLInstanceName
             RestartTimeout       = 120
             PsDscRunAsCredential = $Admincreds
 
             DependsOn = '[SqlSetup]InstallNamedInstance','[xCluster]JoinSecondNodeToCluster'
+        }
+
+        SqlWaitForAG SQLConfigureAG-WaitAGTest1
+        {
+            Name                 = $AvailabilityGroupName
+            RetryIntervalSec     = 20
+            RetryCount           = 30
+
+            PsDscRunAsCredential = $SqlAdministratorCredential
+        }
+
+        SqlAGReplica AddReplica
+        {
+            Ensure                     = 'Present'
+            Name                       = $env:COMPUTERNAME
+            AvailabilityGroupName      = $AvailabilityGroupName
+            ServerName                 = $env:COMPUTERNAME
+            InstanceName               = $SQLInstanceName
+            PrimaryReplicaServerName   = $FirstNode
+            PrimaryReplicaInstanceName = $SQLInstanceName
+            ProcessOnlyOnActiveNode    = 1
+            PsDscRunAsCredential = $AdminCreds
+        
+            DependsOn                  = '[SqlAlwaysOnService]EnableAlwaysOn'
         }
 
     }
@@ -222,7 +284,8 @@ $ConfigData = @{
     )
 }
 
-#$AdminCreds = Get-Credential
-#$SvcCreds = $AdminCreds
- #SecondaryAlwaysOnSqlServer -DomainName tamz.local -Admincreds $AdminCreds -SQLServicecreds $SvcCreds -Verbose -ConfigurationData $ConfigData -OutputPath d:\
- #Start-DscConfiguration -wait -Force -Verbose -Path D:\
+#  $AdminCreds = Get-Credential
+# $SQLServicecreds = $AdminCreds
+# AlwaysOnSQLServer -DomainName tamz.local -Admincreds $AdminCreds -SQLServicecreds $SQLServicecreds -ClusterName AES3000-c -FirstNode AES3000-1 -ClusterStaticIP "10.50.2.55/24" -Verbose -ConfigurationData $ConfigData -OutputPath d:\
+# Start-DscConfiguration -wait -Force -Verbose -Path D:\
+

@@ -40,6 +40,12 @@
         "domainUserPassword": {
             "type": "securestring"
         },
+        "sqlUserName":{
+            "type":"string"
+        },
+        "sqlUserPassword": {
+            "type": "securestring"
+        },
         "networkSecurityGroupName":{
             "type": "string"
         },
@@ -53,6 +59,12 @@
             "type": "string"
         },
         "ClusterStaticIPSubnetClass":{
+            "type": "string"
+        },
+        "availabilityGroupName":{
+            "type": "string"
+        },
+        "listenerStaticIP":{
             "type": "string"
         },
         "vmcount": {
@@ -80,7 +92,7 @@
             "metadata": {
               "description": "Location of resources that the script is dependent on such as linked templates and DSC modules"
             },
-            "defaultValue": "https://raw.githubusercontent.com/aultt/ARM/master/AlwaysOnExistingVnet" 
+            "defaultValue": "https://raw.githubusercontent.com/aultt/ARM/dev/AlwaysOnExistingVnet" 
           },
           "_artifactsLocationSasToken": {
             "type": "securestring",
@@ -210,7 +222,7 @@
               "settings": {
                   "wmfversion" :"latest",
                   "configuration": {
-                      "url": "https://raw.githubusercontent.com/aultt/ARM/master/AlwaysOnExistingVnet/dsc/Cluster.ps1.zip",
+                      "url": "https://raw.githubusercontent.com/aultt/ARM/dev/AlwaysOnExistingVnet/dsc/Cluster.ps1.zip",
                       "script": "[if(equals(copyIndex(),0),'PrimarySQLNode.ps1','SecondSQLNode.ps1')]",
                       "function" : "AlwaysOnSQLServer"
                   },
@@ -218,7 +230,9 @@
                     "domainName": "[parameters('domainName')]",
                     "ClusterName":"[concat(variables('vmnamePrefix'),'C')]",
                     "FirstNode":  "[concat(variables('vmNamePrefix'), '1')]",
-                    "ClusterStaticIP": "[variables('clusteripwithsubnetclass')]"
+                    "ClusterStaticIP": "[variables('clusteripwithsubnetclass')]",
+                    "AvailabilityGroupName": "[parameters('availabilityGroupName')]",
+                    "ListenerStaticIP": "[parameters('listenerStaticIP')]"
                     }
                 },
               "protectedSettings": {
@@ -226,7 +240,11 @@
                     "adminCreds": {
                     "userName": "[parameters('domainUsername')]",
                     "password": "[parameters('domainUserPassword')]"
-                        }
+                        },
+                    "SQLServicecreds": {
+                      "userName": "[parameters('sqlUsername')]",
+                      "password": "[parameters('sqlUserPassword')]"
+                       }   
                     }
                 }      
             }
