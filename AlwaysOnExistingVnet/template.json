@@ -61,13 +61,16 @@
         "ClusterStaticIP": {
             "type": "string"
         },
-        "ClusterStaticIPSubnetClass":{
+        "ClusterIPSubnetClass":{
             "type": "string"
         },
         "availabilityGroupName":{
             "type": "string"
         },
         "listenerStaticIP":{
+            "type": "string"
+        },
+        "listenerSubnetMask":{
             "type": "string"
         },
         "vmcount": {
@@ -118,8 +121,8 @@
         "listenerConfigID1": "[concat(variables('ilbID'),'/frontendIPConfigurations/',parameters('availabilityGroupName'))]",
         "ilbBEAddressPoolID": "[concat(variables('ilbID'),'/backendAddressPools/',variables('ilbBE'))]",
         "ilbProbe1":"[concat('namePrefix','ilbp1')]",
-        "ilbProbeID1" : "[concat(variables('ilbID'),'/probes/',variables('ilbProbe1'))]" ,
-        "clusteripwithsubnetclass": "[concat(parameters('ClusterStaticIP'),'/',parameters('ClusterStaticIPSubnetClass'))]"
+        "SQLProbe1":"[concat('namePrefix','sql')]",
+        "ilbProbeID1" : "[concat(variables('ilbID'),'/probes/',variables('ilbProbe1'))]" 
     },
     "resources": [
         {
@@ -234,9 +237,11 @@
                     "domainName": "[parameters('domainName')]",
                     "ClusterName":"[concat(variables('vmnamePrefix'),'C')]",
                     "FirstNode":  "[concat(variables('vmNamePrefix'), '1')]",
-                    "ClusterStaticIP": "[variables('clusteripwithsubnetclass')]",
+                    "ClusterStaticIP": "[variables('clusterStaticIP')]",
+                    "ClusterIPSubnetClass": "[variables('clusterIpSubnetClass')]",
                     "AvailabilityGroupName": "[parameters('availabilityGroupName')]",
                     "ListenerStaticIP": "[parameters('listenerStaticIP')]",
+                    "ListenerSubnetMask": "[parameters('listenerSubnetMask')]",
                     "sqlPort": "[parameters('sqlPort')]"                   
                     }
                 },
@@ -362,14 +367,24 @@
                 ],
                 "probes":[
                     {
+                        "name": "[variables('sqlProbe1')]",
+                        "properties": {
+                                "protocol":"Tcp",
+                                "port": 59999,
+                                "intervalInSeconds": 5,
+                                "numberOfProbes": 2
+                        }
+                    },
+                    {
                         "name": "[variables('ilbProbe1')]",
                         "properties": {
                                 "protocol":"Tcp",
-                                "port": 37000,
+                                "port": 58888,
                                 "intervalInSeconds": 5,
                                 "numberOfProbes": 2
                         }
                     }
+
                 ]
             }
         },

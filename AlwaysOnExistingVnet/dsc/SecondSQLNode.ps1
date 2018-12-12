@@ -22,23 +22,29 @@ configuration AlwaysOnSqlServer
         [Parameter(Mandatory)]
         [string]$ClusterStaticIP,
         [Parameter(Mandatory)]
+        [string]$ClusterIPSubnetClass,
+        [Parameter(Mandatory)]
         [string]$FirstNode,
         [Parameter(Mandatory)]
         [string]$AvailabilityGroupName,
         [Parameter(Mandatory)]
         [string]$ListenerStaticIP,
+        [Parameter(Mandatory)]
+        [string]$ListenerSubnetMask,
         [string]$SQLPort=1433,
-
+        
         [Int]$RetryCount = 20,
         [Int]$RetryIntervalSec = 30
     )
 
     
     Import-DscResource -ModuleName ComputerManagementdsc, sqlserverdsc, xFailOverCluster, xPendingReboot
-
+    
+    $ListenerIPandMask = $ListenerStaticIP + '/'+$ListenerSubnetMask
     $SQLVersion = $imageoffer.Substring(5,2)
     $SQLLocation = "MSSQL$(switch ($SQLVersion){17 {14} 16 {13}})"
-    
+    $IPResourceName = $AvailabilityGroupName +'_'+ $ListenerStaticIP
+
     WaitForSqlSetup
 
     Node localhost
@@ -112,6 +118,7 @@ configuration AlwaysOnSqlServer
             TimeZone         = 'Eastern Standard Time'
         }
         
+
         Script CleanSQL
         {
             SetScript  = 'C:\SQLServerFull\Setup.exe /Action=Uninstall /FEATURES=SQL,AS,RS,IS /INSTANCENAME=MSSQLSERVER /Q'
@@ -300,6 +307,7 @@ $ConfigData = @{
 
 #  $AdminCreds = Get-Credential
 # $SQLServicecreds = $AdminCreds
-# AlwaysOnSQLServer -DomainName tamz.local -Admincreds $AdminCreds -SQLServicecreds $SQLServicecreds -ClusterName AES3000-c -FirstNode AES3000-1 -ClusterStaticIP "10.50.2.55/24" -Verbose -ConfigurationData $ConfigData -OutputPath d:\
+# AlwaysOnSQLServer -DomainName tamz.local -Admincreds $AdminCreds -SQLServicecreds $SQLServicecreds -ClusterName AES3000-c -FirstNode AES3000-1 -ListenerStaticIP "10.50.2.56" -ListenerSubnetMask "255.255.255.0" -availabilityGroupName "TestAG" -ClusterStaticIP "10.50.2.55" -ClusterIPSubnetClass "24" -Verbose -ConfigurationData $ConfigData -OutputPath d:\
 # Start-DscConfiguration -wait -Force -Verbose -Path D:\
+
 
