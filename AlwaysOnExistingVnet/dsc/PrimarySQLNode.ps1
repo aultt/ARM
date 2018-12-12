@@ -252,7 +252,7 @@ configuration AlwaysOnSQLServer
             AvailabilityGroup    = $AvailabilityGroupName
             Name                 = $AvailabilityGroupName
             IpAddress            = $ListenerStaticIP
-            Port                 = 5301
+            Port                 = $SQLPort
 
             PsDscRunAsCredential = $AdminCreds
 

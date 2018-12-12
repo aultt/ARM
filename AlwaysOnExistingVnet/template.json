@@ -345,7 +345,7 @@
                         "name": "FileSharing",
                         "properties":{
                             "frontendIPConfiguration":{
-                                "id":"[variables('ilbFEConfigID1')]"
+                                "id":"[variables('listenerConfigID1')]"
                             },
                             "backendAddressPool":{ 
                                 "id": "[variables('ilbBEAddressPoolID')]"
