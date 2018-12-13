@@ -39,7 +39,7 @@ configuration AlwaysOnSQLServer
 
     Import-DscResource -ModuleName ComputerManagementdsc,sqlserverdsc,xFailOverCluster,xPendingReboot
 
-    $ClusterIPandSubNetClass = $ClusterStaticIP+'/'+$ClusterStaticIPSubnetClass
+    $ClusterIPandSubNetClass = $ClusterStaticIP + '/' +$ClusterIPSubnetClass
     $SQLVersion = $imageoffer.Substring(5,2)
     $SQLLocation = "MSSQL$(switch ($SQLVersion){17 {14} 16 {13}})"
     $ListenerIPandMask = $ListenerStaticIP + '/'+$ListenerSubnetMask
@@ -131,7 +131,7 @@ configuration AlwaysOnSQLServer
         xCluster CreateCluster
         {
             Name                          = $ClusterName
-            StaticIPAddress               = $ClusterIPSubnetClass
+            StaticIPAddress               = $ClusterIPandSubNetClass
             FirstNode                     = $FirstNode
             DomainAdministratorCredential = $Admincreds
             DependsOn                     = '[Computer]DomainJoin'
