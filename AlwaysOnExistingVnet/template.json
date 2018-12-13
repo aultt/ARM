@@ -122,7 +122,8 @@
         "ilbBEAddressPoolID": "[concat(variables('ilbID'),'/backendAddressPools/',variables('ilbBE'))]",
         "ilbProbe1":"[concat('namePrefix','ilbp1')]",
         "SQLProbe1":"[concat('namePrefix','sql')]",
-        "ilbProbeID1" : "[concat(variables('ilbID'),'/probes/',variables('ilbProbe1'))]" 
+        "ilbProbeID1" : "[concat(variables('ilbID'),'/probes/',variables('ilbProbe1'))]", 
+        "SQLProbeID1" : "[concat(variables('ilbID'),'/probes/',variables('sqlProbe1'))]" 
     },
     "resources": [
         {
@@ -338,7 +339,7 @@
                                 "id": "[variables('ilbBEAddressPoolID')]"
                             },
                             "probe":{
-                                "id":"[variables('ilbProbeID1')]"
+                                "id":"[variables('SQLProbeID1')]"
                             },
                             "protocol": "Tcp",
                             "frontendPort": "[parameters('sqlPort')]",
@@ -356,7 +357,7 @@
                                 "id": "[variables('ilbBEAddressPoolID')]"
                             },
                             "probe": {
-                                "id": "[variables('ilbProbeID1')]"
+                                "id": "[variables('SQLProbeID1')]"
                             },
                             "protocol": "Tcp",
                             "frontendPort": 445,
