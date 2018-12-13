@@ -143,7 +143,7 @@ configuration AlwaysOnSQLServer
                                 
             SetScript  = {
                             
-                            Get-ClusterResource "Cluster IP Address"| Set-ClusterParameter -Multiple @{"Address"="$ClusterStaticIP";"ProbePort"=59999;"SubnetMask"="$using:ListenerSubnetMask";"Network"="Cluster Network 1";"EnableDhcp"=0}
+                            Get-ClusterResource "Cluster IP Address"| Set-ClusterParameter -Multiple @{"Address"="$using:ClusterStaticIP";"ProbePort"=59999;"SubnetMask"="$using:ListenerSubnetMask";"Network"="Cluster Network 1";"EnableDhcp"=0}
                             Stop-ClusterResource "Cluster IP Address"
                             Start-ClusterResource "Cluster IP Address"
                          }
@@ -204,7 +204,7 @@ configuration AlwaysOnSQLServer
 
             PsDscRunAsCredential  = $AdminCreds
 
-            DependsOn             = '[Script]CleanSQL','[Computer]DomainJoin'
+            DependsOn             = '[xPendingReboot]Reboot1'
         }
 
         SqlServerNetwork 'ChangeTcpIpOnDefaultInstance'

@@ -55,6 +55,48 @@ configuration AlwaysOnSqlServer
             RebootNodeIfNeeded = $True
             ActionAfterReboot = 'ContinueConfiguration'
         }
+        
+        Script  FireWallRuleforSQLProbe
+        {
+            GetScript = {
+                            $test = Get-NetFirewallRule -DisplayName "Load Balancer SQL Probe" -ErrorAction SilentlyContinue
+                            if ($test)
+                            {return @{ 'Result' = $test}}
+                            else
+                            {return @{ 'Result' = "No Rule Present"} }
+                        }
+            SetScript = {New-NetFirewallRule -DisplayName "Load Balancer SQL Probe" -Direction Inbound -Action Allow -Protocol TCP -LocalPort 59999}
+            TestScript = { 
+                            $test = Get-NetFirewallRule -DisplayName "Load Balancer SQL Probe" -ErrorAction SilentlyContinue
+                            if ($test)
+                            {return $true}
+                            else
+                            {return $false}
+                         }
+
+            PsDscRunAsCredential = $AdminCreds
+        }
+        
+        Script  FireWallRuleforClusterProbe
+        {
+            GetScript = {
+                            $test = Get-NetFirewallRule -DisplayName "Load Balancer Cluster Probe" -ErrorAction SilentlyContinue
+                            if ($test)
+                            {return @{ 'Result' = $test}}
+                            else
+                            {return @{ 'Result' = "No Rule Present"} }
+                        }
+            SetScript = {New-NetFirewallRule -DisplayName "Load Balancer Cluster Probe" -Direction Inbound -Action Allow -Protocol TCP -LocalPort 58888}
+            TestScript = { 
+                            $test = Get-NetFirewallRule -DisplayName "Load Balancer Cluster Probe" -ErrorAction SilentlyContinue
+                            if ($test)
+                            {return $true}
+                            else
+                            {return $false}
+                         }
+
+            PsDscRunAsCredential = $AdminCreds
+        }
 
         WindowsFeature AddFailoverFeature
         {
@@ -156,7 +198,7 @@ configuration AlwaysOnSqlServer
 
             PsDscRunAsCredential  = $Admincreds
 
-            DependsOn             = '[Computer]DomainJoin','[Script]CleanSQL'
+            DependsOn             = '[xPendingReboot]Reboot1'
         }
 
         SqlServerNetwork 'ChangeTcpIpOnDefaultInstance'
