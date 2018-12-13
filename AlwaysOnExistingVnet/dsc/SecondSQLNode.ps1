@@ -22,11 +22,16 @@ configuration AlwaysOnSqlServer
         [Parameter(Mandatory)]
         [string]$ClusterStaticIP,
         [Parameter(Mandatory)]
+        [string]$ClusterIPSubnetClass,
+        [Parameter(Mandatory)]
         [string]$FirstNode,
         [Parameter(Mandatory)]
         [string]$AvailabilityGroupName,
         [Parameter(Mandatory)]
         [string]$ListenerStaticIP,
+        [Parameter(Mandatory)]
+        [string]$ListenerSubnetMask,
+        [string]$SQLPort=1433,
         
         [Int]$RetryCount = 20,
         [Int]$RetryIntervalSec = 30
@@ -34,10 +39,13 @@ configuration AlwaysOnSqlServer
 
     
     Import-DscResource -ModuleName ComputerManagementdsc, sqlserverdsc, xFailOverCluster, xPendingReboot
-
+    
+    $ClusterIPandSubNetClass = $ClusterStaticIP + '/' +$ClusterIPSubnetClass
+    $ListenerIPandMask = $ListenerStaticIP + '/'+$ListenerSubnetMask
     $SQLVersion = $imageoffer.Substring(5,2)
     $SQLLocation = "MSSQL$(switch ($SQLVersion){17 {14} 16 {13}})"
-    
+    $IPResourceName = $AvailabilityGroupName +'_'+ $ListenerStaticIP
+
     WaitForSqlSetup
 
     Node localhost
@@ -46,6 +54,48 @@ configuration AlwaysOnSqlServer
         {
             RebootNodeIfNeeded = $True
             ActionAfterReboot = 'ContinueConfiguration'
+        }
+        
+        Script  FireWallRuleforSQLProbe
+        {
+            GetScript = {
+                            $test = Get-NetFirewallRule -DisplayName "Load Balancer SQL Probe" -ErrorAction SilentlyContinue
+                            if ($test)
+                            {return @{ 'Result' = $test}}
+                            else
+                            {return @{ 'Result' = "No Rule Present"} }
+                        }
+            SetScript = {New-NetFirewallRule -DisplayName "Load Balancer SQL Probe" -Direction Inbound -Action Allow -Protocol TCP -LocalPort 59999}
+            TestScript = { 
+                            $test = Get-NetFirewallRule -DisplayName "Load Balancer SQL Probe" -ErrorAction SilentlyContinue
+                            if ($test)
+                            {return $true}
+                            else
+                            {return $false}
+                         }
+
+            PsDscRunAsCredential = $AdminCreds
+        }
+        
+        Script  FireWallRuleforClusterProbe
+        {
+            GetScript = {
+                            $test = Get-NetFirewallRule -DisplayName "Load Balancer Cluster Probe" -ErrorAction SilentlyContinue
+                            if ($test)
+                            {return @{ 'Result' = $test}}
+                            else
+                            {return @{ 'Result' = "No Rule Present"} }
+                        }
+            SetScript = {New-NetFirewallRule -DisplayName "Load Balancer Cluster Probe" -Direction Inbound -Action Allow -Protocol TCP -LocalPort 58888}
+            TestScript = { 
+                            $test = Get-NetFirewallRule -DisplayName "Load Balancer Cluster Probe" -ErrorAction SilentlyContinue
+                            if ($test)
+                            {return $true}
+                            else
+                            {return $false}
+                         }
+
+            PsDscRunAsCredential = $AdminCreds
         }
 
         WindowsFeature AddFailoverFeature
@@ -94,7 +144,7 @@ configuration AlwaysOnSqlServer
         {
             Name                          = $ClusterName
             FirstNode                     = $FirstNode
-            StaticIPAddress               = $ClusterStaticIP
+            StaticIPAddress               = $ClusterIPandSubNetClass
             DomainAdministratorCredential = $Admincreds
             DependsOn                     = '[xWaitForCluster]WaitForCluster','[Computer]DomainJoin'
         }
@@ -111,17 +161,20 @@ configuration AlwaysOnSqlServer
             TimeZone         = 'Eastern Standard Time'
         }
         
+
         Script CleanSQL
         {
             SetScript  = 'C:\SQLServerFull\Setup.exe /Action=Uninstall /FEATURES=SQL,AS,RS,IS /INSTANCENAME=MSSQLSERVER /Q'
             TestScript = "(test-path -Path `"C:\Program Files\Microsoft SQL Server\$SQLLocation.MSSQLSERVER\MSSQL\DATA\master.mdf`") -eq `$false"
             GetScript  = "@{Ensure = if ((test-path -Path `"C:\Program Files\Microsoft SQL Server\$SQLLocation.MSSQLSERVER\MSSQL\DATA\master.mdf`") -eq `$false) {'Present'} Else {'Absent'}}"
+            
+            DependsON = '[Computer]DomainJoin'
         }
 
         xPendingReboot Reboot1
         {
             Name = 'Reboot1'
-            dependson = '[Computer]DomainJoin','[Script]CleanSQL'
+            dependson = '[Script]CleanSQL'
         }
 
         SqlSetup 'InstallNamedInstance'
@@ -147,7 +200,20 @@ configuration AlwaysOnSqlServer
 
             PsDscRunAsCredential  = $Admincreds
 
-            DependsOn             = '[Computer]DomainJoin','[Script]CleanSQL'
+            DependsOn             = '[xPendingReboot]Reboot1'
+        }
+
+        SqlServerNetwork 'ChangeTcpIpOnDefaultInstance'
+        {
+            InstanceName         = $SQLInstanceName
+            ProtocolName         = 'Tcp'
+            IsEnabled            = $true
+            TCPDynamicPort       = $false
+            TCPPort              = $SQLPort
+            RestartService       = $true
+            DependsOn = '[SqlSetup]InstallNamedInstance'
+            
+            PsDscRunAsCredential = $AdminCreds
         }
 
         SqlServerMaxDop Set_SQLServerMaxDop_ToAuto
@@ -230,13 +296,14 @@ configuration AlwaysOnSqlServer
             DependsOn = '[SqlSetup]InstallNamedInstance','[xCluster]JoinSecondNodeToCluster'
         }
 
-        SqlWaitForAG SQLConfigureAG-WaitAGTest1
+        SqlWaitForAG 'SQLConfigureAG-WaitAG'
         {
             Name                 = $AvailabilityGroupName
             RetryIntervalSec     = 20
             RetryCount           = 30
-
             PsDscRunAsCredential = $SqlAdministratorCredential
+
+            DependsOn = '[SqlAlwaysOnService]EnableAlwaysOn'
         }
 
         SqlAGReplica AddReplica
@@ -251,9 +318,8 @@ configuration AlwaysOnSqlServer
             ProcessOnlyOnActiveNode    = 1
             PsDscRunAsCredential = $AdminCreds
         
-            DependsOn                  = '[SqlAlwaysOnService]EnableAlwaysOn'
+            DependsOn                  = '[SqlWaitForAG]SQLConfigureAG-WaitAG'
         }
-
     }
 }
 
@@ -286,6 +352,7 @@ $ConfigData = @{
 
 #  $AdminCreds = Get-Credential
 # $SQLServicecreds = $AdminCreds
-# AlwaysOnSQLServer -DomainName tamz.local -Admincreds $AdminCreds -SQLServicecreds $SQLServicecreds -ClusterName AES3000-c -FirstNode AES3000-1 -ClusterStaticIP "10.50.2.55/24" -Verbose -ConfigurationData $ConfigData -OutputPath d:\
+# AlwaysOnSQLServer -DomainName tamz.local -Admincreds $AdminCreds -SQLServicecreds $SQLServicecreds -ClusterName AES3000-c -FirstNode AES3000-1 -ListenerStaticIP "10.50.2.56" -ListenerSubnetMask "255.255.255.0" -availabilityGroupName "TestAG" -ClusterStaticIP "10.50.2.55" -ClusterIPSubnetClass "24" -Verbose -ConfigurationData $ConfigData -OutputPath d:\
 # Start-DscConfiguration -wait -Force -Verbose -Path D:\
+
 

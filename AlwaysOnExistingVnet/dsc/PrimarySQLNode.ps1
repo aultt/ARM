@@ -21,12 +21,16 @@ configuration AlwaysOnSQLServer
         [Parameter(Mandatory)]
         [string]$ClusterStaticIP,
         [Parameter(Mandatory)]
+        [string]$ClusterIPSubnetClass,
+        [Parameter(Mandatory)]
         [string]$FirstNode,
         [Parameter(Mandatory)]
         [string]$AvailabilityGroupName,
         [Parameter(Mandatory)]
         [string]$ListenerStaticIP,
-
+        [Parameter(Mandatory)]
+        [string]$ListenerSubnetMask,
+        [string]$SQLPort=1433,
         
         [Int]$RetryCount = 20,
         [Int]$RetryIntervalSec = 30
@@ -35,9 +39,12 @@ configuration AlwaysOnSQLServer
 
     Import-DscResource -ModuleName ComputerManagementdsc,sqlserverdsc,xFailOverCluster,xPendingReboot
 
+    $ClusterIPandSubNetClass = $ClusterStaticIP + '/' +$ClusterIPSubnetClass
     $SQLVersion = $imageoffer.Substring(5,2)
     $SQLLocation = "MSSQL$(switch ($SQLVersion){17 {14} 16 {13}})"
-    
+    $ListenerIPandMask = $ListenerStaticIP + '/'+$ListenerSubnetMask
+    $IPResourceName = $AvailabilityGroupName +'_'+ $ListenerStaticIP
+
     WaitForSqlSetup
 
     Node localhost
@@ -47,7 +54,48 @@ configuration AlwaysOnSQLServer
             RebootNodeIfNeeded = $true
             ActionAfterReboot = 'ContinueConfiguration'
         }
+        
+        Script  FireWallRuleforSQLProbe
+        {
+            GetScript = {
+                            $test = Get-NetFirewallRule -DisplayName "Load Balancer SQL Probe" -ErrorAction SilentlyContinue
+                            if ($test)
+                            {return @{ 'Result' = $test}}
+                            else
+                            {return @{ 'Result' = "No Rule Present"} }
+                        }
+            SetScript = {New-NetFirewallRule -DisplayName "Load Balancer SQL Probe" -Direction Inbound -Action Allow -Protocol TCP -LocalPort 59999}
+            TestScript = { 
+                            $test = Get-NetFirewallRule -DisplayName "Load Balancer SQL Probe" -ErrorAction SilentlyContinue
+                            if ($test)
+                            {return $true}
+                            else
+                            {return $false}
+                         }
 
+            PsDscRunAsCredential = $AdminCreds
+        }
+        
+        Script  FireWallRuleforClusterProbe
+        {
+            GetScript = {
+                            $test = Get-NetFirewallRule -DisplayName "Load Balancer Cluster Probe" -ErrorAction SilentlyContinue
+                            if ($test)
+                            {return @{ 'Result' = $test}}
+                            else
+                            {return @{ 'Result' = "No Rule Present"} }
+                        }
+            SetScript = {New-NetFirewallRule -DisplayName "Load Balancer Cluster Probe" -Direction Inbound -Action Allow -Protocol TCP -LocalPort 58888}
+            TestScript = { 
+                            $test = Get-NetFirewallRule -DisplayName "Load Balancer Cluster Probe" -ErrorAction SilentlyContinue
+                            if ($test)
+                            {return $true}
+                            else
+                            {return $false}
+                         }
+
+            PsDscRunAsCredential = $AdminCreds
+        }
         WindowsFeature FC
         {
             Name = "Failover-Clustering"
@@ -83,10 +131,30 @@ configuration AlwaysOnSQLServer
         xCluster CreateCluster
         {
             Name                          = $ClusterName
-            StaticIPAddress               = $ClusterStaticIP
+            StaticIPAddress               = $ClusterIPandSubNetClass
             FirstNode                     = $FirstNode
             DomainAdministratorCredential = $Admincreds
             DependsOn                     = '[Computer]DomainJoin'
+        }
+
+        Script  AddProbeToClusterResource
+        {
+            GetScript  = {return @{ 'Result' = $(Get-ClusterResource "Cluster IP Address" | Get-ClusterParameter -Name ProbePort ).Value} }
+                                
+            SetScript  = {
+                            
+                            Get-ClusterResource "Cluster IP Address"| Set-ClusterParameter -Multiple @{"Address"="$using:ClusterStaticIP";"ProbePort"=59999;"SubnetMask"="$using:ListenerSubnetMask";"Network"="Cluster Network 1";"EnableDhcp"=0}
+                            #Stop-ClusterResource 'Cluster IP Address'
+                            #Start-ClusterResource 'Cluster IP Address'
+                            #Start-ClusterResource 'Cluster Name' 
+                         }
+            TestScript = {
+                             return($(Get-ClusterResource -name "Cluster IP Address" | Get-ClusterParameter -Name ProbePort ).Value -eq 59999)
+                         }
+
+            PsDscRunAsCredential = $AdminCreds
+
+            DependsON = "[xCluster]CreateCluster"
         }
 
         PowerPlan HighPerf
@@ -106,12 +174,13 @@ configuration AlwaysOnSQLServer
             SetScript  = 'C:\SQLServerFull\Setup.exe /Action=Uninstall /FEATURES=SQL,AS,RS,IS /INSTANCENAME=MSSQLSERVER /Q'
             TestScript = "(test-path -Path `"C:\Program Files\Microsoft SQL Server\$SQLLocation.MSSQLSERVER\MSSQL\DATA\master.mdf`") -eq `$false"
             GetScript  = "@{Ensure = if ((test-path -Path `"C:\Program Files\Microsoft SQL Server\$SQLLocation.MSSQLSERVER\MSSQL\DATA\master.mdf`") -eq `$false) {'Present'} Else {'Absent'}}"
+            DependsON = '[Computer]DomainJoin'
         }
 
         xPendingReboot Reboot1
         {
             Name = 'Reboot1'
-            dependson = '[Computer]DomainJoin','[Script]CleanSQL'
+            dependson = '[Script]CleanSQL'
         }
 
         SqlSetup 'InstallNamedInstance'
@@ -137,7 +206,20 @@ configuration AlwaysOnSQLServer
 
             PsDscRunAsCredential  = $AdminCreds
 
-            DependsOn             = '[Script]CleanSQL','[Computer]DomainJoin'
+            DependsOn             = '[xPendingReboot]Reboot1'
+        }
+
+        SqlServerNetwork 'ChangeTcpIpOnDefaultInstance'
+        {
+            InstanceName         = $SQLInstanceName
+            ProtocolName         = 'Tcp'
+            IsEnabled            = $true
+            TCPDynamicPort       = $false
+            TCPPort              = $SQLPort
+            RestartService       = $true
+            DependsOn = '[SqlSetup]InstallNamedInstance'
+            
+            PsDscRunAsCredential = $AdminCreds
         }
 
         SqlServerMaxDop Set_SQLServerMaxDop_ToAuto
@@ -238,12 +320,31 @@ configuration AlwaysOnSQLServer
             InstanceName         = $SQLInstanceName
             AvailabilityGroup    = $AvailabilityGroupName
             Name                 = $AvailabilityGroupName
-            IpAddress            = $ListenerStaticIP
-            Port                 = 5301
+            IpAddress            = $ListenerIPandMask
+            Port                 = $SQLPort
 
             PsDscRunAsCredential = $AdminCreds
 
             DependsON = '[SqlAG]AddAG'
+        }
+        
+        Script  AddProbeToSQLClusterResource
+        {
+            GetScript  = {return @{ 'Result' = $(Get-ClusterResource $using:IPResourceName | Get-ClusterParameter -Name ProbePort ).Value} }
+                                
+            SetScript  = {
+                            
+                            Get-ClusterResource $using:IPResourceName| Set-ClusterParameter -Multiple @{"Address"="$using:ListenerStaticIP";"ProbePort"=59999;"SubnetMask"="$using:ListenerSubnetMask";"Network"="Cluster Network 1";"EnableDhcp"=0}
+                            #Stop-ClusterResource $using:availabilityGroupName
+                            #Start-ClusterResource $using:availabilityGroupName
+                         }
+            TestScript = {
+                             return($(Get-ClusterResource -name $using:IPResourceName | Get-ClusterParameter -Name ProbePort ).Value -eq 59999)
+                         }
+
+            PsDscRunAsCredential = $AdminCreds
+
+            DependsON = "[SqlAGListener]AvailabilityGroupListenerWithSameNameAsVCO"
         }
     }
 }
@@ -277,5 +378,7 @@ $ConfigData = @{
 
 #  $AdminCreds = Get-Credential
 # $SQLServicecreds = $AdminCreds
-# AlwaysOnSQLServer -DomainName tamz.local -Admincreds $AdminCreds -SQLServicecreds $SQLServicecreds -ClusterName AES3000-c -ClusterStaticIP "10.50.2.55/24" -Verbose -ConfigurationData $ConfigData -OutputPath d:\
+# AlwaysOnSQLServer -DomainName tamz.local -Admincreds $AdminCreds -SQLServicecreds $SQLServicecreds -ClusterName AES3000-c -FirstNode AES3000-1 -ListenerStaticIP "10.50.2.56" -ListenerSubnetMask "255.255.255.0" -availabilityGroupName "TestAG" -ClusterStaticIP "10.50.2.55" -ClusterIPSubnetClass "24" -Verbose -ConfigurationData $ConfigData -OutputPath d:\
 # Start-DscConfiguration -wait -Force -Verbose -Path D:\
+
+
