@@ -144,8 +144,9 @@ configuration AlwaysOnSQLServer
             SetScript  = {
                             
                             Get-ClusterResource "Cluster IP Address"| Set-ClusterParameter -Multiple @{"Address"="$using:ClusterStaticIP";"ProbePort"=59999;"SubnetMask"="$using:ListenerSubnetMask";"Network"="Cluster Network 1";"EnableDhcp"=0}
-                            Stop-ClusterResource "Cluster IP Address"
-                            Start-ClusterResource "Cluster IP Address"
+                            Stop-ClusterResource 'Cluster IP Address'
+                            Start-ClusterResource 'Cluster IP Address'
+                            Start-ClusterResource 'Cluster Name' 
                          }
             TestScript = {
                              return($(Get-ClusterResource -name "Cluster IP Address" | Get-ClusterParameter -Name ProbePort ).Value -eq 59999)
