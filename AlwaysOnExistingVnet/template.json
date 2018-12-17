@@ -109,6 +109,8 @@
           }
     },
     "variables": {
+        "witnessStorageName": "[concat(toLower(parameters('namePrefix')),uniqueString(resourceGroup().id),'cw')]",
+        "witnessStorageType": "Standard_LRS",
         "vnetID": "[resourceID(parameters('existingVirtualNetworkRGName'),'Microsoft.Network/virtualNetworks',parameters('existingVirtualNetworkName'))]",
         "subnetRef": "[concat(variables('vnetId'), '/subnets/', parameters('existingSubnetName'))]",
         "diagnosticsExtensionName": "Microsoft.Insights.VMDiagnosticsSettings",
@@ -139,6 +141,17 @@
               "platformUpdateDomainCount": 5,
               "virtualMachines": []
             }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[variables('witnessStorageName')]",
+            "apiVersion": "2017-10-01",
+            "location": "[resourceGroup().location]",
+            "sku": {
+              "name": "[variables('witnessStorageType')]"
+            },
+            "kind": "Storage",
+            "comments": "The storage account used for the SQL Cloud Witness"
         },
         {
             "type": "Microsoft.Compute/virtualMachines",
