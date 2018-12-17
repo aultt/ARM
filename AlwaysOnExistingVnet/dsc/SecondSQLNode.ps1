@@ -36,7 +36,7 @@ configuration AlwaysOnSqlServer
         [string]$CloudWitnessName,
         [Parameter(Mandatory)]
         [System.Management.Automation.PSCredential]$CloudWitnessKey, 
-        
+
         [Int]$RetryCount = 20,
         [Int]$RetryIntervalSec = 30
     )
@@ -309,8 +309,8 @@ configuration AlwaysOnSqlServer
         SqlWaitForAG 'SQLConfigureAG-WaitAG'
         {
             Name                 = $AvailabilityGroupName
-            RetryIntervalSec     = 20
-            RetryCount           = 30
+            RetryIntervalSec     = 30
+            RetryCount           = 40
             PsDscRunAsCredential = $SqlAdministratorCredential
 
             DependsOn = '[xPendingReboot]Reboot2'
@@ -330,6 +330,7 @@ configuration AlwaysOnSqlServer
         
             DependsOn                  = '[SqlWaitForAG]SQLConfigureAG-WaitAG'
         }
+
     }
 }
 
