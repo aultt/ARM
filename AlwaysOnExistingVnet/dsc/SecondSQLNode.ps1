@@ -309,7 +309,7 @@ configuration AlwaysOnSqlServer
             RetryCount           = 30
             PsDscRunAsCredential = $SqlAdministratorCredential
 
-            DependsOn = '[xPendingReboot] Reboot2'
+            DependsOn = '[xPendingReboot]Reboot2'
         }
 
         SqlAGReplica AddReplica
