@@ -296,6 +296,12 @@ configuration AlwaysOnSqlServer
             DependsOn = '[SqlSetup]InstallNamedInstance','[xCluster]JoinSecondNodeToCluster'
         }
 
+        xPendingReboot Reboot2
+        {
+            Name = 'Reboot2'
+            dependson = '[SqlAlwaysOnService]EnableAlwaysOn'
+        }
+
         SqlWaitForAG 'SQLConfigureAG-WaitAG'
         {
             Name                 = $AvailabilityGroupName
@@ -303,7 +309,7 @@ configuration AlwaysOnSqlServer
             RetryCount           = 30
             PsDscRunAsCredential = $SqlAdministratorCredential
 
-            DependsOn = '[SqlAlwaysOnService]EnableAlwaysOn'
+            DependsOn = '[xPendingReboot]Reboot2'
         }
 
         SqlAGReplica AddReplica
