@@ -271,7 +271,10 @@
                       "userName": "[parameters('sqlUsername')]",
                       "password": "[parameters('sqlUserPassword')]"
                        },
-                    "CloudWitnessKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts',variables('witnessStorageName')),variables('apiVersionStorage')).keys[0].value]"   
+                    "CloudWitnessKey":{
+                        "userName": "PLACEHOLDER-DO-NOT-USE",
+                         "password": "[listKeys(resourceId('Microsoft.Storage/storageAccounts',variables('witnessStorageName')),variables('apiVersionStorage')).keys[0].value]"   
+                        }
                     }
                 }      
             }

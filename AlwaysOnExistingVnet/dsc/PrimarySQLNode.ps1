@@ -148,7 +148,8 @@ configuration AlwaysOnSQLServer
             SetScript  = {
                             
                             Get-ClusterResource "Cluster IP Address"| Set-ClusterParameter -Multiple @{"Address"="$using:ClusterStaticIP";"ProbePort"=59999;"SubnetMask"="$using:ListenerSubnetMask";"Network"="Cluster Network 1";"EnableDhcp"=0}
-                         }
+                            $global:DSCMachineStatus = 1  
+                        }
             TestScript = {
                              return($(Get-ClusterResource -name "Cluster IP Address" | Get-ClusterParameter -Name ProbePort ).Value -eq 59999)
                          }
@@ -346,7 +347,8 @@ configuration AlwaysOnSQLServer
             SetScript  = {
                             
                             Get-ClusterResource $using:IPResourceName| Set-ClusterParameter -Multiple @{"Address"="$using:ListenerStaticIP";"ProbePort"=59999;"SubnetMask"="$using:ListenerSubnetMask";"Network"="Cluster Network 1";"EnableDhcp"=0}
-                         }
+                            $global:DSCMachineStatus = 1  
+                        }
             TestScript = {
                              return($(Get-ClusterResource -name $using:IPResourceName | Get-ClusterParameter -Name ProbePort ).Value -eq 59999)
                          }
