@@ -32,6 +32,10 @@ configuration AlwaysOnSqlServer
         [Parameter(Mandatory)]
         [string]$ListenerSubnetMask,
         [string]$SQLPort=1433,
+        [Parameter(Mandatory)]
+        [string]$CloudWitnessName,
+        [Parameter(Mandatory)]
+        [System.Management.Automation.PSCredential]$CloudWitnessKey, 
         
         [Int]$RetryCount = 20,
         [Int]$RetryIntervalSec = 30
