@@ -15,7 +15,9 @@ configuration AlwaysOnSQLServer
         [string]$SQLInstanceName = "MSSQLSERVER",
         [string]$datadriveLetter = 'C',
         [string]$logdriveLetter = 'C',
-        [string]$tempdbdriveLetter = 'D',
+        [string]$tempdbdriveLetter = 'C',
+        [string]$SQLSysAdmins = 'TAMZ\DBA',
+        [string]$SourcePath = 'C:\SQLServerFull'
         [Parameter(Mandatory)]
         [string]$ClusterName,
         [Parameter(Mandatory)]
@@ -33,6 +35,7 @@ configuration AlwaysOnSQLServer
         [string]$SQLPort=1433,
         [Parameter(Mandatory)]
         [string]$CloudWitnessName,
+        [string]$TimeZone ="Eastern Standard Time",
         [Parameter(Mandatory)]
         [System.Management.Automation.PSCredential]$CloudWitnessKey, 
 
@@ -177,7 +180,7 @@ configuration AlwaysOnSQLServer
         TimeZone SetTimeZone
         {
             IsSingleInstance = 'Yes'
-            TimeZone         = 'Eastern Standard Time'
+            TimeZone         = $TimeZone
         }
 
         Script CleanSQL
@@ -200,17 +203,17 @@ configuration AlwaysOnSQLServer
             Features              = $SQLFeatures
             SQLCollation          = 'SQL_Latin1_General_CP1_CI_AS'
             SQLSvcAccount         = $SQLServicecreds
-            SQLSysAdminAccounts   = 'TAMZ\DBA'
+            SQLSysAdminAccounts   = $SQLSysAdmins
             InstallSharedDir      = 'C:\Program Files\Microsoft SQL Server'
             InstallSharedWOWDir   = 'C:\Program Files (x86)\Microsoft SQL Server'
             InstanceDir           = "${datadriveletter}:\Program Files\Microsoft SQL Server"
             InstallSQLDataDir     = "${datadriveletter}:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\"
             SQLUserDBDir          = "${datadriveletter}:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\Data"
             SQLUserDBLogDir       = "${logdriveletter}:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\Log"
-            SQLTempDBDir          = "${datadriveletter}:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\Data"
-            SQLTempDBLogDir       = "${datadriveletter}:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\Data"
+            SQLTempDBDir          = "${$tempdbdriveLetter}:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\Data"
+            SQLTempDBLogDir       = "${logdriveletter}:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\Data"
             SQLBackupDir          = "${datadriveletter}:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\Backup"
-            SourcePath            = 'C:\SQLServerFull'
+            SourcePath            = $SourcePath
             UpdateEnabled         = 'False'
             ForceReboot           = $false
             BrowserSvcStartupType = 'Automatic'

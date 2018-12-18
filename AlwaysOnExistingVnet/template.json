@@ -335,7 +335,7 @@
                         "name": "[parameters('availabilityGroupName')]",
                         "properties":{
                             "privateIPAllocationMethod": "Static",
-                            "privateIPAddress": "10.50.2.56",
+                            "privateIPAddress": "[parameters('listenerStaticIP')]",
                             "subnet":{
                                 "id": "[variables('subnetRef')]"
                             }
