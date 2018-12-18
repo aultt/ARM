@@ -346,7 +346,6 @@ configuration AlwaysOnSQLServer
             SetScript  = {
                             
                             Get-ClusterResource $using:IPResourceName| Set-ClusterParameter -Multiple @{"Address"="$using:ListenerStaticIP";"ProbePort"=59999;"SubnetMask"="$using:ListenerSubnetMask";"Network"="Cluster Network 1";"EnableDhcp"=0}
-                            $global:DSCMachineStatus = 1  
                         }
             TestScript = {
                              return($(Get-ClusterResource -name $using:IPResourceName | Get-ClusterParameter -Name ProbePort ).Value -eq 59999)
@@ -355,11 +354,6 @@ configuration AlwaysOnSQLServer
             PsDscRunAsCredential = $AdminCreds
 
             DependsON = "[SqlAGListener]AvailabilityGroupListenerWithSameNameAsVCO"
-        }
-        xPendingReboot Reboot2
-        {
-            Name = 'Reboot2'
-            dependson = '[SqlAG]AddAG'
         }
     }
 }

@@ -141,7 +141,6 @@ configuration AlwaysOnSqlServer
             Name             = $ClusterName
             RetryIntervalSec = 10
             RetryCount       = 60
-            DependsOn        = '[WindowsFeature]AddRemoteServerAdministrationToolsClusteringCmdInterfaceFeature'
         }
 
         xCluster JoinSecondNodeToCluster
