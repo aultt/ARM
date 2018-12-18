@@ -17,7 +17,7 @@ configuration AlwaysOnSQLServer
         [string]$logdriveLetter = 'C',
         [string]$tempdbdriveLetter = 'C',
         [string]$SQLSysAdmins = 'TAMZ\DBA',
-        [string]$SourcePath = 'C:\SQLServerFull'
+        [string]$SourcePath = 'C:\SQLServerFull',
         [Parameter(Mandatory)]
         [string]$ClusterName,
         [Parameter(Mandatory)]
