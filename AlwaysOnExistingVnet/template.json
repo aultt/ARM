@@ -109,6 +109,7 @@
           }
     },
     "variables": {
+        "apiVersionStorage": "2016-01-01",
         "witnessStorageName": "[concat(toLower(parameters('namePrefix')),uniqueString(resourceGroup().id),'cw')]",
         "witnessStorageType": "Standard_LRS",
         "vnetID": "[resourceID(parameters('existingVirtualNetworkRGName'),'Microsoft.Network/virtualNetworks',parameters('existingVirtualNetworkName'))]",
@@ -256,7 +257,8 @@
                     "AvailabilityGroupName": "[parameters('availabilityGroupName')]",
                     "ListenerStaticIP": "[parameters('listenerStaticIP')]",
                     "ListenerSubnetMask": "[parameters('listenerSubnetMask')]",
-                    "sqlPort": "[parameters('sqlPort')]"                   
+                    "sqlPort": "[parameters('sqlPort')]",
+                    "CloudWitnessName" : "[variables('witnessStorageName')]"                                   
                     }
                 },
               "protectedSettings": {
@@ -268,7 +270,11 @@
                     "SQLServicecreds": {
                       "userName": "[parameters('sqlUsername')]",
                       "password": "[parameters('sqlUserPassword')]"
-                       }   
+                       },
+                    "CloudWitnessKey":{
+                        "userName": "PLACEHOLDER-DO-NOT-USE",
+                         "password": "[listKeys(resourceId('Microsoft.Storage/storageAccounts',variables('witnessStorageName')),variables('apiVersionStorage')).keys[0].value]"   
+                        }
                     }
                 }      
             }

@@ -32,7 +32,11 @@ configuration AlwaysOnSqlServer
         [Parameter(Mandatory)]
         [string]$ListenerSubnetMask,
         [string]$SQLPort=1433,
-        
+        [Parameter(Mandatory)]
+        [string]$CloudWitnessName,
+        [Parameter(Mandatory)]
+        [System.Management.Automation.PSCredential]$CloudWitnessKey, 
+
         [Int]$RetryCount = 20,
         [Int]$RetryIntervalSec = 30
     )
@@ -137,7 +141,7 @@ configuration AlwaysOnSqlServer
             Name             = $ClusterName
             RetryIntervalSec = 10
             RetryCount       = 60
-            DependsOn        = '[WindowsFeature]AddRemoteServerAdministrationToolsClusteringCmdInterfaceFeature'
+            DependsOn        = '[WindowsFeature]AddRemoteServerAdministrationToolsClusteringCmdInterfaceFeature','[xPendingReboot]Reboot1'
         }
 
         xCluster JoinSecondNodeToCluster
@@ -305,8 +309,8 @@ configuration AlwaysOnSqlServer
         SqlWaitForAG 'SQLConfigureAG-WaitAG'
         {
             Name                 = $AvailabilityGroupName
-            RetryIntervalSec     = 20
-            RetryCount           = 30
+            RetryIntervalSec     = 30
+            RetryCount           = 40
             PsDscRunAsCredential = $SqlAdministratorCredential
 
             DependsOn = '[xPendingReboot]Reboot2'
