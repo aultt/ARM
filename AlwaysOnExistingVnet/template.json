@@ -193,10 +193,9 @@
                     },
                     "dataDisks": [
                         {
+                            "createOption": "empty",
                             "lun": 0,
-                            "name": "Data",
-                            "createOption": "Empty",
-                            "diskSizeGB": 1024,
+                            "diskSizeGB": "1023",
                             "caching": "ReadOnly",
                             "managedDisk": {
                                 "storageAccountType": "StandardSSD_LRS"
