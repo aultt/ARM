@@ -330,39 +330,6 @@ configuration AlwaysOnSqlServer
         
             DependsOn                  = '[SqlWaitForAG]SQLConfigureAG-WaitAG'
         }
-
-        SqlAGListener AvailabilityGroupListenerWithSameNameAsVCO
-        {
-            Ensure               = 'Present'
-            ServerName           = $env:COMPUTERNAME
-            InstanceName         = $SQLInstanceName
-            AvailabilityGroup    = $AvailabilityGroupName
-            Name                 = $AvailabilityGroupName
-            IpAddress            = $ListenerIPandMask
-            Port                 = $SQLPort
-
-            PsDscRunAsCredential = $AdminCreds
-
-            DependsON = '[SqlAGReplica]AddReplica'
-        }
-        
-        Script  AddProbeToSQLClusterResource
-        {
-            GetScript  = {return @{ 'Result' = $(Get-ClusterResource $using:IPResourceName | Get-ClusterParameter -Name ProbePort ).Value} }
-                                
-            SetScript  = {
-                            
-                            Get-ClusterResource $using:IPResourceName| Set-ClusterParameter -Multiple @{"Address"="$using:ListenerStaticIP";"ProbePort"=59999;"SubnetMask"="$using:ListenerSubnetMask";"Network"="Cluster Network 1";"EnableDhcp"=0}
-                            $global:DSCMachineStatus = 1  
-                        }
-            TestScript = {
-                             return($(Get-ClusterResource -name $using:IPResourceName | Get-ClusterParameter -Name ProbePort ).Value -eq 59999)
-                         }
-
-            PsDscRunAsCredential = $AdminCreds
-
-            DependsON = "[SqlAGListener]AvailabilityGroupListenerWithSameNameAsVCO"
-        }
     }
 }
 
