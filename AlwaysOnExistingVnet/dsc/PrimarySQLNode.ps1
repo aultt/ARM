@@ -44,7 +44,7 @@ configuration AlwaysOnSQLServer
 
     )
 
-    Import-DscResource -ModuleName ComputerManagementdsc,sqlserverdsc,xFailOverCluster,xPendingReboot, Storagedsc
+    Import-DscResource -ModuleName ComputerManagementdsc,sqlserverdsc,xFailOverCluster,xPendingReboot,Storagedsc,SecurityPolicydsc
 
     $ClusterIPandSubNetClass = $ClusterStaticIP + '/' +$ClusterIPSubnetClass
     $SQLVersion = $imageoffer.Substring(5,2)
@@ -251,7 +251,7 @@ configuration AlwaysOnSQLServer
 
             DependsOn             = '[xPendingReboot]Reboot1','[Disk]LogVolume','[Disk]DataVolume'
         }
-        
+
         UserRightsAssignment PerformVolumeMaintenanceTasks
         {
             Policy = "Perform_volume_maintenance_tasks"

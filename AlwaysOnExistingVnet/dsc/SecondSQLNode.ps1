@@ -45,7 +45,7 @@ configuration AlwaysOnSqlServer
     )
 
     
-    Import-DscResource -ModuleName ComputerManagementdsc, sqlserverdsc, xFailOverCluster, xPendingReboot,StorageDSC
+    Import-DscResource -ModuleName ComputerManagementdsc, sqlserverdsc, xFailOverCluster, xPendingReboot,StorageDSC,SecurityPolicydsc
     
     $ClusterIPandSubNetClass = $ClusterStaticIP + '/' +$ClusterIPSubnetClass
     $ListenerIPandMask = $ListenerStaticIP + '/'+$ListenerSubnetMask
