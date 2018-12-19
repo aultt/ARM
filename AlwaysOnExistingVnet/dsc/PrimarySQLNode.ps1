@@ -240,7 +240,7 @@ configuration AlwaysOnSQLServer
             SQLUserDBDir          = "${datadriveletter}:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\Data"
             SQLUserDBLogDir       = "${logdriveletter}:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\Log"
             SQLTempDBDir          = "${tempdbdriveLetter}:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\Data"
-            SQLTempDBLogDir       = "${logdriveletter}:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\Data"
+            SQLTempDBLogDir       = "${logdriveletter}:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\Log"
             SQLBackupDir          = "${datadriveletter}:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\Backup"
             SourcePath            = $SourcePath
             UpdateEnabled         = 'False'
@@ -256,12 +256,16 @@ configuration AlwaysOnSQLServer
         {
             Policy = "Perform_volume_maintenance_tasks"
             Identity = $SQLServicecreds.UserName
+
+            DependsOn                     = '[Computer]DomainJoin'
         }
 
         UserRightsAssignment LockPagesInMemory
         {
             Policy = "Lock_pages_in_memory"
             Identity = $SQLServicecreds.UserName
+
+            DependsOn                     = '[Computer]DomainJoin'
         }
 
         SqlServerNetwork 'ChangeTcpIpOnDefaultInstance'
