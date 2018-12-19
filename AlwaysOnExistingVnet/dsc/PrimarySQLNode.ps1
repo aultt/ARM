@@ -236,7 +236,7 @@ configuration AlwaysOnSQLServer
             InstallSharedDir      = 'C:\Program Files\Microsoft SQL Server'
             InstallSharedWOWDir   = 'C:\Program Files (x86)\Microsoft SQL Server'
             InstanceDir           = "${datadriveletter}:\Program Files\Microsoft SQL Server"
-            InstallSQLDataDir     = "${datadriveletter}:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\"
+            InstallSQLDataDir     = "${datadriveletter}:\Program Files\Microsoft SQL Server\"
             SQLUserDBDir          = "${datadriveletter}:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\Data"
             SQLUserDBLogDir       = "${logdriveletter}:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\Log"
             SQLTempDBDir          = "${tempdbdriveLetter}:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\Data"
@@ -250,6 +250,18 @@ configuration AlwaysOnSQLServer
             PsDscRunAsCredential  = $AdminCreds
 
             DependsOn             = '[xPendingReboot]Reboot1','[Disk]LogVolume','[Disk]DataVolume'
+        }
+        
+        UserRightsAssignment PerformVolumeMaintenanceTasks
+        {
+            Policy = "Perform_volume_maintenance_tasks"
+            Identity = $SQLServicecreds.UserName
+        }
+
+        UserRightsAssignment LockPagesInMemory
+        {
+            Policy = "Lock_pages_in_memory"
+            Identity = $SQLServicecreds.UserName
         }
 
         SqlServerNetwork 'ChangeTcpIpOnDefaultInstance'

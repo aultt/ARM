@@ -45,7 +45,7 @@ configuration AlwaysOnSqlServer
     )
 
     
-    Import-DscResource -ModuleName ComputerManagementdsc, sqlserverdsc, xFailOverCluster, xPendingReboot
+    Import-DscResource -ModuleName ComputerManagementdsc, sqlserverdsc, xFailOverCluster, xPendingReboot,StorageDSC
     
     $ClusterIPandSubNetClass = $ClusterStaticIP + '/' +$ClusterIPSubnetClass
     $ListenerIPandMask = $ListenerStaticIP + '/'+$ListenerSubnetMask
@@ -236,6 +236,18 @@ configuration AlwaysOnSqlServer
             PsDscRunAsCredential  = $Admincreds
 
             DependsOn             = '[xPendingReboot]Reboot1','[Disk]LogVolume','[Disk]DataVolume'
+        }
+
+        UserRightsAssignment PerformVolumeMaintenanceTasks
+        {
+            Policy = "Perform_volume_maintenance_tasks"
+            Identity = $SQLServicecreds.UserName
+        }
+
+        UserRightsAssignment LockPagesInMemory
+        {
+            Policy = "Lock_pages_in_memory"
+            Identity = $SQLServicecreds.UserName
         }
 
         SqlServerNetwork 'ChangeTcpIpOnDefaultInstance'
