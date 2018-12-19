@@ -14,9 +14,11 @@ configuration AlwaysOnSqlServer
         [string]$imageoffer = "SQL2016-WS2016",
         [string]$SQLFeatures = "SQLENGINE",
         [string]$SQLInstanceName = "MSSQLSERVER",
-        [string]$datadriveLetter = 'C',
-        [string]$logdriveLetter = 'C',
-        [string]$tempdbdriveLetter = 'D',
+        [string]$datadriveLetter = 'F',
+        [string]$logdriveLetter = 'L',
+        [string]$tempdbdriveLetter = 'F',
+        [string]$SQLSysAdmins = 'TAMZ\DBA',
+        [string]$SourcePath = 'C:\SQLServerFull',
         [Parameter(Mandatory)]
         [string]$ClusterName,
         [Parameter(Mandatory)]
@@ -34,6 +36,7 @@ configuration AlwaysOnSqlServer
         [string]$SQLPort=1433,
         [Parameter(Mandatory)]
         [string]$CloudWitnessName,
+        [string]$TimeZone ="Eastern Standard Time",
         [Parameter(Mandatory)]
         [System.Management.Automation.PSCredential]$CloudWitnessKey, 
 
@@ -42,7 +45,7 @@ configuration AlwaysOnSqlServer
     )
 
     
-    Import-DscResource -ModuleName ComputerManagementdsc, sqlserverdsc, xFailOverCluster, xPendingReboot
+    Import-DscResource -ModuleName ComputerManagementdsc, sqlserverdsc, xFailOverCluster, xPendingReboot,StorageDSC,SecurityPolicydsc
     
     $ClusterIPandSubNetClass = $ClusterStaticIP + '/' +$ClusterIPSubnetClass
     $ListenerIPandMask = $ListenerStaticIP + '/'+$ListenerSubnetMask
@@ -100,6 +103,34 @@ configuration AlwaysOnSqlServer
                          }
 
             PsDscRunAsCredential = $AdminCreds
+        }
+
+        WaitForDisk DataVolume{
+            DiskId = 2
+            RetryIntervalSec = 60
+            RetryCount =60
+        }
+
+        Disk DataVolume{
+            DiskId =  2
+            DriveLetter = $datadriveLetter
+            FSFormat = 'NTFS'
+            AllocationUnitSize = 64kb
+            DependsOn = '[WaitForDisk]DataVolume'
+        }
+
+        WaitForDisk LogVolume{
+            DiskId = 3
+            RetryIntervalSec = 60
+            RetryCount =60
+        }
+
+        Disk LogVolume{
+            DiskId =  3
+            DriveLetter = $logdriveLetter
+            FSFormat = 'NTFS'
+            AllocationUnitSize = 64kb
+            DependsOn = '[WaitForDisk]LogVolume'
         }
 
         WindowsFeature AddFailoverFeature
@@ -162,7 +193,7 @@ configuration AlwaysOnSqlServer
         TimeZone SetTimeZone
         {
             IsSingleInstance = 'Yes'
-            TimeZone         = 'Eastern Standard Time'
+            TimeZone         = $TimeZone
         }
         
 
@@ -187,24 +218,40 @@ configuration AlwaysOnSqlServer
             Features              = $SQLFeatures
             SQLCollation          = 'SQL_Latin1_General_CP1_CI_AS'
             SQLSvcAccount         = $SQLServicecreds
-            SQLSysAdminAccounts   = 'TAMZ\DBA'
+            SQLSysAdminAccounts   = $SQLSysAdmins
             InstallSharedDir      = 'C:\Program Files\Microsoft SQL Server'
             InstallSharedWOWDir   = 'C:\Program Files (x86)\Microsoft SQL Server'
             InstanceDir           = "${datadriveletter}:\Program Files\Microsoft SQL Server"
             InstallSQLDataDir     = "${datadriveletter}:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\"
             SQLUserDBDir          = "${datadriveletter}:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\Data"
             SQLUserDBLogDir       = "${logdriveletter}:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\Log"
-            SQLTempDBDir          = "${datadriveletter}:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\Data"
-            SQLTempDBLogDir       = "${datadriveletter}:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\Data"
+            SQLTempDBDir          = "${tempdbdriveLetter}:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\Data"
+            SQLTempDBLogDir       = "${logdriveletter}:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\Log"
             SQLBackupDir          = "${datadriveletter}:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\Backup"
-            SourcePath            = 'C:\SQLServerFull'
+            SourcePath            = $SourcePath 
             UpdateEnabled         = 'False'
             ForceReboot           = $false
             BrowserSvcStartupType = 'Automatic'
 
             PsDscRunAsCredential  = $Admincreds
 
-            DependsOn             = '[xPendingReboot]Reboot1'
+            DependsOn             = '[xPendingReboot]Reboot1','[Disk]LogVolume','[Disk]DataVolume'
+        }
+
+        UserRightsAssignment PerformVolumeMaintenanceTasks
+        {
+            Policy = "Perform_volume_maintenance_tasks"
+            Identity = $SQLServicecreds.UserName
+
+            DependsOn                     = '[Computer]DomainJoin'
+        }
+
+        UserRightsAssignment LockPagesInMemory
+        {
+            Policy = "Lock_pages_in_memory"
+            Identity = $SQLServicecreds.UserName
+
+            DependsOn                     = '[Computer]DomainJoin'
         }
 
         SqlServerNetwork 'ChangeTcpIpOnDefaultInstance'
