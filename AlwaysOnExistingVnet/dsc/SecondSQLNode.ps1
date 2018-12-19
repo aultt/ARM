@@ -105,6 +105,34 @@ configuration AlwaysOnSqlServer
             PsDscRunAsCredential = $AdminCreds
         }
 
+        WaitForDisk DataVolume{
+            DiskId = 2
+            RetryIntervalSec = 60
+            RetryCount =60
+        }
+
+        Disk DataVolume{
+            DiskId =  2
+            DriveLetter = $datadriveLetter
+            FSFormat = 'NTFS'
+            AllocationUnitSize = 64kb
+            DependsOn = '[WaitForDisk]DataVolume'
+        }
+
+        WaitForDisk LogVolume{
+            DiskId = 3
+            RetryIntervalSec = 60
+            RetryCount =60
+        }
+
+        Disk LogVolume{
+            DiskId =  4
+            DriveLetter = $logdriveLetter
+            FSFormat = 'NTFS'
+            AllocationUnitSize = 64kb
+            DependsOn = '[WaitForDisk]LogVolume'
+        }
+
         WindowsFeature AddFailoverFeature
         {
             Ensure = 'Present'
@@ -207,7 +235,7 @@ configuration AlwaysOnSqlServer
 
             PsDscRunAsCredential  = $Admincreds
 
-            DependsOn             = '[xPendingReboot]Reboot1'
+            DependsOn             = '[xPendingReboot]Reboot1','[Disk]LogVolume','[Disk]DataVolume'
         }
 
         SqlServerNetwork 'ChangeTcpIpOnDefaultInstance'
