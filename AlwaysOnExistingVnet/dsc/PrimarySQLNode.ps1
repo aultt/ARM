@@ -13,9 +13,9 @@ configuration AlwaysOnSQLServer
         [string]$imageoffer = "SQL2016-WS2016",
         [string]$SQLFeatures = "SQLENGINE",
         [string]$SQLInstanceName = "MSSQLSERVER",
-        [string]$datadriveLetter = 'C',
-        [string]$logdriveLetter = 'C',
-        [string]$tempdbdriveLetter = 'C',
+        [string]$datadriveLetter = 'F',
+        [string]$logdriveLetter = 'L',
+        [string]$tempdbdriveLetter = 'F',
         [string]$SQLSysAdmins = 'TAMZ\DBA',
         [string]$SourcePath = 'C:\SQLServerFull',
         [Parameter(Mandatory)]
@@ -125,7 +125,7 @@ configuration AlwaysOnSQLServer
         }
 
         Disk LogVolume{
-            DiskId =  4
+            DiskId =  3
             DriveLetter = $logdriveLetter
             FSFormat = 'NTFS'
             AllocationUnitSize = 64kb
