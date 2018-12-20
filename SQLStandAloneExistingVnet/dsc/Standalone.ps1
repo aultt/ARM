@@ -7,10 +7,10 @@ configuration StandAlone
         [String]$DomainName,
 
         [Parameter(Mandatory)]
-        [System.Management.Automation.PSCredential]$domainuserCreds,
+        [System.Management.Automation.PSCredential]$AdminCreds,
 
         [Parameter(Mandatory)]
-        [System.Management.Automation.PSCredential]$localAdminCreds,
+        [System.Management.Automation.PSCredential]$SQLServicecreds,
         [string]$imageoffer,
         [string]$SQLFeatures,
         [string]$SQLInstanceName,
@@ -83,7 +83,7 @@ configuration StandAlone
         {
             Name       = $env:COMPUTERNAME
             DomainName = $DomainName
-            Credential = $domainuserCreds
+            Credential = $AdminCreds
         }
 
         Script CleanSQL
@@ -106,6 +106,7 @@ configuration StandAlone
             Features              = $SQLFeatures
             SQLCollation          = 'SQL_Latin1_General_CP1_CI_AS'
             SQLSysAdminAccounts   = $SQLSysAdmins
+            SQLSvcAccount         = $SQLServicecreds
             InstallSharedDir      = 'C:\Program Files\Microsoft SQL Server'
             InstallSharedWOWDir   = 'C:\Program Files (x86)\Microsoft SQL Server'
             InstanceDir           = "${datadriveletter}:\Program Files\Microsoft SQL Server"
@@ -120,27 +121,27 @@ configuration StandAlone
             ForceReboot           = $false
             BrowserSvcStartupType = 'Automatic'
 
-            PsDscRunAsCredential  = $localAdminCreds
+            PsDscRunAsCredential  = $AdminCreds
 
             DependsOn             = '[xPendingReboot]Reboot1','[Disk]LogVolume','[Disk]DataVolume'
         }
 
-        #UserRightsAssignment PerformVolumeMaintenanceTasks
-        #{
-        #    Policy = "Perform_volume_maintenance_tasks"
-        #    Identity = $SQLServicecreds.UserName
-#
-        #    DependsOn                     = '[Computer]DomainJoin'
-        #}
-#
-        #UserRightsAssignment LockPagesInMemory
-        #{
-        #    Policy = "Lock_pages_in_memory"
-        #    Identity = $SQLServicecreds.UserName
-#
-        #    DependsOn                     = '[Computer]DomainJoin'
-        #}
-#
+        UserRightsAssignment PerformVolumeMaintenanceTasks
+        {
+            Policy = "Perform_volume_maintenance_tasks"
+            Identity = $SQLServicecreds.UserName
+
+            DependsOn  = '[Computer]DomainJoin'
+        }
+
+        UserRightsAssignment LockPagesInMemory
+        {
+            Policy = "Lock_pages_in_memory"
+            Identity = $SQLServicecreds.UserName
+
+            DependsOn  = '[Computer]DomainJoin'
+        }
+
         SqlServerNetwork 'ChangeTcpIpOnDefaultInstance'
         {
             InstanceName         = $SQLInstanceName
@@ -151,7 +152,7 @@ configuration StandAlone
             RestartService       = $true
             DependsOn = '[SqlSetup]InstallNamedInstance'
             
-            PsDscRunAsCredential = $localAdminCreds
+            PsDscRunAsCredential = $AdminCreds
         }
 
         SqlServerMaxDop Set_SQLServerMaxDop_ToAuto
@@ -159,7 +160,7 @@ configuration StandAlone
             Ensure                  = 'Present'
             DynamicAlloc            = $true
             InstanceName            = $SQLInstanceName
-            PsDscRunAsCredential    = $localAdminCreds
+            PsDscRunAsCredential    = $AdminCreds
 
             DependsOn = '[SqlSetup]InstallNamedInstance'
         }
@@ -169,7 +170,7 @@ configuration StandAlone
             Ensure                  = 'Present'
             DynamicAlloc            = $true
             InstanceName            = $SQLInstanceName
-            PsDscRunAsCredential    = $localAdminCreds
+            PsDscRunAsCredential    = $AdminCreds
 
             DependsOn = '[SqlSetup]InstallNamedInstance'
         }
@@ -187,5 +188,16 @@ configuration StandAlone
     }
 }
  
+$ConfigData = @{
+    AllNodes = @(
+    @{
+        NodeName = 'localhost'
+        PSDscAllowPlainTextPassword = $true
+    }
+    )
+}
 
-
+#  $AdminCreds = Get-Credential
+# $SQLServicecreds = $AdminCreds
+# StandAlone -DomainName tamz.local -domainuserCreds $AdminCreds -SQLServicecreds $SQLServicecreds -imageOffer "SQL2017-WS2016" -SQLFeatures "SQLENGINE" -SQLInstance "MSSQLSERVER" -datadriveLetter "F" -logdriveLetter "L" -tempdbdriveletter "F" -SQLSysAdmins "TAMZ\DBA" -SourcePath "C:\\SQLServerFull" -SQLPort 1433 -TimeZone "Eastern Standard Time" -Verbose -ConfigurationData $ConfigData -OutputPath d:\
+# Start-DscConfiguration -wait -Force -Verbose -Path D:\

@@ -2,7 +2,7 @@ $resourceGroupName = 'StandAloneTesting'
 $resourceGroupLocation = "East US"
 $templateFile = 'D:\GitHub\ARM\SQLStandAloneExistingVnet\azuredeploy.json'
 $templateParm = 'D:\ParameterFiles\StandAloneExistingVnet.parameters.json'
-
+##ii 'D:\ParameterFiles\StandAloneExistingVnet.parameters.json'
 
 Import-Module Az
 Login-AzAccount

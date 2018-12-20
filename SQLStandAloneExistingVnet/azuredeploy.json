@@ -6,11 +6,18 @@
       "type": "string",
       "minLength": 8
     },
-    "localAdminUserName": {
+    "sqlUserName": {
       "type": "string",
       "minLength": 5
     },
-    "localAdminPassword": {
+    "sqlUserPassword": {
+      "type": "securestring"
+    },
+    "adminUserName": {
+      "type": "string",
+      "minLength": 5
+    },
+    "adminPassword": {
       "type": "securestring"
     },
     "imageSKU": {
@@ -122,15 +129,15 @@
     },
     "dataStorageSize":  {
       "type": "int",
-      "defaultValue": "1023"
+      "defaultValue": 1023
     },
     "logStorageSize":  {
         "type": "int",  
-        "defaultValue": "1023"
+        "defaultValue": 1023
     },
     "sqlPort": {
       "type": "int",
-      "defaultValue": "1433"
+      "defaultValue": 1433
     },
     "timeZone":{
       "type": "string",
@@ -148,7 +155,7 @@
       "metadata": {
         "description": "Auto-generated container in staging storage account to receive post-build staging folder upload"
       },
-      "defaultValue": "https://raw.githubusercontent.com/aultt/ARM/master/SQLStandAlone" 
+      "defaultValue": "https://raw.githubusercontent.com/aultt/ARM/master/SQLStandAloneExistingVnet" 
     },
     "_artifactsLocationSasToken": {
       "type": "securestring",
@@ -199,8 +206,8 @@
         },
         "osProfile": {
           "computerName": "[parameters('VMName')]",
-          "adminUsername": "[parameters('localAdminUsername')]",
-          "adminPassword": "[parameters('localAdminPassword')]"
+          "adminUsername": "[parameters('AdminUsername')]",
+          "adminPassword": "[parameters('AdminPassword')]"
         },
         "storageProfile": {
           "imageReference": {
@@ -251,7 +258,7 @@
           "name": "Microsoft.Powershell.DSC",
           "type": "extensions",
           "location": "[resourceGroup().location]",
-          "apiVersion": "2016-03-30",
+          "apiVersion": "2018-06-01",
           "dependsOn": [
             "[resourceId('Microsoft.Compute/virtualMachines', parameters('VMName'))]"
           ],
@@ -273,14 +280,8 @@
               "configurationArguments": {
                 "domainName": "[parameters('existingdomainName')]",
                 "datadriveletter" : "[parameters('datadriveletter')]",
-                "datadrivesize" : "[parameters('datadrivesize')]",
-                "datadrivelabel" : "[parameters('datadrivelabel')]",
                 "logdriveletter" : "[parameters('logdriveletter')]",
-                "logdrivesize" : "[parameters('logdrivesize')]",
-                "logdrivelabel" : "[parameters('logdrivelabel')]",
                 "tempdbdriveletter" : "[parameters('tempdbdriveletter')]",
-                "tempdbdrivesize" : "[parameters('tempdbdrivesize')]",
-                "tempdbdrivelabel" : "[parameters('tempdbdrivelabel')]",
                 "imageoffer" : "[parameters('imageOffer')]",
                 "sqlfeatures" : "[parameters('SQLFeatures')]",
                 "sqlinstancename" : "[parameters('sqlInstanceName')]",
@@ -288,23 +289,22 @@
                 "timeZone": "[parameters('timeZone')]",
                 "sqlSysAdmins": "[parameters('sqlSysAdmins')]",
                 "sourcePath": "[parameters('sourcePath')]"
-              },
-              "protectiedSettings": {
+                }
+              }, 
+              "protectedSettings": {
                 "configurationArguments":{
-                  "configurationUrlSasToken": "[parameters('_artifactsLocationSasToken')]",
                   "domainuserCreds": {
-                    "userName": "[parameters('domainUserName')]",
-                    "password": "[parameters('domainuserPassword')]"
+                    "userName": "[parameters('domainUsername')]",
+                    "password": "[parameters('domainUserPassword')]"
                     },
-                    "localadminCreds": {
-                      "userName": "[parameters('localadminuserName')]",
-                      "password": "[parameters('localAdminPassword')]" 
+                    "SQLServicecreds": {
+                      "userName": "[parameters('sqluserName')]",
+                      "password": "[parameters('sqluserPassword')]" 
                     }
                   } 
                 }
               }
             } 
-          }
         ]
       }
     ],
