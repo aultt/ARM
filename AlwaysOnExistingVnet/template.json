@@ -93,6 +93,57 @@
         "sqlAuthenticationPassword": {
             "type": "securestring"
         },
+        "imageOffer":  {
+            "type": "string",
+            "defaultValue": "SQL2016SP1-WS2016"
+        },
+        "imageSKU":  {
+            "type": "string",
+            "defaultValue": "Enterprise"
+        },
+        "oSStorageType":  {
+            "type": "string",
+            "defaultValue": "StandardSSD_LRS"
+        },
+        "dataStorageType":  {
+            "type": "string",
+            "defaultValue": "StandardSSD_LRS"
+        },
+        "logStorageType":  {
+            "type": "string",
+            "defaultValue": "StandardSSD_LRS"
+        },
+        "sqlFeatures":{
+            "type": "string",
+            "defaultValue": "SQLENGINE"
+        },
+        "sqlInstanceName":{
+            "type": "string",
+            "defaultValue": "MSSQLSERVER"
+        },
+        "dataDriveLetter":{
+            "type": "string",
+            "defaultValue": "F"
+        },
+        "logDriveLetter":{
+            "type": "string",
+            "defaultValue": "L"
+        },
+        "tempdbDriveLetter":{
+            "type": "string",
+            "defaultValue": "F"
+        },
+        "sqlSysAdmins":{
+            "type": "string"
+        },
+        "sourcePath":{
+            "type": "string",
+            "defaultValue": "C:\\SQLServerFull"
+        },
+        "timeZone":{
+            "type": "string",
+            "defaultValue": "Eastern Standard Time"
+        },
         "_artifactsLocation": {
             "type": "string",
             "metadata": {
@@ -181,33 +232,33 @@
                 "storageProfile": {
                     "imageReference": {
                         "publisher": "MicrosoftSQLServer",
-                        "offer": "SQL2016SP1-WS2016",
-                        "sku": "Enterprise",
+                        "offer": "[parameters('imageoffer')]",
+                        "sku": "[parameters('imageSKU')]",
                         "version": "latest"
                     },
                     "osDisk": {
-                        "createOption": "fromImage",
+                        "createOption": "FromImage",
                         "managedDisk": {
-                            "storageAccountType": "StandardSSD_LRS"
+                            "storageAccountType": "[parameters('oSStorageType')]"
                         }
                     },
                     "dataDisks": [
                         {
                             "createOption": "Empty",
                             "lun": 0,
-                            "diskSizeGB": "1023",
+                            "diskSizeGB": 1023,
                             "caching": "ReadOnly",
                             "managedDisk": {
-                                "storageAccountType": "StandardSSD_LRS"
+                                "storageAccountType": "[parameters('dataStorageType')]"
                             }
                         },
                         {
                             "createOption": "Empty",
                             "lun": 1,
-                            "diskSizeGB": "1023",
+                            "diskSizeGB": 1023,
                             "caching": "None",
                             "managedDisk": {
-                                "storageAccountType": "StandardSSD_LRS"
+                                "storageAccountType": "[parameters('logStorageType')]"
                             }
                         }
                     ]
@@ -230,7 +281,7 @@
                 }
             },
             "identity": {
-                "type": "systemAssigned"
+                "type": "SystemAssigned"
             }
         },
         {
@@ -267,7 +318,16 @@
                     "ListenerStaticIP": "[parameters('listenerStaticIP')]",
                     "ListenerSubnetMask": "[parameters('listenerSubnetMask')]",
                     "sqlPort": "[parameters('sqlPort')]",
-                    "CloudWitnessName" : "[variables('witnessStorageName')]"                                   
+                    "CloudWitnessName" : "[variables('witnessStorageName')]",
+                    "imageOffer" : "[parameters('imageOffer')]",
+                    "sqlFeatures" : "[parameters('sqlFeatures')]",
+                    "sqlInstanceName": "[parameters('sqlInstanceName')]",
+                    "dataDriveLetter": "[parameters('dataDriveLetter')]",
+                    "logDriveLetter": "[parameters('logDriveLetter')]",
+                    "tempdbDriveLetter": "[parameters('tempdbDriveLetter')]",
+                    "sqlSysAdmins" : "[parameters('sqlSysAdmins')]",
+                    "sourcePath" : "[parameters('sourcePath')]",
+                    "timeZone" : "[parameters('timeZone')]"
                     }
                 },
               "protectedSettings": {

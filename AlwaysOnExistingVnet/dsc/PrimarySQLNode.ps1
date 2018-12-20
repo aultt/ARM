@@ -10,14 +10,14 @@ configuration AlwaysOnSQLServer
 
         [Parameter(Mandatory)]
         [System.Management.Automation.PSCredential]$SQLServicecreds,
-        [string]$imageoffer = "SQL2016-WS2016",
-        [string]$SQLFeatures = "SQLENGINE",
-        [string]$SQLInstanceName = "MSSQLSERVER",
-        [string]$datadriveLetter = 'F',
-        [string]$logdriveLetter = 'L',
-        [string]$tempdbdriveLetter = 'F',
-        [string]$SQLSysAdmins = 'TAMZ\DBA',
-        [string]$SourcePath = 'C:\SQLServerFull',
+        [string]$imageoffer,
+        [string]$SQLFeatures,
+        [string]$SQLInstanceName,
+        [string]$datadriveLetter,
+        [string]$logdriveLetter,
+        [string]$tempdbdriveLetter,
+        [string]$SQLSysAdmins,
+        [string]$SourcePath,
         [Parameter(Mandatory)]
         [string]$ClusterName,
         [Parameter(Mandatory)]
@@ -35,7 +35,7 @@ configuration AlwaysOnSQLServer
         [string]$SQLPort=1433,
         [Parameter(Mandatory)]
         [string]$CloudWitnessName,
-        [string]$TimeZone ="Eastern Standard Time",
+        [string]$TimeZone,
         [Parameter(Mandatory)]
         [System.Management.Automation.PSCredential]$CloudWitnessKey, 
 
