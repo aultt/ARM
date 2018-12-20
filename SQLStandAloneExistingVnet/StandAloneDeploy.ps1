@@ -27,5 +27,3 @@ else{
 New-AZResourceGroupDeployment  -ResourceGroupName $resourceGroupName -TemplateFile $templateFile -TemplateParameterFile $templateParm  -Verbose;
 
 
-#Remove-AzureRmResourceGroup -Name $RG -Force 
-#clear-host 
