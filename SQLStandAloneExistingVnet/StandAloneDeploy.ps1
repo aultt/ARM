@@ -1,14 +1,31 @@
+$resourceGroupName = 'StandAloneTesting'
+$resourceGroupLocation = "East US"
+$templateFile = 'D:\GitHub\ARM\SQLStandAloneExistingVnet\azuredeploy.json'
+$templateParm = 'D:\ParameterFiles\StandAloneExistingVnet.parameters.json'
+
+
 Import-Module Az
-Enable-AzureRmAlias -Scope CurrentUser
-Connect-AzureRmAccount 
-Get-AzureRmSubscription -SubscriptionName TAMZ_MS | Select-AzureRmSubscription
+Login-AzAccount
+Select-AzSubscription -SubscriptionName TAMZ_MS
 
-$RG = 'ClusterTesting'
+#Create or check for existing resource group
+$resourceGroup = Get-AZResourceGroup -Name $resourceGroupName -ErrorAction SilentlyContinue
+if(!$resourceGroup)
+{
+    Write-Host "Resource group '$resourceGroupName' does not exist. To create a new resource group, please enter a location.";
+    if(!$resourceGroupLocation) {
+        $resourceGroupLocation = Read-Host "resourceGroupLocation";
+    }
+    Write-Host "Creating resource group '$resourceGroupName' in location '$resourceGroupLocation'";
+    New-AZResourceGroup -Name $resourceGroupName -Location $resourceGroupLocation
+}
+else{
+    Write-Host "Using existing resource group '$resourceGroupName'";
+}
 
-$templateFile = '/Users/troyault/Documents/GitHub/ARM/SQLStandAlone/azuredeploy.json'
-$templateParm = '/Users/troyault/Documents/GitHub/ParameterFiles/StandAloneMSSub.parameters.json'
-New-AzureRmResourceGroup -Name $RG -Location "East US"
-New-AzureRmResourceGroupDeployment -Name NewSQL -ResourceGroupName $RG -TemplateFile $templateFile -TemplateParameterFile $templateParm  -Verbose
+# Start the deployment
+New-AZResourceGroupDeployment  -ResourceGroupName $resourceGroupName -TemplateFile $templateFile -TemplateParameterFile $templateParm  -Verbose;
+
 
 #Remove-AzureRmResourceGroup -Name $RG -Force 
 #clear-host 
