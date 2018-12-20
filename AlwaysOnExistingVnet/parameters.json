@@ -15,70 +15,100 @@
             "value": "Standard_D2s_v3"
         },
         "existingVirtualNetworkRGName":{
-            "value": ""
+            "value": "core-prod-rg"
         },
         "existingVirtualNetworkName":{
-            "value": ""
+            "value": "prod-vnet"
         },
         "existingSubnetName":{
             "value": "data"
         },
         "domainName": {
-            "value": "yourdomain"
+            "value": "yourdomain.com"
         },
         "adminUsername": {
-            "value": "adminusername"
+            "value": "youradmin"
         },
         "virtualNetworkName": {
-            "value": "your network name"
+            "value": "prod-vnet"
         },
         "networkSecurityGroupName":{
-            "value": ""
+            "value": "AESQL3000-nsg"
         },
         "adminPassword": {
             "reference": {
                 "keyVault": {
-                  "id": "Your Keyvault ID"
+                  "id": "YourKeyVaultID"
                 },
-                "secretName": "Your Keyvault Secret"
+                "secretName": "adminPass"
               }
         },
         "availabilitySetName": {
-            "value": ""
+            "value": "SQL-Availability3000"
         },
         "ClusterStaticIP": {
-            "value": "Grab a free IP in your Azure Vnet Load balancer will reserve it for you"
+            "value": "10.50.2.55"
         },
-        "ClusterStaticIPSubnetClass":{
+        "ClusterIPSubnetClass":{
             "value": "24"
         },
+        "availabilityGroupName":{
+            "value": "TestAG"
+        },
+        "sqlPort": {
+            "value": 1433
+        },
+        "listenerStaticIP": {
+            "value": "10.50.2.56"
+        },
+        "listenerSubnetMask": {
+            "value": "255.255.255.0"
+        },
         "diagnosticsStorageAccountName": {
-            "value": "Your Storage Account Name"
+            "value": "appprodrgdiag992"
         },
         "diagnosticsStorageAccountId": {
-            "value": "Your Storage AccountID"
+            "value": "yourstorageaccountId"
         },
         "sqlAuthenticationLogin": {
-            "value": "tamzadmin"
+            "value": "saadmin"
         },
         "sqlAuthenticationPassword": {
             "reference": {
                 "keyVault": {
-                  "id": "Your Keyvault ID"
+                  "id": "YourKeyVaultID"
                 },
-                "secretName": "Your Keyvault Secret"
+                "secretName": "saPass"
               }
         },
+        "sqlSysAdmins":{
+            "value": "YourDomain\\DBA"
+        },
         "domainUsername": {
-            "value": "your domain username"
+            "value": "yourdomain\\youradmin"
           },
         "domainUserPassword": {
             "reference": {
               "keyVault": {
-                "id": "Your Keyvault ID"
+                "id": "YourKeyVaultID"
               },
-              "secretName": "Your Keyvault Secret"
+              "secretName": "DomainAdmin"
             }
+          },
+        "sqlUsername": {
+            "value": "yourdomain\\yoursqlaccount"
+          },
+        "sqlUserPassword": {
+            "reference": {
+              "keyVault": {
+                "id": "YourKeyVaultID"
+              },
+              "secretName": "DomainAdmin"
+            }
+          },
+          "_artifactsLocation": {
+              "value": "https://raw.githubusercontent.com/aultt/ARM/master/AlwaysOnExistingVnet" 
           }
+          
     }
 }
