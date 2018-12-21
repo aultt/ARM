@@ -113,6 +113,14 @@
             "type": "string",
             "defaultValue": "StandardSSD_LRS"
         },
+        "dataStorageSize":  {
+            "type": "int",
+            "defaultValue": 1023
+          },
+          "logStorageSize":  {
+              "type": "int",  
+              "defaultValue": 1023
+          },
         "sqlFeatures":{
             "type": "string",
             "defaultValue": "SQLENGINE"
@@ -177,7 +185,8 @@
         "ilbProbe1":"[concat('namePrefix','ilbp1')]",
         "SQLProbe1":"[concat('namePrefix','sql')]",
         "ilbProbeID1" : "[concat(variables('ilbID'),'/probes/',variables('ilbProbe1'))]", 
-        "SQLProbeID1" : "[concat(variables('ilbID'),'/probes/',variables('sqlProbe1'))]" 
+        "SQLProbeID1" : "[concat(variables('ilbID'),'/probes/',variables('sqlProbe1'))]" ,
+        "DSCConfigModulesURL": "[concat(parameters('_artifactsLocation'), '/dsc/Cluster.ps1.zip', parameters('_artifactsLocationSasToken'))]"
     },
     "resources": [
         {
@@ -246,7 +255,7 @@
                         {
                             "createOption": "Empty",
                             "lun": 0,
-                            "diskSizeGB": 1023,
+                            "diskSizeGB": "[parameters('dataStorageSize')]",
                             "caching": "ReadOnly",
                             "managedDisk": {
                                 "storageAccountType": "[parameters('dataStorageType')]"
@@ -255,7 +264,7 @@
                         {
                             "createOption": "Empty",
                             "lun": 1,
-                            "diskSizeGB": 1023,
+                            "diskSizeGB": "[parameters('logStorageSize')]",
                             "caching": "None",
                             "managedDisk": {
                                 "storageAccountType": "[parameters('logStorageType')]"
@@ -304,7 +313,7 @@
               "settings": {
                   "wmfversion" :"latest",
                   "configuration": {
-                      "url": "https://raw.githubusercontent.com/aultt/ARM/dev/AlwaysOnExistingVnet/dsc/Cluster.ps1.zip",
+                      "url": "[variables('DSCConfigModulesURL')]",
                       "script": "[if(equals(copyIndex(),0),'PrimarySQLNode.ps1','SecondSQLNode.ps1')]",
                       "function" : "AlwaysOnSQLServer"
                   },
