@@ -1,0 +1,114 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "value": "East US"
+        },
+        "namePrefix": {
+            "value": "AES3000"
+        },
+        "vmcount": {
+            "value": 2
+        },
+        "virtualMachineSize": {
+            "value": "Standard_D2s_v3"
+        },
+        "existingVirtualNetworkRGName":{
+            "value": "core-prod-rg"
+        },
+        "existingVirtualNetworkName":{
+            "value": "prod-vnet"
+        },
+        "existingSubnetName":{
+            "value": "data"
+        },
+        "domainName": {
+            "value": "yourdomain.com"
+        },
+        "adminUsername": {
+            "value": "youradmin"
+        },
+        "virtualNetworkName": {
+            "value": "prod-vnet"
+        },
+        "networkSecurityGroupName":{
+            "value": "AESQL3000-nsg"
+        },
+        "adminPassword": {
+            "reference": {
+                "keyVault": {
+                  "id": "YourKeyVaultID"
+                },
+                "secretName": "adminPass"
+              }
+        },
+        "availabilitySetName": {
+            "value": "SQL-Availability3000"
+        },
+        "ClusterStaticIP": {
+            "value": "10.50.2.55"
+        },
+        "ClusterIPSubnetClass":{
+            "value": "24"
+        },
+        "availabilityGroupName":{
+            "value": "TestAG"
+        },
+        "sqlPort": {
+            "value": 1433
+        },
+        "listenerStaticIP": {
+            "value": "10.50.2.56"
+        },
+        "listenerSubnetMask": {
+            "value": "255.255.255.0"
+        },
+        "diagnosticsStorageAccountName": {
+            "value": "appprodrgdiag992"
+        },
+        "diagnosticsStorageAccountId": {
+            "value": "yourstorageaccountId"
+        },
+        "sqlAuthenticationLogin": {
+            "value": "saadmin"
+        },
+        "sqlAuthenticationPassword": {
+            "reference": {
+                "keyVault": {
+                  "id": "YourKeyVaultID"
+                },
+                "secretName": "saPass"
+              }
+        },
+        "sqlSysAdmins":{
+            "value": "YourDomain\\DBA"
+        },
+        "domainUsername": {
+            "value": "yourdomain\\youradmin"
+          },
+        "domainUserPassword": {
+            "reference": {
+              "keyVault": {
+                "id": "YourKeyVaultID"
+              },
+              "secretName": "DomainAdmin"
+            }
+          },
+        "sqlUsername": {
+            "value": "yourdomain\\yoursqlaccount"
+          },
+        "sqlUserPassword": {
+            "reference": {
+              "keyVault": {
+                "id": "YourKeyVaultID"
+              },
+              "secretName": "DomainAdmin"
+            }
+          },
+          "_artifactsLocation": {
+              "value": "https://raw.githubusercontent.com/aultt/ARM/master/AlwaysOnExistingVnet" 
+          }
+          
+    }
+}
