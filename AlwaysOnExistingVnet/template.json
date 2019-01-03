@@ -28,9 +28,6 @@
         "adminUsername": {
             "type": "string"
         },
-        "virtualNetworkName": {
-            "type": "string"
-        },
         "domainName": {
             "type": "string"
         },
@@ -360,7 +357,7 @@
         {
             "name": "[concat(variables('vmNamePrefix'), copyIndex(1), '-nic')]",
             "type": "Microsoft.Network/networkInterfaces",
-            "apiVersion": "2018-04-01",
+            "apiVersion": "2017-06-01",
             "location": "[parameters('location')]",
             "copy":{
               "name": "nicloop",
@@ -387,7 +384,7 @@
                     }
                 ],
                 "networkSecurityGroup": {
-                    "id": "[resourceId('AlwaysOnFCTesting', 'Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]"
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]"
                 }
             }
         },

@@ -29,9 +29,6 @@
         "adminUsername": {
             "value": "youradmin"
         },
-        "virtualNetworkName": {
-            "value": "prod-vnet"
-        },
         "networkSecurityGroupName":{
             "value": "AESQL3000-nsg"
         },

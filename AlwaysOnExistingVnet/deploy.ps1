@@ -2,11 +2,12 @@ $resourceGroupName = 'AlwaysOnFCTesting'
 $resourceGroupLocation = "East US"
 $templateFile = 'D:\GitHub\ARM\AlwaysOnExistingVnet\template.json'
 $templateParm = 'D:\ParameterFiles\AlwaysOnExitingVNetparameters.json'
+$subscription = 'TAMZ_MS'
 # ii 'D:\ParameterFiles\AlwaysOnExitingVNetparameters.json'
  
 Import-Module Az
 Login-AzAccount 
-Select-AZSubscription -SubscriptionName TAMZ_MS 
+Select-AZSubscription -SubscriptionName $subscription 
 
 #Create or check for existing resource group
 $resourceGroup = Get-AZResourceGroup -Name $resourceGroupName -ErrorAction SilentlyContinue
