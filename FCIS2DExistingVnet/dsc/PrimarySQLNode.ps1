@@ -162,14 +162,14 @@ configuration FCISQLServer
             Credential = $AdminCreds
         }
 
-        #xCluster CreateCluster
-        #{
-        #    Name                          = $ClusterName
-        #    StaticIPAddress               = $ClusterIPandSubNetClass
-        #    FirstNode                     = $FirstNode
-        #    DomainAdministratorCredential = $Admincreds
-        #    DependsOn                     = '[Computer]DomainJoin'
-        #}
+        xCluster CreateCluster
+        {
+            Name                          = $ClusterName
+            StaticIPAddress               = $ClusterIPandSubNetClass
+            FirstNode                     = $FirstNode
+            DomainAdministratorCredential = $Admincreds
+            DependsOn                     = '[Computer]DomainJoin'
+        }
 #
         #Script  AddProbeToClusterResource
         #{
