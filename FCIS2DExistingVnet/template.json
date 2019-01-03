@@ -243,6 +243,7 @@
                             "count": 2,
                             "input":{
                                 "createOption": "Empty",
+                                "lun":"[copyIndex('dataDisks')]",
                                 "diskSizeGB": "[parameters('s2dStorageSize')]",
                                 "caching": "ReadOnly",
                                 "managedDisk": {
@@ -339,7 +340,7 @@
         {
             "name": "[concat(variables('vmNamePrefix'), copyIndex(1), '-nic')]",
             "type": "Microsoft.Network/networkInterfaces",
-            "apiVersion": "2018-04-01",
+            "apiVersion": "2017-06-01",
             "location": "[parameters('location')]",
             "copy":{
               "name": "nicloop",
@@ -366,7 +367,7 @@
                     }
                 ],
                 "networkSecurityGroup": {
-                    "id": "[resourceId('AlwaysOnFCTesting', 'Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]"
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]"
                 }
             }
         },
@@ -409,7 +410,7 @@
                         "name": "SQL",
                         "properties":{
                             "frontendIPConfiguration":{
-                                "id": "[variables('listenerConfigID1')]"
+                                "id": "[variables('SQLConfigID1')]"
                             },
                             "backendAddressPool": {
                                 "id": "[variables('ilbBEAddressPoolID')]"
@@ -427,7 +428,7 @@
                         "name": "FileSharing",
                         "properties":{
                             "frontendIPConfiguration":{
-                                "id":"[variables('listenerConfigID1')]"
+                                "id":"[variables('SQLConfigID1')]"
                             },
                             "backendAddressPool":{ 
                                 "id": "[variables('ilbBEAddressPoolID')]"

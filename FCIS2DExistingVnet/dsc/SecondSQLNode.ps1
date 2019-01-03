@@ -1,5 +1,5 @@
 ﻿
-configuration AlwaysOnSqlServer
+configuration FCISQLServer
 {
     param
     (

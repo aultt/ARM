@@ -2,11 +2,12 @@ $resourceGroupName = 'FCIS2DTesting'
 $resourceGroupLocation = "East US"
 $templateFile = 'D:\GitHub\ARM\FCIS2DExistingVnet\template.json'
 $templateParm = 'D:\ParameterFiles\FCIS2DExistingVnetparameters.json'
+$subscription = 'TAMZ_MS'
 # ii 'D:\ParameterFiles\FCIS2DExistingVnetparameters.json'
  
 Import-Module Az
 Login-AzAccount 
-Select-AZSubscription -SubscriptionName TAMZ_MS 
+Select-AZSubscription -SubscriptionName $subscription
 
 #Create or check for existing resource group
 $resourceGroup = Get-AZResourceGroup -Name $resourceGroupName -ErrorAction SilentlyContinue
