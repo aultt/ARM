@@ -233,7 +233,7 @@ configuration FCISQLServer
 
             PsDscRunAsCredential  = $Admincreds
 
-            DependsOn             = '[xPendingReboot]Reboot1','[Disk]LogVolume','[Disk]DataVolume'
+            DependsOn             = '[xPendingReboot]Reboot1','[Script]EnableS2D'
         }
 
         UserRightsAssignment PerformVolumeMaintenanceTasks

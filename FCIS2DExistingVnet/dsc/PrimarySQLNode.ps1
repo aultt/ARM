@@ -201,6 +201,14 @@ configuration FCISQLServer
             Name = 'Reboot1'
             dependson = '[Script]CleanSQL'
         }
+        
+        xWaitForCluster WaitForSQLCluster
+        {
+            Name             = $SQLClusterName
+            RetryIntervalSec = 10
+            RetryCount       = 60
+            DependsOn        = '[WindowsFeature]AddRemoteServerAdministrationToolsClusteringCmdInterfaceFeature'
+        }
 
         SqlSetup 'InstallNamedInstance'
         {
@@ -216,7 +224,7 @@ configuration FCISQLServer
 
             PsDscRunAsCredential  = $AdminCreds
 
-            DependsOn             = '[xPendingReboot]Reboot1','[Disk]LogVolume','[Disk]DataVolume'
+            DependsOn             = '[xPendingReboot]Reboot1','[xWaitForCluster]WaitForSQLCluster'
         }
 
         UserRightsAssignment PerformVolumeMaintenanceTasks
