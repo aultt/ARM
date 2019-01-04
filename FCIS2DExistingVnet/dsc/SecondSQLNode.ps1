@@ -26,6 +26,8 @@ configuration FCISQLServer
         [Parameter(Mandatory)]
         [string]$ClusterIPSubnetClass,
         [Parameter(Mandatory)]
+        [string]$ClusterIPSubnetMask,
+        [Parameter(Mandatory)]
         [string]$FirstNode,
         [Parameter(Mandatory)]
         [string]$SQLClusterName,
@@ -46,7 +48,7 @@ configuration FCISQLServer
     Import-DscResource -ModuleName ComputerManagementdsc, sqlserverdsc, xFailOverCluster, xPendingReboot,StorageDSC,SecurityPolicydsc
     
     $ClusterIPandSubNetClass = $ClusterStaticIP + '/' +$ClusterIPSubnetClass
-    #$ListenerIPandMask = $ListenerStaticIP + '/'+$ListenerSubnetMask
+    #$ListenerIPandMask = $ListenerStaticIP + '/'+$ClusterIPSubnetMask
     $SQLVersion = $imageoffer.Substring(5,2)
     $SQLLocation = "MSSQL$(switch ($SQLVersion){17 {14} 16 {13}})"
     #$IPResourceName = $AvailabilityGroupName +'_'+ $ListenerStaticIP
@@ -61,47 +63,47 @@ configuration FCISQLServer
             ActionAfterReboot = 'ContinueConfiguration'
         }
         
-        #Script  FireWallRuleforSQLProbe
-        #{
-        #    GetScript = {
-        #                    $test = Get-NetFirewallRule -DisplayName "Load Balancer SQL Probe" -ErrorAction SilentlyContinue
-        #                    if ($test)
-        #                    {return @{ 'Result' = $test}}
-        #                    else
-        #                    {return @{ 'Result' = "No Rule Present"} }
-        #                }
-        #    SetScript = {New-NetFirewallRule -DisplayName "Load Balancer SQL Probe" -Direction Inbound -Action Allow -Protocol TCP -LocalPort 59999}
-        #    TestScript = { 
-        #                    $test = Get-NetFirewallRule -DisplayName "Load Balancer SQL Probe" -ErrorAction SilentlyContinue
-        #                    if ($test)
-        #                    {return $true}
-        #                    else
-        #                    {return $false}
-        #                 }
-#
-        #    PsDscRunAsCredential = $AdminCreds
-        #}
-        #
-        #Script  FireWallRuleforClusterProbe
-        #{
-        #    GetScript = {
-        #                    $test = Get-NetFirewallRule -DisplayName "Load Balancer Cluster Probe" -ErrorAction SilentlyContinue
-        #                    if ($test)
-        #                    {return @{ 'Result' = $test}}
-        #                    else
-        #                    {return @{ 'Result' = "No Rule Present"} }
-        #                }
-        #    SetScript = {New-NetFirewallRule -DisplayName "Load Balancer Cluster Probe" -Direction Inbound -Action Allow -Protocol TCP -LocalPort 58888}
-        #    TestScript = { 
-        #                    $test = Get-NetFirewallRule -DisplayName "Load Balancer Cluster Probe" -ErrorAction SilentlyContinue
-        #                    if ($test)
-        #                    {return $true}
-        #                    else
-        #                    {return $false}
-        #                 }
-#
-        #    PsDscRunAsCredential = $AdminCreds
-        #}
+        Script  FireWallRuleforSQLProbe
+        {
+            GetScript = {
+                            $test = Get-NetFirewallRule -DisplayName "Load Balancer SQL Probe" -ErrorAction SilentlyContinue
+                            if ($test)
+                            {return @{ 'Result' = $test}}
+                            else
+                            {return @{ 'Result' = "No Rule Present"} }
+                        }
+            SetScript = {New-NetFirewallRule -DisplayName "Load Balancer SQL Probe" -Direction Inbound -Action Allow -Protocol TCP -LocalPort 59999}
+            TestScript = { 
+                            $test = Get-NetFirewallRule -DisplayName "Load Balancer SQL Probe" -ErrorAction SilentlyContinue
+                            if ($test)
+                            {return $true}
+                            else
+                            {return $false}
+                         }
+
+            PsDscRunAsCredential = $AdminCreds
+        }
+        
+        Script  FireWallRuleforClusterProbe
+        {
+            GetScript = {
+                            $test = Get-NetFirewallRule -DisplayName "Load Balancer Cluster Probe" -ErrorAction SilentlyContinue
+                            if ($test)
+                            {return @{ 'Result' = $test}}
+                            else
+                            {return @{ 'Result' = "No Rule Present"} }
+                        }
+            SetScript = {New-NetFirewallRule -DisplayName "Load Balancer Cluster Probe" -Direction Inbound -Action Allow -Protocol TCP -LocalPort 58888}
+            TestScript = { 
+                            $test = Get-NetFirewallRule -DisplayName "Load Balancer Cluster Probe" -ErrorAction SilentlyContinue
+                            if ($test)
+                            {return $true}
+                            else
+                            {return $false}
+                         }
+
+            PsDscRunAsCredential = $AdminCreds
+        }
 #
         #WaitForDisk DataVolume{
         #    DiskId = 2
@@ -165,22 +167,22 @@ configuration FCISQLServer
             Credential = $Admincreds
         }
 
-        #xWaitForCluster WaitForCluster
-        #{
-        #    Name             = $ClusterName
-        #    RetryIntervalSec = 10
-        #    RetryCount       = 60
-        #    DependsOn        = '[WindowsFeature]AddRemoteServerAdministrationToolsClusteringCmdInterfaceFeature','[xPendingReboot]Reboot1'
-        #}
-#
-        #xCluster JoinSecondNodeToCluster
-        #{
-        #    Name                          = $ClusterName
-        #    FirstNode                     = $FirstNode
-        #    StaticIPAddress               = $ClusterIPandSubNetClass
-        #    DomainAdministratorCredential = $Admincreds
-        #    DependsOn                     = '[xWaitForCluster]WaitForCluster','[Computer]DomainJoin'
-        #}
+        xWaitForCluster WaitForCluster
+        {
+            Name             = $ClusterName
+            RetryIntervalSec = 10
+            RetryCount       = 60
+            DependsOn        = '[WindowsFeature]AddRemoteServerAdministrationToolsClusteringCmdInterfaceFeature','[xPendingReboot]Reboot1'
+        }
+
+        xCluster JoinSecondNodeToCluster
+        {
+            Name                          = $ClusterName
+            FirstNode                     = $FirstNode
+            StaticIPAddress               = $ClusterIPandSubNetClass
+            DomainAdministratorCredential = $Admincreds
+            DependsOn                     = '[xWaitForCluster]WaitForCluster','[Computer]DomainJoin'
+        }
         
         PowerPlan HighPerf
         {
@@ -407,7 +409,7 @@ $ConfigData = @{
 
 #  $AdminCreds = Get-Credential
 # $SQLServicecreds = $AdminCreds
-# AlwaysOnSQLServer -DomainName tamz.local -Admincreds $AdminCreds -SQLServicecreds $SQLServicecreds -ClusterName AES3000-c -FirstNode AES3000-1 -ListenerStaticIP "10.50.2.56" -ListenerSubnetMask "255.255.255.0" -availabilityGroupName "TestAG" -ClusterStaticIP "10.50.2.55" -ClusterIPSubnetClass "24" -Verbose -ConfigurationData $ConfigData -OutputPath d:\
+# AlwaysOnSQLServer -DomainName tamz.local -Admincreds $AdminCreds -SQLServicecreds $SQLServicecreds -ClusterName AES3000-c -FirstNode AES3000-1 -ListenerStaticIP "10.50.2.56" -ClusterIPSubnetMask "255.255.255.0" -availabilityGroupName "TestAG" -ClusterStaticIP "10.50.2.55" -ClusterIPSubnetClass "24" -Verbose -ConfigurationData $ConfigData -OutputPath d:\
 # Start-DscConfiguration -wait -Force -Verbose -Path D:\
 
 

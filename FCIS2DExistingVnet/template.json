@@ -60,6 +60,9 @@
         },
         "ClusterIPSubnetClass":{
             "type": "string"
+        },        
+        "ClusterIPSubnetMask":{
+            "type": "string"
         },
         "SQLStaticIP":{
             "type": "string"
@@ -304,6 +307,7 @@
                     "FirstNode":  "[concat(variables('vmNamePrefix'), '1')]",
                     "ClusterStaticIP": "[parameters('clusterStaticIP')]",
                     "ClusterIPSubnetClass": "[parameters('clusterIpSubnetClass')]",
+                    "ClusterIPSubnetMask": "[parameters('clusterIpSubnetMask')]",
                     "SQLClusterName": "[parameters('SQLClusterName')",
                     "SQLStaticIP": "[parameters('SQLStaticIP')]",
                     "sqlPort": "[parameters('sqlPort')]",

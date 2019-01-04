@@ -25,6 +25,8 @@ configuration FCISQLServer
         [Parameter(Mandatory)]
         [string]$ClusterIPSubnetClass,
         [Parameter(Mandatory)]
+        [string]$ClusterIPSubnetMask,
+        [Parameter(Mandatory)]
         [string]$FirstNode,
         [Parameter(Mandatory)]
         [string]$SQLClusterName,
@@ -47,7 +49,7 @@ configuration FCISQLServer
     $ClusterIPandSubNetClass = $ClusterStaticIP + '/' +$ClusterIPSubnetClass
     $SQLVersion = $imageoffer.Substring(5,2)
     $SQLLocation = "MSSQL$(switch ($SQLVersion){17 {14} 16 {13}})"
-    #$ListenerIPandMask = $ListenerStaticIP + '/'+$ListenerSubnetMask
+    #$ListenerIPandMask = $ListenerStaticIP + '/'+$ClusterIPSubnetMask
     #$IPResourceName = $AvailabilityGroupName +'_'+ $ListenerStaticIP
 
     WaitForSqlSetup
@@ -175,7 +177,7 @@ configuration FCISQLServer
                                 
             SetScript  = {
                             
-                            Get-ClusterResource "Cluster IP Address"| Set-ClusterParameter -Multiple @{"Address"="$using:ClusterStaticIP";"ProbePort"=59999;"SubnetMask"="$using:ListenerSubnetMask";"Network"="Cluster Network 1";"EnableDhcp"=0}
+                            Get-ClusterResource "Cluster IP Address"| Set-ClusterParameter -Multiple @{"Address"="$using:ClusterStaticIP";"ProbePort"=59999;"SubnetMask"="$using:ClusterIPSubnetMask";"Network"="Cluster Network 1";"EnableDhcp"=0}
                         }
             TestScript = {
                              return($(Get-ClusterResource -name "Cluster IP Address" | Get-ClusterParameter -Name ProbePort ).Value -eq 59999)
@@ -389,7 +391,7 @@ configuration FCISQLServer
         #                        
         #    SetScript  = {
         #                    
-        #                    Get-ClusterResource $using:IPResourceName| Set-ClusterParameter -Multiple @{"Address"="$using:ListenerStaticIP";"ProbePort"=59999;"SubnetMask"="$using:ListenerSubnetMask";"Network"="Cluster Network 1";"EnableDhcp"=0}
+        #                    Get-ClusterResource $using:IPResourceName| Set-ClusterParameter -Multiple @{"Address"="$using:ListenerStaticIP";"ProbePort"=59999;"SubnetMask"="$using:ClusterIPSubnetMask";"Network"="Cluster Network 1";"EnableDhcp"=0}
         #                }
         #    TestScript = {
         #                     return($(Get-ClusterResource -name $using:IPResourceName | Get-ClusterParameter -Name ProbePort ).Value -eq 59999)
@@ -431,7 +433,7 @@ $ConfigData = @{
 
 #  $AdminCreds = Get-Credential
 # $SQLServicecreds = $AdminCreds
-# AlwaysOnSQLServer -DomainName tamz.local -Admincreds $AdminCreds -SQLServicecreds $SQLServicecreds -ClusterName AES3000-c -FirstNode AES3000-1 -ListenerStaticIP "10.50.2.56" -ListenerSubnetMask "255.255.255.0" -availabilityGroupName "TestAG" -ClusterStaticIP "10.50.2.55" -ClusterIPSubnetClass "24" -Verbose -ConfigurationData $ConfigData -OutputPath d:\
+# AlwaysOnSQLServer -DomainName tamz.local -Admincreds $AdminCreds -SQLServicecreds $SQLServicecreds -ClusterName AES3000-c -FirstNode AES3000-1 -ListenerStaticIP "10.50.2.56" -ClusterIPSubnetMask "255.255.255.0" -availabilityGroupName "TestAG" -ClusterStaticIP "10.50.2.55" -ClusterIPSubnetClass "24" -Verbose -ConfigurationData $ConfigData -OutputPath d:\
 # Start-DscConfiguration -wait -Force -Verbose -Path D:\
 
 
