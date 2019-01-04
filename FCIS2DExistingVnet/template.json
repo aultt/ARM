@@ -122,13 +122,52 @@
             "type": "string",
             "defaultValue": "F"
         },
+        "datadrivelabel" :{
+            "type": "string",
+            "metadata":{
+              "description": "Label to associate with Data drive once formated"
+            },
+            "defaultValue": "Data"
+          },
+          "datadrivesize" :{
+            "type": "string",
+            "metadata": {
+              "description": "Size of volume to be created for Data Drive"
+            }
+          },
         "logDriveLetter":{
             "type": "string",
             "defaultValue": "L"
         },
+        "logdrivelabel" :{
+            "type": "string",
+            "metadata":{
+              "description": "Label to associate with Log drive once formated"
+            },
+            "defaultValue": "log"
+          },
+        "logdrivesize" :{
+            "type": "string",
+            "metadata": {
+              "description": "Size of volume to be created for Log Drive"
+            }
+        },
         "tempdbDriveLetter":{
             "type": "string",
-            "defaultValue": "F"
+            "defaultValue": "T"
+        },
+        "tempdbdrivelabel" :{
+            "type": "string",
+            "metadata":{
+              "description": "Label to associate with TempDB drive once formated"
+            },
+            "defaultValue": "TempDB"
+          },
+        "tempdbdrivesize" :{
+            "type": "string",
+            "metadata": {
+              "description": "Size of volume to be created for TempDB Drive"
+            }
         },
         "sqlSysAdmins":{
             "type": "string"
@@ -316,8 +355,14 @@
                     "sqlFeatures" : "[parameters('sqlFeatures')]",
                     "sqlInstanceName": "[parameters('sqlInstanceName')]",
                     "dataDriveLetter": "[parameters('dataDriveLetter')]",
+                    "dataDriveLabel": "[parameters('dataDriveLabel')]",
+                    "dataDriveSize": "[parameters('dataDriveSize')]",
                     "logDriveLetter": "[parameters('logDriveLetter')]",
+                    "logDriveLabel": "[parameters('logDriveLabel')]",
+                    "logDriveSize": "[parameters('logDriveSize')]",
                     "tempdbDriveLetter": "[parameters('tempdbDriveLetter')]",
+                    "tempdbDriveLabel": "[parameters('tempdbDriveLabel')]",
+                    "tempdbDriveSize": "[parameters('tempdbDriveSize')]",
                     "sqlSysAdmins" : "[parameters('sqlSysAdmins')]",
                     "sourcePath" : "[parameters('sourcePath')]",
                     "timeZone" : "[parameters('timeZone')]"

@@ -15,8 +15,14 @@ configuration FCISQLServer
         [string]$SQLFeatures,
         [string]$SQLInstanceName,
         [string]$datadriveLetter,
+        [string]$datadrivelabel,
+        [string]$datadriveSize,
         [string]$logdriveLetter,
+        [string]$logdrivelabel,
+        [string]$logdriveSize,
         [string]$tempdbdriveLetter,
+        [string]$tempdbdrivelabel,
+        [string]$tempdbdriveSize,
         [string]$SQLSysAdmins,
         [string]$SourcePath,
         [Parameter(Mandatory)]
@@ -172,7 +178,7 @@ configuration FCISQLServer
             Name             = $ClusterName
             RetryIntervalSec = 10
             RetryCount       = 60
-            DependsOn        = '[WindowsFeature]AddRemoteServerAdministrationToolsClusteringCmdInterfaceFeature','[xPendingReboot]Reboot1'
+            DependsOn        = '[WindowsFeature]AddRemoteServerAdministrationToolsClusteringCmdInterfaceFeature'
         }
 
         xCluster JoinSecondNodeToCluster
@@ -183,7 +189,19 @@ configuration FCISQLServer
             DomainAdministratorCredential = $Admincreds
             DependsOn                     = '[xWaitForCluster]WaitForCluster','[Computer]DomainJoin'
         }
-        
+        Script EnableS2D {
+                SetScript  = 
+@"
+                                Enable-ClusterS2D -Confirm:0; 
+                                New-Volume -StoragePoolFriendlyName S2D* -FriendlyName ${datadrivelabel} -FileSystem NTFS -AllocationUnitSize 65536 -DriveLetter ${datadriveLetter} -size ${datadriveSize};
+                                New-Volume -StoragePoolFriendlyName S2D* -FriendlyName ${logdrivelabel} -FileSystem NTFS -AllocationUnitSize 65536 -DriveLetter ${logdriveLetter} -size ${logdriveSize};
+                                New-Volume -StoragePoolFriendlyName S2D* -FriendlyName ${tempdbdrivelabel} -FileSystem NTFS -AllocationUnitSize 65536 -DriveLetter ${tempdbdriveLetter} -size ${tempdbdriveSize};
+"@
+                TestScript = "(Get-StoragePool -FriendlyName S2D*).OperationalStatus -eq 'OK'"
+                GetScript  = "@{Ensure = if ((Get-StoragePool -FriendlyName S2D*).OperationalStatus -eq 'OK') {'Present'} Else {'Absent'}}"
+                DependsOn  = "[xCluster]JoinSecondNodeToCluster"
+        }
+
         PowerPlan HighPerf
         {
           IsSingleInstance = 'Yes'
