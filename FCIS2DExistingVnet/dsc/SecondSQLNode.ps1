@@ -110,34 +110,6 @@ configuration FCISQLServer
 
             PsDscRunAsCredential = $AdminCreds
         }
-#
-        #WaitForDisk DataVolume{
-        #    DiskId = 2
-        #    RetryIntervalSec = 60
-        #    RetryCount =60
-        #}
-#
-        #Disk DataVolume{
-        #    DiskId =  2
-        #    DriveLetter = $datadriveLetter
-        #    FSFormat = 'NTFS'
-        #    AllocationUnitSize = 64kb
-        #    DependsOn = '[WaitForDisk]DataVolume'
-        #}
-#
-        #WaitForDisk LogVolume{
-        #    DiskId = 3
-        #    RetryIntervalSec = 60
-        #    RetryCount =60
-        #}
-#
-        #Disk LogVolume{
-        #    DiskId =  3
-        #    DriveLetter = $logdriveLetter
-        #    FSFormat = 'NTFS'
-        #    AllocationUnitSize = 64kb
-        #    DependsOn = '[WaitForDisk]LogVolume'
-        #}
 
         WindowsFeature AddFailoverFeature
         {
@@ -230,171 +202,124 @@ configuration FCISQLServer
             dependson = '[Script]CleanSQL'
         }
 
-        #SqlSetup 'InstallNamedInstance'
-        #{
-        #    InstanceName          = $SQLInstanceName
-        #    Features              = $SQLFeatures
-        #    SQLCollation          = 'SQL_Latin1_General_CP1_CI_AS'
-        #    SQLSvcAccount         = $SQLServicecreds
-        #    SQLSysAdminAccounts   = $SQLSysAdmins
-        #    InstallSharedDir      = 'C:\Program Files\Microsoft SQL Server'
-        #    InstallSharedWOWDir   = 'C:\Program Files (x86)\Microsoft SQL Server'
-        #    InstanceDir           = "${datadriveletter}:\Program Files\Microsoft SQL Server"
-        #    InstallSQLDataDir     = "${datadriveletter}:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\"
-        #    SQLUserDBDir          = "${datadriveletter}:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\Data"
-        #    SQLUserDBLogDir       = "${logdriveletter}:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\Log"
-        #    SQLTempDBDir          = "${tempdbdriveLetter}:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\Data"
-        #    SQLTempDBLogDir       = "${logdriveletter}:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\Log"
-        #    SQLBackupDir          = "${datadriveletter}:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\Backup"
-        #    SourcePath            = $SourcePath 
-        #    UpdateEnabled         = 'False'
-        #    ForceReboot           = $false
-        #    BrowserSvcStartupType = 'Automatic'
-#
-        #    PsDscRunAsCredential  = $Admincreds
-#
-        #    DependsOn             = '[xPendingReboot]Reboot1','[Disk]LogVolume','[Disk]DataVolume'
-        #}
-#
-        #UserRightsAssignment PerformVolumeMaintenanceTasks
-        #{
-        #    Policy = "Perform_volume_maintenance_tasks"
-        #    Identity = $SQLServicecreds.UserName
-#
-        #    DependsOn                     = '[Computer]DomainJoin'
-        #}
-#
-        #UserRightsAssignment LockPagesInMemory
-        #{
-        #    Policy = "Lock_pages_in_memory"
-        #    Identity = $SQLServicecreds.UserName
-#
-        #    DependsOn                     = '[Computer]DomainJoin'
-        #}
-#
-        #SqlServerNetwork 'ChangeTcpIpOnDefaultInstance'
-        #{
-        #    InstanceName         = $SQLInstanceName
-        #    ProtocolName         = 'Tcp'
-        #    IsEnabled            = $true
-        #    TCPDynamicPort       = $false
-        #    TCPPort              = $SQLPort
-        #    RestartService       = $true
-        #    DependsOn = '[SqlSetup]InstallNamedInstance'
-        #    
-        #    PsDscRunAsCredential = $AdminCreds
-        #}
-#
-        #SqlServerMaxDop Set_SQLServerMaxDop_ToAuto
-        #{
-        #    Ensure                  = 'Present'
-        #    DynamicAlloc            = $true
-        #    InstanceName            = $SQLInstanceName
-        #    PsDscRunAsCredential    = $Admincreds
-#
-        #    DependsOn = '[SqlSetup]InstallNamedInstance'
-        #}
-#
-        #SqlServerMemory Set_SQLServerMaxMemory_ToAuto
-        #{
-        #    Ensure                  = 'Present'
-        #    DynamicAlloc            = $true
-        #    InstanceName            = $SQLInstanceName
-        #    PsDscRunAsCredential    = $Admincreds
-#
-        #    DependsOn = '[SqlSetup]InstallNamedInstance'
-        #}
-#
-        #SqlWindowsFirewall Create_FirewallRules
-        #{
-        #    Ensure           = 'Present'
-        #    Features         = $SQLFeatures
-        #    InstanceName     = $SQLInstanceName
-        #    SourcePath       = 'C:\SQLServerFull'
-#
-        #    DependsOn = '[SqlSetup]InstallNamedInstance'
-        #}
-        #
-        #SqlServerLogin AddNTServiceClusSvc
-        #{
-        #    Ensure               = 'Present'
-        #    Name                 = 'NT SERVICE\ClusSvc'
-        #    LoginType            = 'WindowsUser'
-        #    ServerName           = $env:COMPUTERNAME
-        #    InstanceName         = $SQLInstanceName
-        #    PsDscRunAsCredential = $AdminCreds
-        #    
-        #    DependsOn = '[SqlSetup]InstallNamedInstance', '[xCluster]JoinSecondNodeToCluster'
-        #}
-#
-        ## Add the required permissions to the cluster service login
-        #SqlServerPermission AddNTServiceClusSvcPermissions
-        #{
-        #    
-        #    Ensure               = 'Present'
-        #    ServerName           = $env:COMPUTERNAME
-        #    InstanceName         = $SQLInstanceName
-        #    Principal            = 'NT SERVICE\ClusSvc'
-        #    Permission           = 'AlterAnyAvailabilityGroup', 'ViewServerState'
-        #    PsDscRunAsCredential = $AdminCreds
-#
-        #    DependsOn            = '[SqlServerLogin]AddNTServiceClusSvc'
-        #}
-#
-        ## Create a DatabaseMirroring endpoint
-        #SqlServerEndpoint HADREndpoint
-        #{
-        #    EndPointName         = 'HADR'
-        #    Ensure               = 'Present'
-        #    Port                 = 5022
-        #    ServerName           = $env:COMPUTERNAME
-        #    InstanceName         = $SQLInstanceName
-        #    PsDscRunAsCredential = $AdminCreds
-#
-        #    DependsOn = '[SqlSetup]InstallNamedInstance', '[xCluster]JoinSecondNodeToCluster'
-        #}
-#
-        #SqlAlwaysOnService 'EnableAlwaysOn'
-        #{
-        #    Ensure               = 'Present'
-        #    ServerName           = $env:COMPUTERNAME
-        #    InstanceName         = $SQLInstanceName
-        #    RestartTimeout       = 120
-        #    PsDscRunAsCredential = $Admincreds
-#
-        #    DependsOn = '[SqlSetup]InstallNamedInstance','[xCluster]JoinSecondNodeToCluster'
-        #}
-#
-        #xPendingReboot Reboot2
-        #{
-        #    Name = 'Reboot2'
-        #    dependson = '[SqlAlwaysOnService]EnableAlwaysOn'
-        #}
-#
-        #SqlWaitForAG 'SQLConfigureAG-WaitAG'
-        #{
-        #    Name                 = $AvailabilityGroupName
-        #    RetryIntervalSec     = 30
-        #    RetryCount           = 40
-        #    PsDscRunAsCredential = $SqlAdministratorCredential
-#
-        #    DependsOn = '[xPendingReboot]Reboot2'
-        #}
-#
-        #SqlAGReplica AddReplica
-        #{
-        #    Ensure                     = 'Present'
-        #    Name                       = $env:COMPUTERNAME
-        #    AvailabilityGroupName      = $AvailabilityGroupName
-        #    ServerName                 = $env:COMPUTERNAME
-        #    InstanceName               = $SQLInstanceName
-        #    PrimaryReplicaServerName   = $FirstNode
-        #    PrimaryReplicaInstanceName = $SQLInstanceName
-        #    ProcessOnlyOnActiveNode    = 1
-        #    PsDscRunAsCredential = $AdminCreds
-        #
-        #    DependsOn                  = '[SqlWaitForAG]SQLConfigureAG-WaitAG'
-        #}
+        SqlSetup 'InstallNamedInstance'
+        {
+            Action                ='InstallFailoverCluster'
+            UpdateEnabled         = 'False'
+            ForceReboot           = $false
+            SourcePath            = $SourcePath 
+
+            InstanceName          = $SQLInstanceName
+            Features              = $SQLFeatures
+            
+            InstallSharedDir      = 'C:\Program Files\Microsoft SQL Server'
+            InstallSharedWOWDir   = 'C:\Program Files (x86)\Microsoft SQL Server'
+            InstanceDir           = "${datadriveletter}:\Program Files\Microsoft SQL Server"
+
+            SQLCollation          = 'SQL_Latin1_General_CP1_CI_AS'
+            SQLSvcAccount         = $SQLServicecreds
+            SQLSysAdminAccounts   = $SQLSysAdmins
+            
+            InstallSQLDataDir     = "${datadriveletter}:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\"
+            SQLUserDBDir          = "${datadriveletter}:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\Data"
+            SQLUserDBLogDir       = "${logdriveletter}:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\Log"
+            SQLTempDBDir          = "${tempdbdriveLetter}:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\Data"
+            SQLTempDBLogDir       = "${logdriveletter}:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\Log"
+            SQLBackupDir          = "${datadriveletter}:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\Backup"
+            
+            FailoverClusterNetworkName = $SQLClusterName
+            FailoverClusterIPAddress = $SQLStaticIP
+            FailoverClusterGroupName = $SQLClusterName
+
+            PsDscRunAsCredential  = $Admincreds
+
+            DependsOn             = '[xPendingReboot]Reboot1','[Disk]LogVolume','[Disk]DataVolume'
+        }
+
+        UserRightsAssignment PerformVolumeMaintenanceTasks
+        {
+            Policy = "Perform_volume_maintenance_tasks"
+            Identity = $SQLServicecreds.UserName
+
+            DependsOn                     = '[Computer]DomainJoin'
+        }
+
+        UserRightsAssignment LockPagesInMemory
+        {
+            Policy = "Lock_pages_in_memory"
+            Identity = $SQLServicecreds.UserName
+
+            DependsOn                     = '[Computer]DomainJoin'
+        }
+
+        SqlServerNetwork 'ChangeTcpIpOnDefaultInstance'
+        {
+            InstanceName         = $SQLInstanceName
+            ProtocolName         = 'Tcp'
+            IsEnabled            = $true
+            TCPDynamicPort       = $false
+            TCPPort              = $SQLPort
+            RestartService       = $true
+            DependsOn = '[SqlSetup]InstallNamedInstance'
+            
+            PsDscRunAsCredential = $AdminCreds
+        }
+
+        SqlServerMaxDop Set_SQLServerMaxDop_ToAuto
+        {
+            Ensure                  = 'Present'
+            DynamicAlloc            = $true
+            InstanceName            = $SQLInstanceName
+            PsDscRunAsCredential    = $Admincreds
+
+            DependsOn = '[SqlSetup]InstallNamedInstance'
+        }
+
+        SqlServerMemory Set_SQLServerMaxMemory_ToAuto
+        {
+            Ensure                  = 'Present'
+            DynamicAlloc            = $true
+            InstanceName            = $SQLInstanceName
+            PsDscRunAsCredential    = $Admincreds
+
+            DependsOn = '[SqlSetup]InstallNamedInstance'
+        }
+
+        SqlWindowsFirewall Create_FirewallRules
+        {
+            Ensure           = 'Present'
+            Features         = $SQLFeatures
+            InstanceName     = $SQLInstanceName
+            SourcePath       = 'C:\SQLServerFull'
+
+            DependsOn = '[SqlSetup]InstallNamedInstance'
+        }
+        
+        SqlServerLogin AddNTServiceClusSvc
+        {
+            Ensure               = 'Present'
+            Name                 = 'NT SERVICE\ClusSvc'
+            LoginType            = 'WindowsUser'
+            ServerName           = $env:COMPUTERNAME
+            InstanceName         = $SQLInstanceName
+            PsDscRunAsCredential = $AdminCreds
+            
+            DependsOn = '[SqlSetup]InstallNamedInstance', '[xCluster]JoinSecondNodeToCluster'
+        }
+
+        # Add the required permissions to the cluster service login
+        SqlServerPermission AddNTServiceClusSvcPermissions
+        {
+            
+            Ensure               = 'Present'
+            ServerName           = $env:COMPUTERNAME
+            InstanceName         = $SQLInstanceName
+            Principal            = 'NT SERVICE\ClusSvc'
+            Permission           = 'AlterAnyAvailabilityGroup', 'ViewServerState'
+            PsDscRunAsCredential = $AdminCreds
+        
+            DependsOn            = '[SqlServerLogin]AddNTServiceClusSvc'
+        }
     }
 }
 
