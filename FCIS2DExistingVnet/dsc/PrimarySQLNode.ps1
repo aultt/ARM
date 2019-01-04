@@ -285,7 +285,7 @@ configuration FCISQLServer
 
             DependsOn = '[SqlSetup]InstallNamedInstance'
         }
-         Adding the required service account to allow the cluster to log into SQL
+        #Adding the required service account to allow the cluster to log into SQL
         SqlServerLogin AddNTServiceClusSvc
         {
             Ensure               = 'Present'
