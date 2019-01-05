@@ -347,7 +347,7 @@
                     "ClusterStaticIP": "[parameters('clusterStaticIP')]",
                     "ClusterIPSubnetClass": "[parameters('clusterIpSubnetClass')]",
                     "ClusterIPSubnetMask": "[parameters('clusterIpSubnetMask')]",
-                    "SQLClusterName": "[parameters('SQLClusterName')",
+                    "SQLClusterName": "[parameters('SQLClusterName')]",
                     "SQLStaticIP": "[parameters('SQLStaticIP')]",
                     "sqlPort": "[parameters('sqlPort')]",
                     "CloudWitnessName" : "[variables('witnessStorageName')]",
