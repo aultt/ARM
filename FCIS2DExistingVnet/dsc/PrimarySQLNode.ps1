@@ -205,7 +205,7 @@ configuration FCISQLServer
         xWaitForCluster WaitForSQLCluster
         {
             Name             = $SQLClusterName
-            RetryIntervalSec = 10
+            RetryIntervalSec = 30
             RetryCount       = 60
             DependsOn        = '[xClusterQuorum]SetQuorumToNodeAndCloudMajority'
         }
@@ -243,39 +243,6 @@ configuration FCISQLServer
             DependsOn                     = '[Computer]DomainJoin'
         }
 
-        SqlServerNetwork 'ChangeTcpIpOnDefaultInstance'
-        {
-            InstanceName         = $SQLInstanceName
-            ProtocolName         = 'Tcp'
-            IsEnabled            = $true
-            TCPDynamicPort       = $false
-            TCPPort              = $SQLPort
-            RestartService       = $true
-            DependsOn = '[SqlSetup]InstallNamedInstance'
-            
-            PsDscRunAsCredential = $AdminCreds
-        }
-
-        SqlServerMaxDop Set_SQLServerMaxDop_ToAuto
-        {
-            Ensure                  = 'Present'
-            DynamicAlloc            = $true
-            InstanceName            = $SQLInstanceName
-            PsDscRunAsCredential    = $AdminCreds
-
-            DependsOn = '[SqlSetup]InstallNamedInstance'
-        }
-
-        SqlServerMemory Set_SQLServerMaxMemory_ToAuto
-        {
-            Ensure                  = 'Present'
-            DynamicAlloc            = $true
-            InstanceName            = $SQLInstanceName
-            PsDscRunAsCredential    = $AdminCreds
-
-            DependsOn = '[SqlSetup]InstallNamedInstance'
-        }
-
         SqlWindowsFirewall Create_FirewallRules
         {
             Ensure           = 'Present'
@@ -284,32 +251,6 @@ configuration FCISQLServer
             SourcePath       = 'C:\SQLServerFull'
 
             DependsOn = '[SqlSetup]InstallNamedInstance'
-        }
-        #Adding the required service account to allow the cluster to log into SQL
-        SqlServerLogin AddNTServiceClusSvc
-        {
-            Ensure               = 'Present'
-            Name                 = 'NT SERVICE\ClusSvc'
-            LoginType            = 'WindowsUser'
-            ServerName           = $env:COMPUTERNAME
-            InstanceName         = $SQLInstanceName
-            PsDscRunAsCredential = $AdminCreds
-            
-            DependsOn = '[SqlSetup]InstallNamedInstance', '[xCluster]CreateCluster'
-        }
-
-        # Add the required permissions to the cluster service login
-        SqlServerPermission AddNTServiceClusSvcPermissions
-        {
-            
-            Ensure               = 'Present'
-            ServerName           = $env:COMPUTERNAME
-            InstanceName         = $SQLInstanceName
-            Principal            = 'NT SERVICE\ClusSvc'
-            Permission           = 'AlterAnyAvailabilityGroup', 'ViewServerState'
-            PsDscRunAsCredential = $AdminCreds
-
-            DependsOn            = '[SqlServerLogin]AddNTServiceClusSvc'
         }
     }
 }

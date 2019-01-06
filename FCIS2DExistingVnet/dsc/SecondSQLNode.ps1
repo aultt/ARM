@@ -270,6 +270,7 @@ configuration FCISQLServer
         {
             Ensure                  = 'Present'
             DynamicAlloc            = $true
+            ServerName              = $SQLClusterName
             InstanceName            = $SQLInstanceName
             PsDscRunAsCredential    = $Admincreds
 
@@ -280,6 +281,7 @@ configuration FCISQLServer
         {
             Ensure                  = 'Present'
             DynamicAlloc            = $true
+            ServerName              = $SQLClusterName
             InstanceName            = $SQLInstanceName
             PsDscRunAsCredential    = $Admincreds
 
@@ -301,7 +303,7 @@ configuration FCISQLServer
             Ensure               = 'Present'
             Name                 = 'NT SERVICE\ClusSvc'
             LoginType            = 'WindowsUser'
-            ServerName           = $env:COMPUTERNAME
+            ServerName           = $SQLClusterName
             InstanceName         = $SQLInstanceName
             PsDscRunAsCredential = $AdminCreds
             
@@ -313,7 +315,7 @@ configuration FCISQLServer
         {
             
             Ensure               = 'Present'
-            ServerName           = $env:COMPUTERNAME
+            ServerName           = $SQLClusterName
             InstanceName         = $SQLInstanceName
             Principal            = 'NT SERVICE\ClusSvc'
             Permission           = 'AlterAnyAvailabilityGroup', 'ViewServerState'
