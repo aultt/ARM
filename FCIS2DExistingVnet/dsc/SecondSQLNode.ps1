@@ -218,6 +218,7 @@ configuration FCISQLServer
 
             SQLCollation          = 'SQL_Latin1_General_CP1_CI_AS'
             SQLSvcAccount         = $SQLServicecreds
+            AgtSvcAccount         = $SQLServicecreds
             SQLSysAdminAccounts   = $SQLSysAdmins
             
             InstallSQLDataDir     = "${datadriveletter}:\Program Files\Microsoft SQL Server\$SQLLocation.$SQLInstanceName\MSSQL\"
