@@ -202,12 +202,14 @@ configuration FCISQLServer
             dependson = '[Script]CleanSQL'
         }
         
-        xWaitForCluster WaitForSQLCluster
+        SqlWaitForAG 'SQLWaitForFCI'
         {
-            Name             = $SQLClusterName
-            RetryIntervalSec = 30
-            RetryCount       = 60
-            DependsOn        = '[xClusterQuorum]SetQuorumToNodeAndCloudMajority'
+            Name                 = $SQLClusterName
+            RetryIntervalSec     = 30
+            RetryCount           = 40
+            PsDscRunAsCredential = $SqlAdministratorCredential
+
+            DependsOn = '[xPendingReboot]Reboot1'
         }
 
         SqlSetup 'InstallNamedInstance'
@@ -224,7 +226,7 @@ configuration FCISQLServer
 
             PsDscRunAsCredential  = $AdminCreds
 
-            DependsOn             = '[xPendingReboot]Reboot1','[xWaitForCluster]WaitForSQLCluster'
+            DependsOn             = '[xPendingReboot]Reboot1','[SqlWaitForAG]SQLWaitForFCI'
         }
 
         UserRightsAssignment PerformVolumeMaintenanceTasks
