@@ -222,6 +222,7 @@ configuration FCISQLServer
             InstanceName          = $SQLInstanceName
             Features              = $SQLFeatures
             SQLSvcAccount         = $SQLServicecreds
+            AgtSvcAccount         = $SQLServicecreds
             FailoverClusterNetworkName = $SQLClusterName
 
             PsDscRunAsCredential  = $AdminCreds
