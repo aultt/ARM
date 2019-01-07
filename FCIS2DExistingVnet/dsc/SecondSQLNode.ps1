@@ -313,7 +313,6 @@ configuration FCISQLServer
         # Add the required permissions to the cluster service login
         SqlServerPermission AddNTServiceClusSvcPermissions
         {
-            
             Ensure               = 'Present'
             ServerName           = $SQLClusterName
             InstanceName         = $SQLInstanceName
@@ -322,6 +321,14 @@ configuration FCISQLServer
             PsDscRunAsCredential = $AdminCreds
         
             DependsOn            = '[SqlServerLogin]AddNTServiceClusSvc'
+        }
+
+        Script FixProbe {
+            #SetScript  = "Get-ClusterResource -Name 'SQL IP*' | Set-ClusterParameter -Multiple @{Address=${SQLStaticIP};ProbePort=59999;SubnetMask=${ClusterIPSubnetMask};Network='Cluster Network 1';EnableDhcp=0} -ErrorAction SilentlyContinue | out-null;Get-ClusterGroup -Name 'SQL Server*' -ErrorAction SilentlyContinue | Move-ClusterGroup -ErrorAction SilentlyContinue"
+            SetScript  = "Get-ClusterResource -Name 'SQL IP*' | Set-ClusterParameter -Multiple @{Address=${SQLStaticIP};ProbePort=59999;SubnetMask=${ClusterIPSubnetMask};Network='Cluster Network 1';EnableDhcp=0} -ErrorAction SilentlyContinue | out-null;"
+            TestScript = "(Get-ClusterResource -name 'SQL IP*' | Get-ClusterParameter -Name ProbePort).Value -eq  59999"
+            GetScript  = '@{Result = "Moved Cluster Group"}'
+            DependsOn  = '[SqlServerPermission]AddNTServiceClusSvcPermissions'
         }
     }
 }
