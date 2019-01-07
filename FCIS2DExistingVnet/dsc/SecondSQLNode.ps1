@@ -201,6 +201,13 @@ configuration FCISQLServer
             Name = 'Reboot1'
             dependson = '[Script]CleanSQL'
         }
+        
+        Script MoveClusterGroups2 {
+            SetScript  = 'try {Get-ClusterGroup -ErrorAction SilentlyContinue | Move-ClusterGroup -Node $env:COMPUTERNAME -ErrorAction SilentlyContinue} catch {}'
+            TestScript = 'return $false'
+            GetScript  = '@{Result = "Moved Cluster Group"}'
+            DependsOn  = "[xPendingReboot]Reboot1"
+        }
 
         SqlSetup 'InstallNamedInstance'
         {
