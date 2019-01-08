@@ -175,12 +175,12 @@ configuration FCISQLServer
 
             DependsON = '[xCluster]CreateCluster'
         }
-        
+
         Script IncreaseClusterTimeouts {
             SetScript  = "(Get-Cluster).SameSubnetDelay = 2000; (Get-Cluster).SameSubnetThreshold = 15; (Get-Cluster).CrossSubnetDelay = 3000; (Get-Cluster).CrossSubnetThreshold = 15"
             TestScript = "(Get-Cluster).SameSubnetDelay -eq 2000 -and (Get-Cluster).SameSubnetThreshold -eq 15 -and (Get-Cluster).CrossSubnetDelay -eq 3000 -and (Get-Cluster).CrossSubnetThreshold -eq 15"
             GetScript  = "@{Ensure = if ((Get-Cluster).SameSubnetDelay -eq 2000 -and (Get-Cluster).SameSubnetThreshold -eq 15 -and (Get-Cluster).CrossSubnetDelay -eq 3000 -and (Get-Cluster).CrossSubnetThreshold -eq 15) {'Present'} else {'Absent'}}"
-            DependsOn  = "[Script]CloudWitness"
+            DependsOn  = '[xClusterQuorum]SetQuorumToNodeAndCloudMajority'
         }
 
         Script MoveClusterGroups1 {
