@@ -183,13 +183,6 @@ configuration FCISQLServer
             DependsOn  = '[xClusterQuorum]SetQuorumToNodeAndCloudMajority'
         }
 
-        Script MoveClusterGroups1 {
-            SetScript  = 'try {Get-ClusterGroup -ErrorAction SilentlyContinue | Move-ClusterGroup -Node $env:COMPUTERNAME -ErrorAction SilentlyContinue} catch {}'
-            TestScript = 'return $false'
-            GetScript  = '@{Result = "Moved Cluster Group"}'
-            DependsOn  = "[Script]IncreaseClusterTimeouts"
-        }
-
         PowerPlan HighPerf
         {
           IsSingleInstance = 'Yes'

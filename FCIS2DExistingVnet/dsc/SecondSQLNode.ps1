@@ -329,13 +329,21 @@ configuration FCISQLServer
         
             DependsOn            = '[SqlServerLogin]AddNTServiceClusSvc'
         }
+        Script  AddProbeToSQLClusterResource
+        {
+            GetScript  = {return @{ 'Result' = $(Get-ClusterResource 'SQL IP*' | Get-ClusterParameter -Name ProbePort ).Value} }
+                                
+            SetScript  = {
+                            
+                            Get-ClusterResource 'SQL IP*'| Set-ClusterParameter -Multiple @{"Address"="$using:SQLStaticIP";"ProbePort"=59999;"SubnetMask"="$using:CusterIPSubnetMask";"Network"="Cluster Network 1";"EnableDhcp"=0}
+                        }
+            TestScript = {
+                             return($(Get-ClusterResource -name 'SQL IP*' | Get-ClusterParameter -Name ProbePort ).Value -eq 59999)
+                         }
 
-        Script FixProbe {
-            SetScript  = "Get-ClusterResource -Name 'SQL IP*' | Set-ClusterParameter -Multiple @{Address=${SQLStaticIP};ProbePort=59999;SubnetMask=${ClusterIPSubnetMask};Network='Cluster Network 1';EnableDhcp=0} -ErrorAction SilentlyContinue | out-null;Get-ClusterGroup -Name 'SQL Server*' -ErrorAction SilentlyContinue | Move-ClusterGroup -ErrorAction SilentlyContinue"
-            #SetScript  = "Get-ClusterResource -Name 'SQL IP*' | Set-ClusterParameter -Multiple @{Address=${SQLStaticIP};ProbePort=59999;SubnetMask=${ClusterIPSubnetMask};Network='Cluster Network 1';EnableDhcp=0} -ErrorAction SilentlyContinue | out-null;"
-            TestScript = "(Get-ClusterResource -name 'SQL IP*' | Get-ClusterParameter -Name ProbePort).Value -eq  59999"
-            GetScript  = '@{Result = "Moved Cluster Group"}'
-            DependsOn  = '[SqlServerPermission]AddNTServiceClusSvcPermissions'
+            PsDscRunAsCredential = $AdminCreds
+
+            DependsON = "[SqlAGListener]AvailabilityGroupListenerWithSameNameAsVCO"
         }
     }
 }
