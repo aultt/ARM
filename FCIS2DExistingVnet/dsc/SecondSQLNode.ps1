@@ -343,7 +343,7 @@ configuration FCISQLServer
 
             PsDscRunAsCredential = $AdminCreds
 
-            DependsON = "[SqlAGListener]AvailabilityGroupListenerWithSameNameAsVCO"
+            DependsON = '[SqlServerPermission]AddNTServiceClusSvcPermissions'
         }
     }
 }
