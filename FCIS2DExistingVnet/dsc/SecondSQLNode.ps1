@@ -335,7 +335,7 @@ configuration FCISQLServer
                                 
             SetScript  = {
                             
-                            Get-ClusterResource 'SQL IP*'| Set-ClusterParameter -Multiple @{"Address"=$SQLStaticIP;"ProbePort"=59999;"SubnetMask"=$CusterIPSubnetMask;"Network"="Cluster Network 1";"EnableDhcp"=0}
+                            Get-ClusterResource 'SQL IP*'| Set-ClusterParameter -Multiple @{"Address"=$using:SQLStaticIP;"ProbePort"=59999;"SubnetMask"=$using:CusterIPSubnetMask;"Network"="Cluster Network 1";"EnableDhcp"=0}
                         }
             TestScript = {
                              return($(Get-ClusterResource -name 'SQL IP*' | Get-ClusterParameter -Name ProbePort ).Value -eq 59999)
