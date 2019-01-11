@@ -211,13 +211,13 @@ configuration FCISQLServer
         
         Script  SQLClusterConnectivity
         {
-            GetScript  = {return @{ 'Result' = $(Invoke-Sqlcmd -query "Select @@servername" -ServerInstance $using:sqlClusterName).Column1}}
+            GetScript  = {return @{ 'Result' = $(Invoke-Sqlcmd -query "Select @@servername" -ServerInstance $sqlClusterName-ErrorAction SilentlyContinue).Column1 }}
                                 
             SetScript  = {
                             Start-Sleep -Seconds 1
                          }
             TestScript = {
-                             return($(Invoke-Sqlcmd -query "Select @@servername" -ServerInstance $using:sqlClusterName).Column1 -eq $using:SqlClusterName)
+                             return($(Invoke-Sqlcmd -query "Select @@servername" -ServerInstance $sqlClusterName -ErrorAction SilentlyContinue).Column1 -eq $SqlClusterName)
                          }
 
             PsDscRunAsCredential = $AdminCreds
