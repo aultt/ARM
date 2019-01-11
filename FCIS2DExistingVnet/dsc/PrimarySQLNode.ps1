@@ -214,18 +214,57 @@ configuration FCISQLServer
             GetScript  = {return @{ 'Result' = $(Invoke-Sqlcmd -query "Select @@servername" -ServerInstance $using:sqlClusterName -ErrorAction SilentlyContinue).Column1 }}
                                 
             SetScript  = {
-                            Start-Sleep -Seconds 1
+                                $RetryIntervalSec =30
+                                $RetryCount =40
+                                for ($count = 0; $count -lt $RetryCount; $count++)
+                                {
+                                    try
+                                    {
+                                        $test = Invoke-Sqlcmd -query "Select @@servername" -ServerInstance $using:sqlClusterName -ErrorAction SilentlyContinue
+                                        if ($null -eq $test -or $null -eq $test.Column1)
+                                        {
+                                            Write-Verbose -Message "$using:sqlClusterName not found"
+                                            break
+                                        }
+
+                                        if ($test.Column1 -ne $using:sqlClusterName)
+                                        {
+                                            Write-Verbose -Message "$using:sqlClusterName Found!"
+                                            $clusterFound = $true
+                                            break
+                                        }
+                                    }
+                                    catch
+                                    {
+
+                                    }
+                                      Write-Verbose -Message "$using:sqlClusterName not found rety in $using:RetryIntervalSec"
+                                      Start-Sleep -Seconds $using:RetryIntervalSec
+                                    
+                                }
+                                
+                                if (-not $clusterFound)
+                                {
+                                    Write-Verbose -Message "$using:sqlClusterName not found rety in allotted time!"
+                                }
                          }
-            TestScript = {
-                            $test = Invoke-Sqlcmd -query "Select @@servername" -ServerInstance $using:sqlClusterName -ErrorAction SilentlyContinue
-                            if ($test)
+            TestScript = {  try
                             {
-                                if ($test.Column1 -eq $using:sqlClusterName)
-                                {return($true)}
-                                else 
-                                {return($false)}
+                                $test = Invoke-Sqlcmd -query "Select @@servername" -ServerInstance $using:sqlClusterName -ErrorAction SilentlyContinue
+                                if ($test)
+                                {
+                                    if ($test.Column1 -eq $using:sqlClusterName)
+                                    {return($true)}
+                                    else 
+                                    {return($false)}
+                                }
+                                else {
+                                    return($false)
+                                }
                             }
-                            else {
+                            Catch
+                            {
+                                Write-Verbose -Message "$using:sqlClusterName unavailable."
                                 return($false)
                             }
                          }
@@ -234,7 +273,6 @@ configuration FCISQLServer
 
             DependsON = '[xPendingReboot]Reboot1'
         }
-
 
         SqlSetup 'InstallNamedInstance'
         {
