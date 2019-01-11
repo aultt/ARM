@@ -209,15 +209,22 @@ configuration FCISQLServer
             dependson = '[Script]CleanSQL'
         }
         
-        SqlWaitForAG 'SQLWaitForFCI'
+        Script  SQLClusterConnectivity
         {
-            Name                 = $SQLClusterName
-            RetryIntervalSec     = 30
-            RetryCount           = 40
-            PsDscRunAsCredential = $SqlAdministratorCredential
+            GetScript  = {return @{ 'Result' = $(Invoke-Sqlcmd -query "Select @@servername" -ServerInstance $using:sqlClusterName).Column1}}
+                                
+            SetScript  = {
+                            Start-Sleep -Seconds 1
+                         }
+            TestScript = {
+                             return($(Invoke-Sqlcmd -query "Select @@servername" -ServerInstance $using:sqlClusterName).Column1 -eq $using:SqlClusterName)
+                         }
 
-            DependsOn = '[xPendingReboot]Reboot1'
+            PsDscRunAsCredential = $AdminCreds
+
+            DependsON = '[xPendingReboot]Reboot1'
         }
+
 
         SqlSetup 'InstallNamedInstance'
         {
@@ -234,7 +241,7 @@ configuration FCISQLServer
 
             PsDscRunAsCredential  = $AdminCreds
 
-            DependsOn             = '[xPendingReboot]Reboot1','[SqlWaitForAG]SQLWaitForFCI'
+            DependsOn             = '[xPendingReboot]Reboot1','[Script]SQLClusterConnectivity'
         }
 
         UserRightsAssignment PerformVolumeMaintenanceTasks
@@ -296,7 +303,7 @@ $ConfigData = @{
 
 #  $AdminCreds = Get-Credential
 # $SQLServicecreds = $AdminCreds
-# AlwaysOnSQLServer -DomainName tamz.local -Admincreds $AdminCreds -SQLServicecreds $SQLServicecreds -ClusterName AES3000-c -FirstNode AES3000-1 -ListenerStaticIP "10.50.2.56" -ClusterIPSubnetMask "255.255.255.0" -availabilityGroupName "TestAG" -ClusterStaticIP "10.50.2.55" -ClusterIPSubnetClass "24" -Verbose -ConfigurationData $ConfigData -OutputPath d:\
+# FCISQLServer -DomainName tamz.local -Admincreds $AdminCreds -SQLServicecreds $SQLServicecreds -imageoffer "SQL2016SP1-WS2016" -TimeZone "Eastern Standard Time" -ClusterName AES3000-c -FirstNode AES3000-1 -SQLStaticIP "10.50.2.56" -ClusterIPSubnetMask "255.255.255.0" -SQLClusterName "SQLTESTCluster" -ClusterStaticIP "10.50.2.55" -SQLFeatures "SQLENGINE" -SQLInstanceName "MSSQLSERVER" -ClusterIPSubnetClass "24" -Verbose -ConfigurationData $ConfigData -OutputPath d:\
 # Start-DscConfiguration -wait -Force -Verbose -Path D:\
 
 
