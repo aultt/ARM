@@ -1,0 +1,535 @@
+﻿{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "type": "string"
+        },
+        "namePrefix": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 9,
+            "metadata": {
+              "description": "Naming prefix for each new resource created. 3-char min, 9-char max, lowercase alphanumeric"
+            }
+        },
+        "virtualMachineSize": {
+            "type": "string"
+        },
+        "existingVirtualNetworkRGName":{
+            "type": "string"
+        },
+        "existingVirtualNetworkName":{
+            "type": "string"
+        },
+        "existingSubnetName":{
+            "type": "string"
+        },
+        "adminUsername": {
+            "type": "string"
+        },
+        "domainName": {
+            "type": "string"
+        },
+        "domainUserName":{
+            "type":"string"
+        },
+        "domainUserPassword": {
+            "type": "securestring"
+        },
+        "sqlUserName":{
+            "type":"string"
+        },
+        "sqlUserPassword": {
+            "type": "securestring"
+        },
+        "sqlPort": {
+            "type": "int"
+        },
+        "networkSecurityGroupName":{
+            "type": "string"
+        },
+        "adminPassword": {
+            "type": "securestring"
+        },
+        "availabilitySetName": {
+            "type": "string"
+        },
+        "ClusterStaticIP": {
+            "type": "string"
+        },
+        "ClusterIPSubnetClass":{
+            "type": "string"
+        },        
+        "ClusterIPSubnetMask":{
+            "type": "string"
+        },
+        "SQLStaticIP":{
+            "type": "string"
+        },
+        "SQlClusterName":{
+            "type": "string"
+        },
+        "diagnosticsStorageAccountName": {
+            "type": "string"
+        },
+        "diagnosticsStorageAccountId": {
+            "type": "string"
+        },
+        "sqlAuthenticationLogin": {
+            "type": "string"
+        },
+        "sqlAuthenticationPassword": {
+            "type": "securestring"
+        },
+        "imageOffer":  {
+            "type": "string",
+            "defaultValue": "SQL2016SP1-WS2016"
+        },
+        "imageSKU":  {
+            "type": "string",
+            "defaultValue": "Enterprise"
+        },
+        "oSStorageType":  {
+            "type": "string",
+            "defaultValue": "StandardSSD_LRS"
+        },
+        "dataStorageType":  {
+            "type": "string",
+            "defaultValue": "StandardSSD_LRS"
+        },
+        "s2dStorageSize":  {
+            "type": "int",
+            "defaultValue": 1024
+          },
+        "dataStorageSize":  {
+            "type": "int",
+            "defaultValue": 50
+          },
+        "logStorageSize":  {
+              "type": "int",  
+              "defaultValue": 50
+          },
+        "sqlFeatures":{
+            "type": "string",
+            "defaultValue": "SQLENGINE"
+        },
+        "sqlInstanceName":{
+            "type": "string",
+            "defaultValue": "MSSQLSERVER"
+        },
+        "dataDriveLetter":{
+            "type": "string",
+            "defaultValue": "F"
+        },
+        "datadrivelabel" :{
+            "type": "string",
+            "metadata":{
+              "description": "Label to associate with Data drive once formated"
+            },
+            "defaultValue": "Data"
+          },
+          "datadrivesize" :{
+            "type": "string",
+            "metadata": {
+              "description": "Size of volume to be created for Data Drive"
+            }
+          },
+        "logDriveLetter":{
+            "type": "string",
+            "defaultValue": "L"
+        },
+        "logdrivelabel" :{
+            "type": "string",
+            "metadata":{
+              "description": "Label to associate with Log drive once formated"
+            },
+            "defaultValue": "log"
+          },
+        "logdrivesize" :{
+            "type": "string",
+            "metadata": {
+              "description": "Size of volume to be created for Log Drive"
+            }
+        },
+        "tempdbDriveLetter":{
+            "type": "string",
+            "defaultValue": "T"
+        },
+        "tempdbdrivelabel" :{
+            "type": "string",
+            "metadata":{
+              "description": "Label to associate with TempDB drive once formated"
+            },
+            "defaultValue": "TempDB"
+          },
+        "tempdbdrivesize" :{
+            "type": "string",
+            "metadata": {
+              "description": "Size of volume to be created for TempDB Drive"
+            }
+        },
+        "sqlSysAdmins":{
+            "type": "string"
+        },
+        "sourcePath":{
+            "type": "string",
+            "defaultValue": "C:\\SQLServerFull"
+        },
+        "timeZone":{
+            "type": "string",
+            "defaultValue": "Eastern Standard Time"
+        },
+        "_artifactsLocation": {
+            "type": "string",
+            "metadata": {
+              "description": "Location of resources that the script is dependent on such as linked templates and DSC modules"
+            },
+            "defaultValue": "https://raw.githubusercontent.com/aultt/ARM/master/AlwaysOnExistingVnet" 
+          },
+          "_artifactsLocationSasToken": {
+            "type": "securestring",
+            "metadata": {
+              "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated."
+            },
+            "defaultValue": ""
+          }
+    },
+    "variables": {
+        "apiVersionStorage": "2016-01-01",
+        "witnessStorageName": "[concat(toLower(parameters('namePrefix')),uniqueString(resourceGroup().id),'cw')]",
+        "witnessStorageType": "Standard_LRS",
+        "vnetID": "[resourceID(parameters('existingVirtualNetworkRGName'),'Microsoft.Network/virtualNetworks',parameters('existingVirtualNetworkName'))]",
+        "subnetRef": "[concat(variables('vnetId'), '/subnets/', parameters('existingSubnetName'))]",
+        "diagnosticsExtensionName": "Microsoft.Insights.VMDiagnosticsSettings",
+        "vmNamePrefix": "[concat(parameters('namePrefix'),'-')]",
+        "ilbname": "[concat(parameters('namePrefix'),'-ilb')]",
+        "ilbID": "[resourceID('Microsoft.Network/loadBalancers',variables('ilbName'))]",
+        "ilbFE" :"[concat(parameters('namePrefix'),'-ilb-fe')]",
+        "ilbBE" :"[concat(parameters('namePrefix'),'-ilb-be')]",
+        "ilbFEConfigID1": "[concat(variables('ilbID'),'/frontendIPConfigurations/',variables('ilbFE'))]",
+        "SQLConfigID1": "[concat(variables('ilbID'),'/frontendIPConfigurations/',parameters('SQLClusterName'))]",
+        "ilbBEAddressPoolID": "[concat(variables('ilbID'),'/backendAddressPools/',variables('ilbBE'))]",
+        "ilbProbe1":"[concat('namePrefix','ilbp1')]",
+        "SQLProbe1":"[concat('namePrefix','sql')]",
+        "ilbProbeID1" : "[concat(variables('ilbID'),'/probes/',variables('ilbProbe1'))]", 
+        "SQLProbeID1" : "[concat(variables('ilbID'),'/probes/',variables('sqlProbe1'))]" ,
+        "DSCConfigModulesURL": "[concat(parameters('_artifactsLocation'), '/dsc/Cluster.ps1.zip', parameters('_artifactsLocationSasToken'))]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Compute/availabilitySets",
+            "name": "[parameters('availabilitySetName')]",
+            "sku": {
+                "name": "Aligned"
+            },
+            "apiVersion": "2018-06-01",
+            "location": "[parameters('location')]",
+            "properties": {
+              "platformFaultDomainCount": 3,
+              "platformUpdateDomainCount": 5,
+              "virtualMachines": []
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[variables('witnessStorageName')]",
+            "apiVersion": "2017-10-01",
+            "location": "[resourceGroup().location]",
+            "sku": {
+              "name": "[variables('witnessStorageType')]"
+            },
+            "kind": "Storage",
+            "comments": "The storage account used for the SQL Cloud Witness"
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "name": "[concat(variables('vmNamePrefix'), copyIndex(1))]",
+            "apiVersion": "2018-06-01",
+            "location": "[parameters('location')]",
+            "copy": {
+              "name": "virtualMachineLoop",
+              "count": 2
+            },
+            "dependsOn": [
+                "[concat(variables('vmNamePrefix'), copyIndex(1), '-nic')]","[concat('Microsoft.Compute/availabilitySets/', parameters('availabilitySetName'))]"
+            ],
+            "properties": {
+                "osProfile": {
+                    "computerName": "[concat(variables('vmNamePrefix'),copyindex(1))]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]",
+                    "windowsConfiguration": {
+                        "provisionVmAgent": "true"
+                    }
+                },
+                "hardwareProfile": {
+                    "vmSize": "[parameters('virtualMachineSize')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "MicrosoftSQLServer",
+                        "offer": "[parameters('imageoffer')]",
+                        "sku": "[parameters('imageSKU')]",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "createOption": "FromImage",
+                        "managedDisk": {
+                            "storageAccountType": "[parameters('oSStorageType')]"
+                        }
+                    },
+                    "copy":[
+                        {
+                            "name": "dataDisks",
+                            "count": 2,
+                            "input":{
+                                "createOption": "Empty",
+                                "lun":"[copyIndex('dataDisks')]",
+                                "diskSizeGB": "[parameters('s2dStorageSize')]",
+                                "caching": "ReadOnly",
+                                "managedDisk": {
+                                    "storageAccountType": "[parameters('dataStorageType')]"
+                                    }
+                            }
+                        }
+                    ]
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('vmNamePrefix'), copyindex(1), '-nic'))]"
+                        }
+                    ]
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true,
+                        "storageUri": "[concat('https://', parameters('diagnosticsStorageAccountName'), '.blob.core.windows.net/')]"
+                    }
+                },
+                "availabilitySet": {
+                    "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('availabilitySetName'))]"
+                }
+            },
+            "identity": {
+                "type": "SystemAssigned"
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(variables('vmNamePrefix'), copyIndex(1),'/DSC')]",
+            "apiVersion": "2015-05-01-preview",
+            "location": "[parameters('location')]",
+            "copy": {
+                "name": "DSCLoop",
+                "count": 2
+              },
+            "dependsOn": [
+              "[concat('Microsoft.Compute/virtualMachines/', variables('vmNamePrefix'), copyIndex(1))]"
+            ],
+            "properties": {
+              "publisher": "Microsoft.Powershell",
+              "type": "DSC",
+              "typeHandlerVersion": "2.73",
+              "autoUpgradeMinorVersion": true,
+              "settings": {
+                  "wmfversion" :"latest",
+                  "configuration": {
+                      "url": "[variables('DSCConfigModulesURL')]",
+                      "script": "[if(equals(copyIndex(),0),'PrimarySQLNode.ps1','SecondSQLNode.ps1')]",
+                      "function" : "FCISQLServer"
+                  },
+                "configurationArguments": {
+                    "domainName": "[parameters('domainName')]",
+                    "ClusterName":"[concat(variables('vmnamePrefix'),'C')]",
+                    "FirstNode":  "[concat(variables('vmNamePrefix'), '1')]",
+                    "ClusterStaticIP": "[parameters('clusterStaticIP')]",
+                    "ClusterIPSubnetClass": "[parameters('clusterIpSubnetClass')]",
+                    "ClusterIPSubnetMask": "[parameters('clusterIpSubnetMask')]",
+                    "SQLClusterName": "[parameters('SQLClusterName')]",
+                    "SQLStaticIP": "[parameters('SQLStaticIP')]",
+                    "sqlPort": "[parameters('sqlPort')]",
+                    "CloudWitnessName" : "[variables('witnessStorageName')]",
+                    "imageOffer" : "[parameters('imageOffer')]",
+                    "sqlFeatures" : "[parameters('sqlFeatures')]",
+                    "sqlInstanceName": "[parameters('sqlInstanceName')]",
+                    "dataDriveLetter": "[parameters('dataDriveLetter')]",
+                    "dataDriveLabel": "[parameters('dataDriveLabel')]",
+                    "dataDriveSize": "[parameters('dataDriveSize')]",
+                    "logDriveLetter": "[parameters('logDriveLetter')]",
+                    "logDriveLabel": "[parameters('logDriveLabel')]",
+                    "logDriveSize": "[parameters('logDriveSize')]",
+                    "tempdbDriveLetter": "[parameters('tempdbDriveLetter')]",
+                    "tempdbDriveLabel": "[parameters('tempdbDriveLabel')]",
+                    "tempdbDriveSize": "[parameters('tempdbDriveSize')]",
+                    "sqlSysAdmins" : "[parameters('sqlSysAdmins')]",
+                    "sourcePath" : "[parameters('sourcePath')]",
+                    "timeZone" : "[parameters('timeZone')]"
+                    }
+                },
+              "protectedSettings": {
+                "configurationArguments": {
+                    "adminCreds": {
+                    "userName": "[parameters('domainUsername')]",
+                    "password": "[parameters('domainUserPassword')]"
+                        },
+                    "SQLServicecreds": {
+                      "userName": "[parameters('sqlUsername')]",
+                      "password": "[parameters('sqlUserPassword')]"
+                       },
+                    "CloudWitnessKey":{
+                        "userName": "PLACEHOLDER-DO-NOT-USE",
+                         "password": "[listKeys(resourceId('Microsoft.Storage/storageAccounts',variables('witnessStorageName')),variables('apiVersionStorage')).keys[0].value]"   
+                        }
+                    }
+                }      
+            }
+        },
+        {
+            "name": "[concat(variables('vmNamePrefix'), copyIndex(1), '-nic')]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2017-06-01",
+            "location": "[parameters('location')]",
+            "copy":{
+              "name": "nicloop",
+              "count": 2
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkSecurityGroups/', parameters('networkSecurityGroupName'))]","[variables('ilbID')]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[variables('subnetRef')]"
+                            },
+                            "loadBalancerBackendAddressPools":[
+                                {
+                                    "id": "[variables('ilbBEAddressPoolID')]"
+                                }
+                            ],
+                            "privateIPAllocationMethod": "Dynamic"
+                        }
+                    }
+                ],
+                "networkSecurityGroup": {
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]"
+                }
+            }
+        },
+        {
+            "apiVersion": "2017-10-01",
+            "name": "[variables('ilbName')]",
+            "type": "Microsoft.Network/loadBalancers",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [],
+            "properties":{
+                "frontendIPConfigurations":[
+                    {
+                    "name": "[variables('ilbFE')]",
+                    "properties":{
+                        "privateIPAllocationMethod": "Static",
+                        "privateIPAddress": "[parameters('ClusterStaticIP')]",
+                        "subnet":{
+                            "id": "[variables('subnetRef')]"
+                        }
+                        }
+                    },
+                    {                    
+                        "name": "[parameters('SQLClusterName')]",
+                        "properties":{
+                            "privateIPAllocationMethod": "Static",
+                            "privateIPAddress": "[parameters('SQLStaticIP')]",
+                            "subnet":{
+                                "id": "[variables('subnetRef')]"
+                            }
+                        }
+                    }
+                ],
+                "backendAddressPools": [
+                    {
+                        "name": "[variables('ilbBE')]"
+                    }
+                ],
+                "loadBalancingRules":[
+                    {
+                        "name": "SQL",
+                        "properties":{
+                            "frontendIPConfiguration":{
+                                "id": "[variables('SQLConfigID1')]"
+                            },
+                            "backendAddressPool": {
+                                "id": "[variables('ilbBEAddressPoolID')]"
+                            },
+                            "probe":{
+                                "id":"[variables('SQLProbeID1')]"
+                            },
+                            "protocol": "Tcp",
+                            "frontendPort": "[parameters('sqlPort')]",
+                            "backendPort": "[parameters('sqlPort')]",
+                            "enableFloatingIP": true
+                        }
+                    },
+                    {
+                        "name": "FileSharing",
+                        "properties":{
+                            "frontendIPConfiguration":{
+                                "id":"[variables('SQLConfigID1')]"
+                            },
+                            "backendAddressPool":{ 
+                                "id": "[variables('ilbBEAddressPoolID')]"
+                            },
+                            "probe": {
+                                "id": "[variables('SQLProbeID1')]"
+                            },
+                            "protocol": "Tcp",
+                            "frontendPort": 445,
+                            "backendPort": 445,
+                            "enableFloatingIP": true
+                        }
+                    }
+                ],
+                "probes":[
+                    {
+                        "name": "[variables('sqlProbe1')]",
+                        "properties": {
+                                "protocol":"Tcp",
+                                "port": 59999,
+                                "intervalInSeconds": 5,
+                                "numberOfProbes": 2
+                        }
+                    },
+                    {
+                        "name": "[variables('ilbProbe1')]",
+                        "properties": {
+                                "protocol":"Tcp",
+                                "port": 58888,
+                                "intervalInSeconds": 5,
+                                "numberOfProbes": 2
+                        }
+                    }
+
+                ]
+            }
+        },
+        {
+            "name": "[parameters('networkSecurityGroupName')]",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2018-08-01",
+            "location": "[parameters('location')]",
+            "properties": {
+                "securityRules": []
+            }
+        }
+    ],
+    "outputs": {
+        "adminUsername": {
+            "type": "string",
+            "value": "[parameters('adminUsername')]"
+        }
+    }
+    
+}
