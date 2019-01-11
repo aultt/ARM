@@ -211,7 +211,7 @@ configuration FCISQLServer
         
         Script  SQLClusterConnectivity
         {
-            GetScript  = {return @{ 'Result' = $(Invoke-Sqlcmd -query "Select @@servername" -ServerInstance $sqlClusterName-ErrorAction SilentlyContinue).Column1 }}
+            GetScript  = {return @{ 'Result' = $(Invoke-Sqlcmd -query "Select @@servername" -ServerInstance $sqlClusterName -ErrorAction SilentlyContinue).Column1 }}
                                 
             SetScript  = {
                             Start-Sleep -Seconds 1
