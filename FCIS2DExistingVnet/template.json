@@ -43,6 +43,12 @@
         "sqlUserPassword": {
             "type": "securestring"
         },
+        "agtUserName":{
+            "type":"string"
+        },
+        "agtUserPassword": {
+            "type": "securestring"
+        },
         "sqlPort": {
             "type": "int"
         },
@@ -101,6 +107,10 @@
         "s2dStorageSize":  {
             "type": "int",
             "defaultValue": 1024
+          },
+        "diskCount":  {
+            "type": "int",
+            "defaultValue": 2
           },
         "dataStorageSize":  {
             "type": "int",
@@ -282,7 +292,7 @@
                     "copy":[
                         {
                             "name": "dataDisks",
-                            "count": 2,
+                            "count": "[parameters('diskCount')]",
                             "input":{
                                 "createOption": "Empty",
                                 "lun":"[copyIndex('dataDisks')]",
@@ -378,6 +388,10 @@
                       "userName": "[parameters('sqlUsername')]",
                       "password": "[parameters('sqlUserPassword')]"
                        },
+                    "AgtServicecreds": {
+                        "userName": "[parameters('agtUsername')]",
+                        "password": "[parameters('agtUserPassword')]"
+                         },  
                     "CloudWitnessKey":{
                         "userName": "PLACEHOLDER-DO-NOT-USE",
                          "password": "[listKeys(resourceId('Microsoft.Storage/storageAccounts',variables('witnessStorageName')),variables('apiVersionStorage')).keys[0].value]"   
