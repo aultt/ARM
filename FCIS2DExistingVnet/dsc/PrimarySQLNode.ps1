@@ -10,6 +10,8 @@ configuration FCISQLServer
 
         [Parameter(Mandatory)]
         [System.Management.Automation.PSCredential]$SQLServicecreds,
+        [Parameter(Mandatory)]
+        [System.Management.Automation.PSCredential]$AgtServicecreds,
         [string]$imageoffer,
         [string]$SQLFeatures,
         [string]$SQLInstanceName,
@@ -55,8 +57,6 @@ configuration FCISQLServer
     $ClusterIPandSubNetClass = $ClusterStaticIP + '/' +$ClusterIPSubnetClass
     $SQLVersion = $imageoffer.Substring(5,2)
     $SQLLocation = "MSSQL$(switch ($SQLVersion){17 {14} 16 {13}})"
-    #$ListenerIPandMask = $ListenerStaticIP + '/'+$ClusterIPSubnetMask
-    #$IPResourceName = $AvailabilityGroupName +'_'+ $ListenerStaticIP
 
     WaitForSqlSetup
 
@@ -108,23 +108,31 @@ configuration FCISQLServer
             PsDscRunAsCredential = $AdminCreds
         }
 
-        WindowsFeature FC
+        WindowsFeature AddFailoverFeature
         {
-            Name = "Failover-Clustering"
-            Ensure = "Present"
+            Ensure = 'Present'
+            Name   = 'Failover-clustering'
         }
 
 		WindowsFeature FailoverClusterTools 
         { 
             Ensure = "Present" 
             Name = "RSAT-Clustering-Mgmt"
-			DependsOn = "[WindowsFeature]FC"
-        } 
-
-        WindowsFeature FCPS
+			DependsOn = "[WindowsFeature]AddFailoverFeature"
+        }
+        
+        WindowsFeature AddRemoteServerAdministrationToolsClusteringPowerShellFeature
         {
-            Name = "RSAT-Clustering-PowerShell"
-            Ensure = "Present"
+            Ensure    = 'Present'
+            Name      = 'RSAT-Clustering-PowerShell'
+            DependsOn = '[WindowsFeature]AddFailoverFeature'
+        }
+
+        WindowsFeature AddRemoteServerAdministrationToolsClusteringCmdInterfaceFeature
+        {
+            Ensure    = 'Present'
+            Name      = 'RSAT-Clustering-CmdInterface'
+            DependsOn = '[WindowsFeature]AddRemoteServerAdministrationToolsClusteringPowerShellFeature'
         }
 
         WindowsFeature ADPS
@@ -176,12 +184,12 @@ configuration FCISQLServer
             DependsON = '[xCluster]CreateCluster'
         }
 
-        Script IncreaseClusterTimeouts {
-            SetScript  = "(Get-Cluster).SameSubnetDelay = 2000; (Get-Cluster).SameSubnetThreshold = 15; (Get-Cluster).CrossSubnetDelay = 3000; (Get-Cluster).CrossSubnetThreshold = 15"
-            TestScript = "(Get-Cluster).SameSubnetDelay -eq 2000 -and (Get-Cluster).SameSubnetThreshold -eq 15 -and (Get-Cluster).CrossSubnetDelay -eq 3000 -and (Get-Cluster).CrossSubnetThreshold -eq 15"
-            GetScript  = "@{Ensure = if ((Get-Cluster).SameSubnetDelay -eq 2000 -and (Get-Cluster).SameSubnetThreshold -eq 15 -and (Get-Cluster).CrossSubnetDelay -eq 3000 -and (Get-Cluster).CrossSubnetThreshold -eq 15) {'Present'} else {'Absent'}}"
-            DependsOn  = '[xClusterQuorum]SetQuorumToNodeAndCloudMajority'
-        }
+        #Script IncreaseClusterTimeouts {
+        #    SetScript  = "(Get-Cluster).SameSubnetDelay = 2000; (Get-Cluster).SameSubnetThreshold = 15; (Get-Cluster).CrossSubnetDelay = 3000; (Get-Cluster).CrossSubnetThreshold = 15"
+        #    TestScript = "(Get-Cluster).SameSubnetDelay -eq 2000 -and (Get-Cluster).SameSubnetThreshold -eq 15 -and (Get-Cluster).CrossSubnetDelay -eq 3000 -and (Get-Cluster).CrossSubnetThreshold -eq 15"
+        #    GetScript  = "@{Ensure = if ((Get-Cluster).SameSubnetDelay -eq 2000 -and (Get-Cluster).SameSubnetThreshold -eq 15 -and (Get-Cluster).CrossSubnetDelay -eq 3000 -and (Get-Cluster).CrossSubnetThreshold -eq 15) {'Present'} else {'Absent'}}"
+        #    DependsOn  = '[xClusterQuorum]SetQuorumToNodeAndCloudMajority'
+        #}
 
         PowerPlan HighPerf
         {
@@ -284,7 +292,7 @@ configuration FCISQLServer
             InstanceName          = $SQLInstanceName
             Features              = $SQLFeatures
             SQLSvcAccount         = $SQLServicecreds
-            AgtSvcAccount         = $SQLServicecreds
+            AgtSvcAccount         = $AgtServicecreds
             FailoverClusterNetworkName = $SQLClusterName
 
             PsDscRunAsCredential  = $AdminCreds

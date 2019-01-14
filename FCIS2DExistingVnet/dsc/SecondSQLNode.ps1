@@ -11,6 +11,8 @@ configuration FCISQLServer
 
         [Parameter(Mandatory)]
         [System.Management.Automation.PSCredential]$SQLServicecreds,
+        [Parameter(Mandatory)]
+        [System.Management.Automation.PSCredential]$AgtServicecreds,
         [string]$imageoffer,
         [string]$SQLFeatures,
         [string]$SQLInstanceName,
@@ -54,10 +56,8 @@ configuration FCISQLServer
     Import-DscResource -ModuleName ComputerManagementdsc, sqlserverdsc, xFailOverCluster, xPendingReboot,StorageDSC,SecurityPolicydsc
     
     $ClusterIPandSubNetClass = $ClusterStaticIP + '/' +$ClusterIPSubnetClass
-    #$ListenerIPandMask = $ListenerStaticIP + '/'+$ClusterIPSubnetMask
     $SQLVersion = $imageoffer.Substring(5,2)
     $SQLLocation = "MSSQL$(switch ($SQLVersion){17 {14} 16 {13}})"
-    #$IPResourceName = $AvailabilityGroupName +'_'+ $ListenerStaticIP
 
     WaitForSqlSetup
 
@@ -136,6 +136,12 @@ configuration FCISQLServer
             Ensure    = 'Present'
             Name      = 'RSAT-Clustering-CmdInterface'
             DependsOn = '[WindowsFeature]AddRemoteServerAdministrationToolsClusteringPowerShellFeature'
+        }
+
+        WindowsFeature ADPS
+        {
+            Name = "RSAT-AD-PowerShell"
+            Ensure = "Present"
         }
 
         Computer DomainJoin
