@@ -8,9 +8,6 @@
         "namePrefix": {
             "value": "AES3000"
         },
-        "vmcount": {
-            "value": 2
-        },
         "virtualMachineSize": {
             "value": "Standard_D2s_v3"
         },
@@ -29,9 +26,6 @@
         "adminUsername": {
             "value": "youradmin"
         },
-        "virtualNetworkName": {
-            "value": "prod-vnet"
-        },
         "networkSecurityGroupName":{
             "value": "AESQL3000-nsg"
         },
@@ -40,7 +34,7 @@
                 "keyVault": {
                   "id": "YourKeyVaultID"
                 },
-                "secretName": "adminPass"
+                "secretName": "saPass"
               }
         },
         "availabilitySetName": {
@@ -52,26 +46,35 @@
         "ClusterIPSubnetClass":{
             "value": "24"
         },
-        "availabilityGroupName":{
-            "value": "TestAG"
+        "ClusterIPSubnetMask":{
+            "value": "255.255.255.0"
+        },
+        "logdrivesize":{
+            "value": "50GB"
+        },
+        "datadrivesize":{
+          "value": "50GB"
+        },
+        "tempdbdrivesize" :{
+          "value": "50GB"
+        },
+        "SQLClusterName":{
+            "value": "AES3000SQL"
         },
         "sqlPort": {
             "value": 1433
         },
-        "listenerStaticIP": {
+        "SQLStaticIP": {
             "value": "10.50.2.56"
         },
-        "listenerSubnetMask": {
-            "value": "255.255.255.0"
-        },
         "diagnosticsStorageAccountName": {
-            "value": "appprodrgdiag992"
+            "value": "tiaappprodrgdiag992"
         },
         "diagnosticsStorageAccountId": {
             "value": "yourstorageaccountId"
         },
         "sqlAuthenticationLogin": {
-            "value": "saadmin"
+            "value": "youradmin"
         },
         "sqlAuthenticationPassword": {
             "reference": {
@@ -82,10 +85,10 @@
               }
         },
         "sqlSysAdmins":{
-            "value": "YourDomain\\DBA"
+            "value": "yourdomain\\yourDBAGroup"
         },
         "domainUsername": {
-            "value": "yourdomain\\youradmin"
+            "value": "yourdomain\\yourdomainaccount"
           },
         "domainUserPassword": {
             "reference": {
@@ -106,8 +109,19 @@
               "secretName": "DomainAdmin"
             }
           },
+          "agtUsername": {
+            "value": "yourdomain\\youragtaccount"
+          },
+        "agtUserPassword": {
+            "reference": {
+              "keyVault": {
+                "id": "YourKeyVaultID"
+              },
+              "secretName": "DomainAdmin"
+            }
+          },
           "_artifactsLocation": {
-              "value": "https://raw.githubusercontent.com/aultt/ARM/master/AlwaysOnExistingVnet" 
+              "value": "https://raw.githubusercontent.com/aultt/ARM/dev/FCIS2DExistingVnet" 
           }
           
     }

@@ -1,4 +1,4 @@
-$resourceGroupName = 'FCIS2DTesting'
+$resourceGroupName = 'FCIS2DDemo'
 $resourceGroupLocation = "East US"
 $templateFile = 'D:\GitHub\ARM\FCIS2DExistingVnet\template.json'
 $templateParm = 'D:\ParameterFiles\FCIS2DExistingVnetparameters.json'
