@@ -1,4 +1,4 @@
-$resourceGroupName = 'AlwaysOnFCTesting'
+$resourceGroupName = 'AlwaysOnFCDemo'
 $resourceGroupLocation = "East US"
 $templateFile = 'D:\GitHub\ARM\AlwaysOnExistingVnet\template.json'
 $templateParm = 'D:\ParameterFiles\AlwaysOnExitingVNetparameters.json'
