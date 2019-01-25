@@ -1,0 +1,87 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.1",
+    "parameters": {
+        "administratorLogin": {
+            "type": "string"
+        },
+        "administratorLoginPassword": {
+            "type": "securestring"
+        },
+        "location": {
+            "type": "string"
+        },
+        "managedInstanceName": {
+            "type": "string"
+        },
+        "virtualNetworkResourceGroupName": {
+            "type": "string"
+        },
+        "virtualNetworkName": {
+            "type": "string"
+        },
+        "subnetName": {
+            "type": "string"
+        },
+        "skuName": {
+            "defaultValue": "GP_Gen4",
+            "type": "string"
+        },
+        "skuEdition": {
+            "defaultValue": "GeneralPurpose",
+            "type": "string"
+        },
+        "storageSizeInGB": {
+            "defaultValue": "32",
+            "type": "int"
+        },
+        "vCores": {
+            "defaultValue": "8",
+            "type": "int"
+        },
+        "licenseType": {
+            "defaultValue": "LicenseIncluded",
+            "type": "string"
+        },
+        "hardwareFamily": {
+            "defaultValue": "Gen4",
+            "type": "string"
+        },
+        "dnsZonePartner": {
+            "type": "string",
+            "defaultValue": ""
+        },
+        "collation": {
+            "type": "string",
+            "defaultValue": "SQL_Latin1_General_CP1_CI_AS"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Sql/managedInstances",
+            "sku": {
+                "name": "[parameters('skuName')]",
+                "tier": "[parameters('skuEdition')]"
+            },
+            "name": "[parameters('managedInstanceName')]",
+            "apiVersion": "2015-05-01-preview",
+            "location": "[parameters('location')]",
+            "identity": {
+                "type": "SystemAssigned"
+            },
+            "properties": {
+                "administratorLogin": "[parameters('administratorLogin')]",
+                "administratorLoginPassword": "[parameters('administratorLoginPassword')]",
+                "subnetId": "[resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('subnetName'))]",
+                "storageSizeInGB": "[parameters('storageSizeInGB')]",
+                "vCores": "[parameters('vCores')]",
+                "licenseType": "[parameters('licenseType')]",
+                "hardwareFamily": "[parameters('hardwareFamily')]",
+                "dnsZonePartner": "[parameters('dnsZonePartner')]",
+                "collation": "[parameters('collation')]"
+            },
+            "dependsOn": []
+        }
+    ]
+}

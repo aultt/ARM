@@ -1,0 +1,51 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "managedInstanceName": {
+            "value": "sqlmi"
+        },
+        "location": {
+            "value": "eastus"
+        },
+        "administratorLogin": {
+            "value": "sqlmiadmin"
+        },
+        "administratorLoginPassword": {
+            "value": null
+        },
+        "virtualNetworkResourceGroupName": {
+            "value": "tim-core-prod-rg"
+        },
+        "virtualNetworkName": {
+            "value": "mst-prod-vnet"
+        },
+        "subnetName": {
+            "value": "Misub"
+        },
+        "skuName": {
+            "value": "GP_Gen5"
+        },
+        "skuEdition": {
+            "value": "GeneralPurpose"
+        },
+        "storageSizeInGB": {
+            "value": 32
+        },
+        "vCores": {
+            "value": 8
+        },
+        "licenseType": {
+            "value": "BasePrice"
+        },
+        "hardwareFamily": {
+            "value": "Gen5"
+        },
+        "dnsZonePartner": {
+            "value": ""
+        },
+        "collation": {
+            "value": "SQL_Latin1_General_CP1_CI_AS"
+        }
+    }
+}
