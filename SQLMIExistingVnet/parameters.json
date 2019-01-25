@@ -1,0 +1,56 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "managedInstanceName": {
+            "value": "sqlmiarm"
+        },
+        "location": {
+            "value": "eastus"
+        },
+        "administratorLogin": {
+            "value": "sqlmiadmin"
+        },
+        "administratorLoginPassword": {
+            "reference": {
+                "keyVault": {
+                  "id": "YourKeyVaultID"
+                },
+                "secretName": "saPass"
+              }
+        },
+        "virtualNetworkResourceGroupName": {
+            "value": "core-prod-rg"
+        },
+        "virtualNetworkName": {
+            "value": "prod-vnet"
+        },
+        "subnetName": {
+            "value": "MISub"
+        },
+        "skuName": {
+            "value": "GP_Gen5"
+        },
+        "skuEdition": {
+            "value": "GeneralPurpose"
+        },
+        "storageSizeInGB": {
+            "value": 32
+        },
+        "vCores": {
+            "value": 8
+        },
+        "licenseType": {
+            "value": "LicenseIncluded"
+        },
+        "hardwareFamily": {
+            "value": "Gen5"
+        },
+        "dnsZonePartner": {
+            "value": ""
+        },
+        "collation": {
+            "value": "SQL_Latin1_General_CP1_CI_AS"
+        }
+    }
+}
