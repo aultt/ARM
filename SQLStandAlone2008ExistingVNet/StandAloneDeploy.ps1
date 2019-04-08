@@ -1,6 +1,6 @@
 $resourceGroupName = 'StandAlone2008Testing'
 $resourceGroupLocation = "East US"
-$templateFile = 'E:\GitHub\ARM\SQLStandAloneExistingVnet\azuredeploy.json'
+$templateFile = 'E:\GitLocal\ARM\SQLStandAlone2008ExistingVNet\azuredeploy.json'
 $templateParm = 'E:\ParameterFiles\StandAlone2008ExistingVnet.parameters.json'
 ##ii 'E:\ParameterFiles\StandAlone2008ExistingVnet.parameters.json'
 
