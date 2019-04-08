@@ -156,7 +156,7 @@
       "metadata": {
         "description": "Auto-generated container in staging storage account to receive post-build staging folder upload"
       },
-      "defaultValue": "https://raw.githubusercontent.com/aultt/ARM/master/SQLStandAloneExistingVnet" 
+      "defaultValue": "https://raw.githubusercontent.com/aultt/ARM/2008Testing/SQLStandAlone2008ExistingVnet"  
     },
     "_artifactsLocationSasToken": {
       "type": "securestring",
