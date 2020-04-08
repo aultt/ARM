@@ -1,7 +1,7 @@
 $resourceGroupName = 'AlwaysOnFCDemo'
 $resourceGroupLocation = "East US"
-$templateFile = 'D:\GitHub\ARM\AlwaysOnExistingVnet\template.json'
-$templateParm = 'D:\ParameterFiles\AlwaysOnExitingVNetparameters.json'
+$templateFile = 'E:\GitHub\ARM\AlwaysOnExistingVnet\template.json'
+$templateParm = 'E:\ParameterFiles\AlwaysOnExitingVNetparameters.json'
 $subscription = 'TAMZ_MS'
 # ii 'D:\ParameterFiles\AlwaysOnExitingVNetparameters.json'
  
