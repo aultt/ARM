@@ -159,12 +159,18 @@ configuration AlwaysOnSqlServer
             Name      = 'RSAT-Clustering-CmdInterface'
             DependsOn = '[WindowsFeature]AddRemoteServerAdministrationToolsClusteringPowerShellFeature'
         }
+        xPendingReboot Reboot1
+        {
+            Name = 'Reboot1'
+            dependson = '[WindowsFeature]AddRemoteServerAdministrationToolsClusteringCmdInterfaceFeature'
 
         Computer DomainJoin
         {
             Name = $env:COMPUTERNAME
             DomainName = $DomainName
             Credential = $Admincreds
+
+            dependson = '[xPendingReboot]Reboot1'
         }
 
     #    xWaitForCluster WaitForCluster
@@ -184,18 +190,18 @@ configuration AlwaysOnSqlServer
     #        DependsOn                     = '[xWaitForCluster]WaitForCluster','[Computer]DomainJoin'
     #    }
     #    
-    #    PowerPlan HighPerf
-    #    {
-    #      IsSingleInstance = 'Yes'
-    #      Name             = 'High performance'
-    #    }
+        PowerPlan HighPerf
+        {
+          IsSingleInstance = 'Yes'
+          Name             = 'High performance'
+        }
 #
-    #    TimeZone SetTimeZone
-    #    {
-    #        IsSingleInstance = 'Yes'
-    #        TimeZone         = $TimeZone
-    #    }
-    #    
+        TimeZone SetTimeZone
+        {
+            IsSingleInstance = 'Yes'
+            TimeZone         = $TimeZone
+        }
+        
 #
     #    Script CleanSQL
     #    {
@@ -238,21 +244,21 @@ configuration AlwaysOnSqlServer
     #        DependsOn             = '[xPendingReboot]Reboot1','[Disk]LogVolume','[Disk]DataVolume'
     #    }
 #
-    #    UserRightsAssignment PerformVolumeMaintenanceTasks
-    #    {
-    #        Policy = "Perform_volume_maintenance_tasks"
-    #        Identity = $SQLServicecreds.UserName
-#
-    #        DependsOn                     = '[Computer]DomainJoin'
-    #    }
-#
-    #    UserRightsAssignment LockPagesInMemory
-    #    {
-    #        Policy = "Lock_pages_in_memory"
-    #        Identity = $SQLServicecreds.UserName
-#
-    #        DependsOn                     = '[Computer]DomainJoin'
-    #    }
+        UserRightsAssignment PerformVolumeMaintenanceTasks
+        {
+            Policy = "Perform_volume_maintenance_tasks"
+            Identity = $SQLServicecreds.UserName
+
+            DependsOn                     = '[Computer]DomainJoin'
+        }
+
+        UserRightsAssignment LockPagesInMemory
+        {
+            Policy = "Lock_pages_in_memory"
+            Identity = $SQLServicecreds.UserName
+
+            DependsOn                     = '[Computer]DomainJoin'
+        }
 #
     #    SqlServerNetwork 'ChangeTcpIpOnDefaultInstance'
     #    {

@@ -199,19 +199,19 @@ configuration AlwaysOnSQLServer
 #
       #      DependsON = '[xCluster]CreateCluster'
       #  }
-#
-      #  PowerPlan HighPerf
-      #  {
-      #    IsSingleInstance = 'Yes'
-      #    Name             = 'High performance'
-      #  }
-#
-      #  TimeZone SetTimeZone
-      #  {
-      #      IsSingleInstance = 'Yes'
-      #      TimeZone         = $TimeZone
-      #  }
-#
+        
+      PowerPlan HighPerf
+      {
+        IsSingleInstance = 'Yes'
+        Name             = 'High performance'
+      }
+  
+      TimeZone SetTimeZone
+      {
+          IsSingleInstance = 'Yes'
+          TimeZone         = $TimeZone
+      }
+  
       #  Script CleanSQL
       #  {
       #      SetScript  = 'C:\SQLServerFull\Setup.exe /Action=Uninstall /FEATURES=SQL,AS,RS,IS /INSTANCENAME=MSSQLSERVER /Q'
@@ -251,22 +251,22 @@ configuration AlwaysOnSQLServer
 #
       #      DependsOn             = '[xPendingReboot]Reboot1','[Disk]LogVolume','[Disk]DataVolume'
       #  }
-#
-      #  UserRightsAssignment PerformVolumeMaintenanceTasks
-      #  {
-      #      Policy = "Perform_volume_maintenance_tasks"
-      #      Identity = $SQLServicecreds.UserName
-#
-      #      DependsOn                     = '[Computer]DomainJoin'
-      #  }
-#
-      #  UserRightsAssignment LockPagesInMemory
-      #  {
-      #      Policy = "Lock_pages_in_memory"
-      #      Identity = $SQLServicecreds.UserName
-#
-      #      DependsOn                     = '[Computer]DomainJoin'
-      #  }
+
+      UserRightsAssignment PerformVolumeMaintenanceTasks
+      {
+          Policy = "Perform_volume_maintenance_tasks"
+          Identity = $SQLServicecreds.UserName
+
+          DependsOn                     = '[Computer]DomainJoin'
+      }
+
+      UserRightsAssignment LockPagesInMemory
+      {
+          Policy = "Lock_pages_in_memory"
+          Identity = $SQLServicecreds.UserName
+
+          DependsOn                     = '[Computer]DomainJoin'
+      }
 
     #    SqlServerNetwork 'ChangeTcpIpOnDefaultInstance'
     #    {
