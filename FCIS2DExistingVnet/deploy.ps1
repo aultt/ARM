@@ -1,7 +1,7 @@
 $resourceGroupName = 'FCIS2DDemo'
 $resourceGroupLocation = "East US"
-$templateFile = 'D:\GitHub\ARM\FCIS2DExistingVnet\template.json'
-$templateParm = 'D:\ParameterFiles\FCIS2DExistingVnetparameters.json'
+$templateFile = 'E:\GitHub\ARM\FCIS2DExistingVnet\template.json'
+$templateParm = 'E:\ParameterFiles\FCIS2DExistingVnetparameters.json'
 $subscription = 'TAMZ_MS'
 # ii 'D:\ParameterFiles\FCIS2DExistingVnetparameters.json'
  

@@ -48,7 +48,7 @@ configuration AlwaysOnSQLServer
 
     $ClusterIPandSubNetClass = $ClusterStaticIP + '/' +$ClusterIPSubnetClass
     $SQLVersion = $imageoffer.Substring(5,2)
-    $SQLLocation = "MSSQL$(switch ($SQLVersion){17 {14} 16 {13}})"
+    $SQLLocation = "MSSQL$(switch ($SQLVersion){19 {15} 17 {14} 16 {13}})"
     $ListenerIPandMask = $ListenerStaticIP + '/'+$ListenerSubnetMask
     $IPResourceName = $AvailabilityGroupName +'_'+ $ListenerStaticIP
 
