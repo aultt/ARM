@@ -4,10 +4,8 @@ configuration AlwaysOnSQLServer
     (
         [Parameter(Mandatory)]
         [String]$DomainName,
-
         [Parameter(Mandatory)]
         [System.Management.Automation.PSCredential]$Admincreds,
-
         [Parameter(Mandatory)]
         [System.Management.Automation.PSCredential]$SQLServicecreds,
         [string]$imageoffer,

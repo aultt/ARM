@@ -5,10 +5,8 @@ configuration AlwaysOnSqlServer
     (
         [Parameter(Mandatory)]
         [String]$DomainName,
-
         [Parameter(Mandatory)]
         [System.Management.Automation.PSCredential]$Admincreds,
-
         [Parameter(Mandatory)]
         [System.Management.Automation.PSCredential]$SQLServicecreds,
         [string]$imageoffer,
@@ -22,7 +20,6 @@ configuration AlwaysOnSqlServer
         [string]$FirstNode,
         [string]$SQLPort=1433,
         [string]$TimeZone,
-
         [Int]$RetryCount = 20,
         [Int]$RetryIntervalSec = 30
     )
