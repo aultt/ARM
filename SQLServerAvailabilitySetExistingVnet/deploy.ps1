@@ -1,6 +1,6 @@
 $resourceGroupName = 'GS-POC-Dist-East'
 $resourceGroupLocation = "East US"
-$templateFile = 'E:\GitLocal\ARM\AlwaysOnExistingVnet\template.json'
+$templateFile = 'E:\GitLocal\ARM\SQLServerAvailabilitySetExistingVnet\template.json'
 $templateParm = 'E:\Demos\GS-SQLRepl\AlwaysOnExitingVNetparametersDistributor.json'
 $subscription = 'TAMZ_MS'
 # ii 'E:\Demos\GS-SQLRepl\AlwaysOnExitingVNetparametersDistributor.json'

@@ -19,26 +19,9 @@ configuration AlwaysOnSqlServer
         [string]$tempdbdriveLetter,
         [string]$SQLSysAdmins,
         [string]$SourcePath,
-        [Parameter(Mandatory)]
-        [string]$ClusterName,
-        [Parameter(Mandatory)]
-        [string]$ClusterStaticIP,
-        [Parameter(Mandatory)]
-        [string]$ClusterIPSubnetClass,
-        [Parameter(Mandatory)]
         [string]$FirstNode,
-        [Parameter(Mandatory)]
-        [string]$AvailabilityGroupName,
-        [Parameter(Mandatory)]
-        [string]$ListenerStaticIP,
-        [Parameter(Mandatory)]
-        [string]$ListenerSubnetMask,
         [string]$SQLPort=1433,
-        [Parameter(Mandatory)]
-        [string]$CloudWitnessName,
         [string]$TimeZone,
-        [Parameter(Mandatory)]
-        [System.Management.Automation.PSCredential]$CloudWitnessKey, 
 
         [Int]$RetryCount = 20,
         [Int]$RetryIntervalSec = 30

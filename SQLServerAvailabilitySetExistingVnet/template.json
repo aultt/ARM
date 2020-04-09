@@ -167,22 +167,10 @@
     "variables": {
         "apiVersionStorage": "2016-01-01",
         "witnessStorageName": "[concat(toLower(parameters('namePrefix')),uniqueString(resourceGroup().id),'cw')]",
-        "witnessStorageType": "Standard_LRS",
         "vnetID": "[resourceID(parameters('existingVirtualNetworkRGName'),'Microsoft.Network/virtualNetworks',parameters('existingVirtualNetworkName'))]",
         "subnetRef": "[concat(variables('vnetId'), '/subnets/', parameters('existingSubnetName'))]",
         "diagnosticsExtensionName": "Microsoft.Insights.VMDiagnosticsSettings",
-        "vmNamePrefix": "[concat(parameters('namePrefix'),'-')]",
-        "ilbname": "[concat(parameters('namePrefix'),'-ilb')]",
-        "ilbID": "[resourceID('Microsoft.Network/loadBalancers',variables('ilbName'))]",
-        "ilbFE" :"[concat(parameters('namePrefix'),'-ilb-fe')]",
-        "ilbBE" :"[concat(parameters('namePrefix'),'-ilb-be')]",
-        "ilbFEConfigID1": "[concat(variables('ilbID'),'/frontendIPConfigurations/',variables('ilbFE'))]",
-        "listenerConfigID1": "[concat(variables('ilbID'),'/frontendIPConfigurations/',parameters('availabilityGroupName'))]",
-        "ilbBEAddressPoolID": "[concat(variables('ilbID'),'/backendAddressPools/',variables('ilbBE'))]",
-        "ilbProbe1":"[concat('namePrefix','ilbp1')]",
-        "SQLProbe1":"[concat('namePrefix','sql')]",
-        "ilbProbeID1" : "[concat(variables('ilbID'),'/probes/',variables('ilbProbe1'))]", 
-        "SQLProbeID1" : "[concat(variables('ilbID'),'/probes/',variables('sqlProbe1'))]" ,
+        "vmNamePrefix": "[concat(parameters('namePrefix'),'-')]",    
         "DSCConfigModulesURL": "[concat(parameters('_artifactsLocation'), '/dsc/Cluster.ps1.zip', parameters('_artifactsLocationSasToken'))]"
     },
     "resources": [
@@ -307,13 +295,7 @@
                     "domainName": "[parameters('domainName')]",
                     "ClusterName":"[concat(variables('vmnamePrefix'),'C')]",
                     "FirstNode":  "[concat(variables('vmNamePrefix'), '1')]",
-                    "ClusterStaticIP": "[parameters('clusterStaticIP')]",
-                    "ClusterIPSubnetClass": "[parameters('clusterIpSubnetClass')]",
-                    "AvailabilityGroupName": "[parameters('availabilityGroupName')]",
-                    "ListenerStaticIP": "[parameters('listenerStaticIP')]",
-                    "ListenerSubnetMask": "[parameters('listenerSubnetMask')]",
                     "sqlPort": "[parameters('sqlPort')]",
-                    "CloudWitnessName" : "[variables('witnessStorageName')]",
                     "imageOffer" : "[parameters('imageOffer')]",
                     "sqlFeatures" : "[parameters('sqlFeatures')]",
                     "sqlInstanceName": "[parameters('sqlInstanceName')]",
@@ -334,11 +316,7 @@
                     "SQLServicecreds": {
                       "userName": "[parameters('sqlUsername')]",
                       "password": "[parameters('sqlUserPassword')]"
-                       },
-                    "CloudWitnessKey":{
-                        "userName": "PLACEHOLDER-DO-NOT-USE",
-                         "password": "[listKeys(resourceId('Microsoft.Storage/storageAccounts',variables('witnessStorageName')),variables('apiVersionStorage')).keys[0].value]"   
-                        }
+                       }
                     }
                 }      
             }
@@ -353,7 +331,7 @@
               "count": "[parameters('vmCount')]"  
             },
             "dependsOn": [
-                "[concat('Microsoft.Network/networkSecurityGroups/', parameters('networkSecurityGroupName'))]","[variables('ilbID')]"
+                "[concat('Microsoft.Network/networkSecurityGroups/', parameters('networkSecurityGroupName'))]"
             ],
             "properties": {
                 "ipConfigurations": [
@@ -363,11 +341,6 @@
                             "subnet": {
                                 "id": "[variables('subnetRef')]"
                             },
-                            "loadBalancerBackendAddressPools":[
-                                {
-                                    "id": "[variables('ilbBEAddressPoolID')]"
-                                }
-                            ],
                             "privateIPAllocationMethod": "Dynamic"
                         }
                     }
