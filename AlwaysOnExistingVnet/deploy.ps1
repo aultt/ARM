@@ -1,9 +1,9 @@
-$resourceGroupName = 'AlwaysOnFCDemo'
+$resourceGroupName = 'GS-POC-Dist-East'
 $resourceGroupLocation = "East US"
-$templateFile = 'E:\GitHub\ARM\AlwaysOnExistingVnet\template.json'
-$templateParm = 'E:\ParameterFiles\AlwaysOnExitingVNetparameters.json'
+$templateFile = 'E:\GitLocal\ARM\AlwaysOnExistingVnet\template.json'
+$templateParm = 'E:\Demos\GS-SQLRepl\AlwaysOnExitingVNetparametersDistributor.json'
 $subscription = 'TAMZ_MS'
-# ii 'D:\ParameterFiles\AlwaysOnExitingVNetparameters.json'
+# ii 'E:\Demos\GS-SQLRepl\AlwaysOnExitingVNetparametersDistributor.json'
  
 Import-Module Az
 Login-AzAccount 
