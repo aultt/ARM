@@ -293,7 +293,6 @@
                   },
                 "configurationArguments": {
                     "domainName": "[parameters('domainName')]",
-                    "ClusterName":"[concat(variables('vmnamePrefix'),'C')]",
                     "FirstNode":  "[concat(variables('vmNamePrefix'), '1')]",
                     "sqlPort": "[parameters('sqlPort')]",
                     "imageOffer" : "[parameters('imageOffer')]",

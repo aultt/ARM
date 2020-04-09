@@ -28,11 +28,8 @@ configuration AlwaysOnSQLServer
 
     Import-DscResource -ModuleName ComputerManagementdsc,sqlserverdsc,xFailOverCluster,xPendingReboot,Storagedsc,SecurityPolicydsc
 
-    $ClusterIPandSubNetClass = $ClusterStaticIP + '/' +$ClusterIPSubnetClass
     $SQLVersion = $imageoffer.Substring(5,2)
     $SQLLocation = "MSSQL$(switch ($SQLVersion){19 {15} 17 {14} 16 {13}})"
-    $ListenerIPandMask = $ListenerStaticIP + '/'+$ListenerSubnetMask
-    $IPResourceName = $AvailabilityGroupName +'_'+ $ListenerStaticIP
 
     WaitForSqlSetup
 
@@ -213,18 +210,6 @@ configuration AlwaysOnSQLServer
             SourcePath       = 'C:\SQLServerFull'
 
             DependsOn = '[SqlSetup]InstallNamedInstance'
-        }
-        # Adding the required service account to allow the cluster to log into SQL
-        SqlServerLogin AddNTServiceClusSvc
-        {
-            Ensure               = 'Present'
-            Name                 = 'NT SERVICE\ClusSvc'
-            LoginType            = 'WindowsUser'
-            ServerName           = $env:COMPUTERNAME
-            InstanceName         = $SQLInstanceName
-            PsDscRunAsCredential = $AdminCreds
-            
-            DependsOn = '[SqlSetup]InstallNamedInstance', '[xCluster]CreateCluster'
         }
     }
 }

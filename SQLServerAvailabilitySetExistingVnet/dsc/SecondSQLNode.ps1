@@ -27,12 +27,8 @@ configuration AlwaysOnSqlServer
     
     Import-DscResource -ModuleName ComputerManagementdsc, sqlserverdsc, xFailOverCluster, xPendingReboot,StorageDSC,SecurityPolicydsc
     
-    $ClusterIPandSubNetClass = $ClusterStaticIP + '/' +$ClusterIPSubnetClass
-    $ListenerIPandMask = $ListenerStaticIP + '/'+$ListenerSubnetMask
     $SQLVersion = $imageoffer.Substring(5,2)
-    $SQLLocation = "MSSQL$(switch ($SQLVersion){19 {15} 17 {14} 16 {13}})"
-    $IPResourceName = $AvailabilityGroupName +'_'+ $ListenerStaticIP
-
+    
     WaitForSqlSetup
 
     Node localhost
@@ -217,8 +213,6 @@ configuration AlwaysOnSqlServer
 
             DependsOn = '[SqlSetup]InstallNamedInstance'
         }
-
-        # Add the required permissions to the cluster service login
     }
 }
 
