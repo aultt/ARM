@@ -55,21 +55,6 @@
         "availabilitySetName": {
             "type": "string"
         },
-        "ClusterStaticIP": {
-            "type": "string"
-        },
-        "ClusterIPSubnetClass":{
-            "type": "string"
-        },
-        "availabilityGroupName":{
-            "type": "string"
-        },
-        "listenerStaticIP":{
-            "type": "string"
-        },
-        "listenerSubnetMask":{
-            "type": "string"
-        },
         "vmcount": {
             "type": "int",
             "minValue": 2,

@@ -28,7 +28,8 @@ configuration AlwaysOnSqlServer
     Import-DscResource -ModuleName ComputerManagementdsc, sqlserverdsc, xFailOverCluster, xPendingReboot,StorageDSC,SecurityPolicydsc
     
     $SQLVersion = $imageoffer.Substring(5,2)
-    
+    $SQLLocation = "MSSQL$(switch ($SQLVersion){19 {15} 17 {14} 16 {13}})"
+
     WaitForSqlSetup
 
     Node localhost
@@ -116,7 +117,7 @@ configuration AlwaysOnSqlServer
 
         Script CleanSQL
         {
-            SetScript  = 'C:\SQLServerFull\Setup.exe /Action=Uninstall /FEATURES=SQL,AS,RS,IS /INSTANCENAME=MSSQLSERVER /Q'
+            SetScript  = 'C:\SQLServerFull\Setup.exe /Action=Uninstall /FEATURES=SQL,AS,RS,IS,MDS,DQC /INSTANCENAME=MSSQLSERVER /Q'
             TestScript = "(test-path -Path `"C:\Program Files\Microsoft SQL Server\$SQLLocation.MSSQLSERVER\MSSQL\DATA\master.mdf`") -eq `$false"
             GetScript  = "@{Ensure = if ((test-path -Path `"C:\Program Files\Microsoft SQL Server\$SQLLocation.MSSQLSERVER\MSSQL\DATA\master.mdf`") -eq `$false) {'Present'} Else {'Absent'}}"
             

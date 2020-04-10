@@ -1,9 +1,9 @@
 $resourceGroupName = 'GS-POC-Dist-East'
 $resourceGroupLocation = "East US"
 $templateFile = 'E:\GitLocal\ARM\SQLServerAvailabilitySetExistingVnet\template.json'
-$templateParm = 'E:\Demos\GS-SQLRepl\AlwaysOnExitingVNetparametersDistributor.json'
+$templateParm = 'E:\Demos\GS-SQLRepl\SQLAvailabilitySetExitingVNetparametersDistributor.json'
 $subscription = 'TAMZ_MS'
-# ii 'E:\Demos\GS-SQLRepl\AlwaysOnExitingVNetparametersDistributor.json'
+# ii 'E:\Demos\GS-SQLRepl\SQLAvailabilitySetExitingVNetparametersDistributor.json'
  
 Import-Module Az
 Login-AzAccount 
